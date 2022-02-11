@@ -1,6 +1,5 @@
 # nvb / 7 Feb 2022
 from abc import ABC, abstractmethod
-from dbm.gnu import _ValueType
 import random
 
 class DungeonCharacter(ABC):
@@ -16,7 +15,6 @@ class DungeonCharacter(ABC):
         self.__damage_min = 20
         self.__damage_max = 30
         self.__model = model
-        self.__alive = True
 
     @property
     def name(self):
@@ -87,7 +85,9 @@ class DungeonCharacter(ABC):
             self.__damage_min = value
         self.__damage_max = value
 
-
+    @property
+    def _is_alive(self):
+        return self.__hp > 0
 
 
 
