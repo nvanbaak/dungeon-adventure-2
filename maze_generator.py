@@ -16,6 +16,7 @@ class Maze:
         self.__i_exit = -1
         self.__j_exit = -1
         self.__path_taken = []
+        self.__pillar_position =[]
 
     # def __str__(self):
     #     return self.__dungeon_str
@@ -84,6 +85,7 @@ class Maze:
         self.__set_path()
         self.__set_impassable()  # sets the rooms impassable (dead_ends)
         self.__set_pillars()  # places the pillars in the rooms
+        self.__set_monsters() # place monsters in all the rooms with pillars
         self.__set_healing_vision_pit()  # sets the healing potion, vision potion and pits in each room randomly
 
     def __set_entrance_room(self):
@@ -215,8 +217,17 @@ class Maze:
         for i in range(0, 4):
             j = np.random.choice(len(pillar_choices))
             row, col = pillar_choices[j]
+            self.__pillar_position.append(pillar_choices[j])
             del pillar_choices[j]
             self.__map[row, col].pillar = str(pillars[i])  # sets a pillar in the room
+
+    def __set_monsters(self):
+        monster_positions = self.__pillar_position.copy()
+        monster_choices = ["Ogre", "Gremlin", "Skeleton"]
+        for i in monster_positions:
+            chosen = random.choice(monster_choices)
+            row, col = i[0], i[1]
+            self.__map[row, col].monster = str(chosen)
 
     def __set_healing_vision_pit(self):
         """
@@ -271,11 +282,13 @@ class Maze:
     def _get_winning_path(self):
         return self.__path_taken
 
+    def _get_pillar_positions(self):
+        return self.__pillar_position
+
     maze = property(_get_map)  # property to access the maze
     winning_path = property(_get_winning_path)  # property to access the winning_path
+    pillar_position = property(_get_pillar_positions)
 
-
-# maze = Maze(100,100)
-# # # # print(maze.random_path_choice())
+# maze = Maze(4,4)
 # maze.create_maze()
 # print(maze)
