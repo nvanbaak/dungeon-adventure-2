@@ -1,3 +1,4 @@
+from logging import exception
 import unittest
 from dungeonchar import DungeonCharacter
 
@@ -12,8 +13,6 @@ class MockDC(DungeonCharacter):
         return super().attack(ch)
     def take_damage(self, dmg):
         return super().take_damage(dmg)
-    def get_model(self):
-        return self.__model
 
 class MockAnnouncer:
     """
@@ -35,7 +34,34 @@ class DungeonCharTests(unittest.TestCase):
         self.assertEquals(test_dc.attack_speed, 1)
         self.assertEquals(test_dc.damage_min, 20)
         self.assertEquals(test_dc.damage_max, 30)
-        self.assertIsInstance(test_dc.get_model(), MockAnnouncer)
+
+    def test_hp(self):
+        test_dc = MockDC("Bob", MockAnnouncer)
+
+        # Test operations
+        old_hp = test_dc.hp
+        test_dc.hp -= 10
+        self.assertEquals(test_dc, old_hp - 10)
+
+        # Test assignment
+        test_dc.hp = 777
+        self.assertEquals(test_dc, 777)
+
+        # Test exception handling
+        exception_raised = False
+        try:
+            self.hp = "doggo"
+        except ValueError:
+            exception_raised = True
+        self.assertTrue(exception_raised)
+
+    def test_hp_total(self):
+        test_dc = MockDC("Bob", MockAnnouncer)
+
+        # test operations
+        old_total = test_dc.hp_total
+        test_dc.hp_total += 100
+        self.assertEquals(test_dc, old_total + 100)
 
 
 

@@ -25,6 +25,8 @@ class DungeonCharacter(ABC):
         return self.__hp
     @hp.setter
     def hp(self, value):
+        if not isinstance(value, int):
+            raise TypeError("hp must be a number!")
         self.__hp = value
 
     @property
@@ -41,7 +43,7 @@ class DungeonCharacter(ABC):
 
     @property
     def attack_speed(self):
-        return self.attack_speed
+        return self.__attack_speed
     @attack_speed.setter
     def attack_speed(self, value):
         if value < 1:
@@ -56,9 +58,7 @@ class DungeonCharacter(ABC):
         return self.__hit_chance
     @hit_chance.setter
     def hit_chance(self, value):
-        if value <= 0 or 1 <= value:
-            raise ValueError("hit change must be a number between 0 and 1")
-        elif not isinstance(self.__hit_chance, float):
+        if not isinstance(self.__hit_chance, float):
             raise TypeError("hit change must be a number between 0 and 1")
 
     @property
@@ -90,9 +90,6 @@ class DungeonCharacter(ABC):
         return self.__hp > 0
 
 
-
-
-
     @abstractmethod
     def attack(self, ch):
         """
@@ -108,7 +105,7 @@ class DungeonCharacter(ABC):
                 if my_attacks < self.attack_speed:
                     hit = random.random() < self.hit_chance
                     if hit:
-                        damage = random.randrange(self.damage_min, self.damage_max)
+                        damage = random.randint(self.damage_min, self.damage_max)
                         ch.take_damage(damage)
                     my_turn = False
                     my_attacks += 1
