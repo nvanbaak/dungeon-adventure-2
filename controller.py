@@ -1,4 +1,4 @@
-
+from dungeon import Dungeon
 
 class Controller:
     """
@@ -17,3 +17,10 @@ class Controller:
         # if they press g they instantly die
         # self.__root.bind("<g>", self.__model.dungeon.kill_player)
         pass
+
+    def start_game(self):
+        """
+        Initializes a dungeon and player character
+        """
+        # self__model = Dungeon(3, 3)
+        print("HEY LOOK A DUNGEON")
