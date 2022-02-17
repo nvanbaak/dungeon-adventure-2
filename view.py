@@ -18,5 +18,5 @@ class View:
         """
         self.__root.mainloop()
 
-    def get_canvas(self):
+    def get_root(self):
         return self.__root
