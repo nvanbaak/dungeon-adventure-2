@@ -10,6 +10,7 @@ class Room:
 
     def __init__(self):
         self.__location = None
+        self.__stairs = None
         self.__left_room = None
         self.__right_room = None
         self.__upper_room = None
@@ -30,6 +31,17 @@ class Room:
             "Right": True
         }
         self.__visited = False
+
+    def __set_stairs(self,room):
+        if isinstance(room, Room):
+            self.__stairs = room
+        else:
+            self.__stairs = None
+
+    def __get_stairs(self):
+        return self.__stairs
+
+    stairs = property(__get_stairs, __set_stairs)
 
     def __set_upper_room(self, room):
         if isinstance(room, Room):
@@ -94,7 +106,7 @@ class Room:
         if monster in ["Ogre", "Gremlin", "Skeleton"]:
             self.__room_contents["monster"] = monster
         else:
-            self.__room_contents["monsters"] = None
+            self.__room_contents["monster"] = None
 
     def __get_monster(self):
         return self.__room_contents["monster"]
@@ -278,45 +290,48 @@ class Room:
     def print_up(self):
         up_str = ""
         if self.__door["Up"] is True:
-            up_str += "|-----::-----|" + "\t"
+            up_str += "|------::------|" + "\t"
         else:
-            up_str += "|-----==-----|" + "\t"
+            up_str += "|------==------|" + "\t"
         return up_str
 
     def print_down(self):
         up_str = ""
         if self.__door["Down"] is True:
-            up_str += "|-----::-----|" + "\t"
+            up_str += "|------::------|" + "\t"
         else:
-            up_str += "|-----==-----|" + "\t"
+            up_str += "|------==------|" + "\t"
         return up_str
 
     def print_room_contents(self):
         if self.__is_entrance:
             if self.__door["Left"] is False and self.__door["Right"] is False:
-                return "|    Enter   |" + "\t"
+                return "|     Enter    |" + "\t"
             elif self.__door["Left"] is False and self.__door["Right"] is True:
-                return "|    Enter  ::" + "\t"
+                return "|     Enter   ::" + "\t"
             elif self.__door["Left"] is True and self.__door["Right"] is True:
-                return "::   Enter  ::" + "\t"
+                return "::    Enter   ::" + "\t"
             else:
-                return "::   Enter   |" + "\t"
+                return "::    Enter    |" + "\t"
         elif self.__is_exit:
             if self.__door["Left"] is False and self.__door["Right"] is False:
-                return "|    Exit    |" + "\t"
+                return "|     Exit     |" + "\t"
             elif self.__door["Left"] is False and self.__door["Right"] is True:
-                return "|    Exit   ::" + "\t"
+                return "|     Exit    ::" + "\t"
             elif self.__door["Left"] is True and self.__door["Right"] is True:
-                return "::   Exit   ::" + "\t"
+                return "::    Exit    ::" + "\t"
             else:
-                return "::   Exit    |" + "\t"
+                return "::    Exit     |" + "\t"
         elif self.is_impassable is True:
-            return "| Impassable |" + "\t"
+            return "|  Impassable  |" + "\t"
         else:
             pillar = "I"
             pit = " X"
             healing_potion = " U"
             vision_potion = " oo"
+            monster ="m"
+            if self.__room_contents["monster"] is None:
+                monster = " "
             if self.__room_contents["pillar"] is None:
                 pillar = " "
             if self.__room_contents["pit"] is False:
@@ -326,24 +341,24 @@ class Room:
             if self.__room_contents["vision_potion"] is False:
                 vision_potion = "   "
             if self.__door["Left"] is True and self.__door["Right"] is True:
-                return f":: {pillar}{pit}{healing_potion}{vision_potion} ::" + "\t"
+                return f":: {pillar}{monster}{pit}{healing_potion}{vision_potion}  ::" + "\t"
             elif self.__door["Left"] is True and self.__door["Right"] is False:
-                return f":: {pillar}{pit}{healing_potion}{vision_potion}  |" + "\t"
+                return f":: {pillar}{monster}{pit}{healing_potion}{vision_potion}   |" + "\t"
             elif self.__door["Left"] is False and self.__door["Right"] is False:
-                return f"|  {pillar}{pit}{healing_potion}{vision_potion}  |" + "\t"
+                return f"|   {pillar}{monster}{pit}{healing_potion}{vision_potion}  |" + "\t"
             else:
-                return f"|  {pillar}{pit}{healing_potion}{vision_potion} ::" + "\t"
+                return f"|  {pillar}{monster}{pit}{healing_potion}{vision_potion}  ::" + "\t"
 
     def vision_current_room(self):
 
         if self.__door["Left"] is True and self.__door["Right"] is True:
-            return "::  +here+  ::" + "\t"
+            return "::  +here+    ::" + "\t"
         elif self.__door["Left"] is False and self.__door["Right"] is True:
-            return "|   +here+  ::" + "\t"
+            return "|   +here+    ::" + "\t"
         elif self.__door["Left"] is False and self.__door["Right"] is False:
-            return "|   +here+   |" + "\t"
+            return "|   +here+     |" + "\t"
         else:
-            return "|   +here+  ::" + "\t"
+            return "|   +here+    ::" + "\t"
 
 
 # class Main:

@@ -21,28 +21,44 @@ class Dungeon:
 
     """
 
-    def __init__(self, row_count=-1, col_count=-1):
+    def __init__(self, row_count=-1, col_count=-1, entrance =False, entrance_row_value = -1, entrance_col_value = -1 ):
         self.__set_rowCount(row_count)  # sets the number of rows of rooms of Dungeon
         self.__set_colCount(col_count)  # sets the number of columns of rooms of Dungeon
         self.__maze = Maze(self.__rowCount, self.__colCount)  # creates a maze object
-        self.__create_maze()
+        if not entrance:
+            self.__create_maze_random_entrance()
         # self.__create_room_links()  # creates pointers between each rooms
+        else:
+            self.__create_maze_specified_entrance(entrance_row_value, entrance_col_value)
+
         self._setting_doors()  # updates the __door dictionary of Room
         self.__dungeon_str = ""
-        self.__set_dungeon_str()  # creates the string representation of the Dungeon
+        self.__dungeon_str = self.__set_dungeon_str()  # creates the string representation of the Dungeon
+
+    def print_initial_map(self):
+        return str(self.__dungeon_str)
 
     def __str__(self):
         """
         returns the the string representation of the Dungeon
         :return: string
         """
-        return str(self.__dungeon_str)
+        return str(self.__set_dungeon_str())
 
-    def __create_maze(self):
+    def __create_maze_specified_entrance(self,entrance_row_value, entrance_col_value):
+        if 0 <= entrance_row_value < self.__rowCount and 0<= entrance_col_value < self.__colCount:
+            try:
+                self.__maze.create_maze_specified_entrance(entrance_row_value, entrance_col_value)
+
+            except RecursionError:
+                self.__maze.create_maze_specified_entrance(entrance_row_value, entrance_col_value)
+
+
+    def __create_maze_random_entrance(self):
         try:
-            self.__maze.create_maze()  # creates a playable maze(array) of Rooms
+            self.__maze.create_maze_random_entrance()  # creates a playable maze(array) of Rooms
         except RecursionError:
-            self.__maze.create_maze()
+            self.__maze.create_maze_random_entrance()
             # raise ValueError("maze is not traversable, try again")
 
     def __set_rowCount(self, row_count):
@@ -149,21 +165,22 @@ class Dungeon:
 
     def __set_dungeon_str(self):
         """creates a string representation of the Dungeon  """
+        dungeon_str =""
         for i in range(0, self.__rowCount):
-            self.__dungeon_str += "\n"
+            dungeon_str += "\n"
             for j in range(0, self.__colCount):
                 # the up door representation of each room in the ith row is appended to the self.__dungeon_str
-                self.__dungeon_str += self.__maze.maze[i, j].print_up()
+                dungeon_str += self.__maze.maze[i, j].print_up()
 
-            self.__dungeon_str += "\n"
+            dungeon_str += "\n"
             for j in range(0, self.__colCount):
                 # the room contents of each room in the ith row is appended to the self.__dungeon_str
-                self.__dungeon_str += self.__maze.maze[i, j].print_room_contents()
-            self.__dungeon_str += "\n"
+                dungeon_str += self.__maze.maze[i, j].print_room_contents()
+            dungeon_str += "\n"
             for j in range(0, self.__colCount):
                 # the down door representation of each room in the ith row is appended to the self.__dungeon_str
-                self.__dungeon_str += self.__maze.maze[i, j].print_down()
-
+                dungeon_str += self.__maze.maze[i, j].print_down()
+        return dungeon_str
     def print_dungeon_live_location(self, room_obj):
         """creates a string representation of the Dungeon with the current room marked as +here+  """
         dungeon_str = ""  # self.dungeon_str is used for testing
@@ -238,9 +255,15 @@ class Dungeon:
             if room_obj.heal is not None:
                 room_obj.heal = None   # sets the healing_potion to None in the room_content dictionary of the Room
 
-#
+
+
 # dun = Dungeon(4, 4)
+# print(dun.dungeon.winning_path)
 # print(dun)
+# for i in range(4):
+#     for j in range(4):
+#         dun.clear_healing_pillar_vision(dun.dungeon.maze[i, j])
+#
 # curr = dun.enter_dungeon()
 # print(dun.print_dungeon_live_location(curr))
 # print(dun.use_vision_potion(curr))
