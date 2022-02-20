@@ -25,10 +25,10 @@ class DungeonCharacter(ABC):
         return self.__hp
     @hp.setter
     def hp(self, value):
-        if isinstance(value, int):
-            self.__hp = value
-        else:
+        if not isinstance(value, int):
             raise TypeError("hp must be an integer!")
+        else:
+            self.__hp = self.__hp_total if value > self.__hp_total else value
 
     @property
     def hp_total(self):
@@ -109,7 +109,6 @@ class DungeonCharacter(ABC):
         if hit_landed:
             damage = random.randint(self.damage_min, self.damage_max)
             target.take_damage(damage, self.name)
-
 
     @abstractmethod
     def combat(self, target):
