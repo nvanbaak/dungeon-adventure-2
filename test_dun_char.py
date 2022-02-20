@@ -48,8 +48,14 @@ class DungeonCharTests(unittest.TestCase):
         self.assertEqual(test_dc.hp, old_hp - 10)
 
         # Test assignment
+        test_dc.hp_total = 777
         test_dc.hp = 777
         self.assertEqual(test_dc.hp, 777)
+
+        # Test that hp does not exceed hp_total
+        test_dc.hp_total = 100
+        test_dc.hp = 300
+        self.assertEqual(test_dc.hp, 100)
 
         # Test exception handling
         exception_raised = False
