@@ -283,7 +283,7 @@ class DungeonCharTests(unittest.TestCase):
         test_dc.take_damage(600, "the developers")
         self.assertFalse(test_dc._is_alive)
 
-    def test_combat(self):
+    def test_attack(self):
         # two fighters, one of which does no damage, the other of which always deals 1/turn
         fighter1 = MockDC("fighter 1", MockAnnouncer())
         fighter1.damage_max = 1
@@ -310,7 +310,7 @@ class DungeonCharTests(unittest.TestCase):
         self.assertEqual(fighter1.hp, 2)
         self.assertFalse(fighter2._is_alive)
 
-        # test fighting with attack speed differences
+    def test_attack_speed(self):
         fast_fighter = MockDC("fastguy", MockAnnouncer())
         fast_fighter.hp_total = 10
         fast_fighter.damage_max = 1
@@ -327,7 +327,7 @@ class DungeonCharTests(unittest.TestCase):
             fast_fighter.combat(slow_fighter)
         self.assertEqual(fast_fighter.hp, 5)
 
-        # test fighting with hit chances
+    def test_hit_chance(self):
         accurate_dude = MockDC("accuratedude", MockAnnouncer())
         accurate_dude.hp_total = 1000
         accurate_dude.hp = 1000
@@ -346,6 +346,12 @@ class DungeonCharTests(unittest.TestCase):
         # statistically speaking drunk dude should have missed more
         probability_isnt_a_lie = accurate_dude.hp > drunk_dude.hp
         self.assertTrue(probability_isnt_a_lie)
+
+
+
+
+
+
 
 if __name__ == "__main__":
     unittest.main()
