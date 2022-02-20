@@ -8,8 +8,8 @@ class Hero(DungeonCharacter, ABC):
     """
     def __init__(self, name, model) -> None:
         super().__init__(name, model)
-        self.__health_potion_count = 0
-        self.__vision_potion_count = 0
+        self.__health_potions = 0
+        self.__vision_potions = 0
         self.__vision = 3
 
     @abstractmethod
@@ -29,33 +29,37 @@ class Hero(DungeonCharacter, ABC):
         """
         Uses a health potion if available
         """
-        if self.__health_potion_count > 0:
-            self.__health_potion_count -= 1
+        if self.health_potions > 0:
+            self.health_potions -= 1
             amount_healed = random.randint(20, 40)
             self.hp += amount_healed
-
-    @abstractmethod
-    def get_health_potion(self):
-        """
-        Adds a health potion to hero's inventory
-        """
-        self.__health_potion_count += 1
 
     @abstractmethod
     def use_vision_potion(self):
         """
         Uses a vision potion if available
         """
-        if self.__vision_potion_count > 0:
-            self.__vision_potion_count -= 1
-            self.__vision += 5
+        if self.vision_potions > 0:
+            self.vision_potions -= 1
+            self.vision += 5
 
-    @abstractmethod
-    def get_vision_potion(self):
-        """
-        Adds a vision potion to the Hero's inventory
-        """
-        self.__vision_potion_count += 1
+    @property
+    def vision_potions(self):
+        return self.__vision_potions
+    @vision_potions.setter
+    def vision_potions(self, value):
+        if value < 0:
+            raise ValueError("potion count can't be less than 0!")
+        self.__vision_potions = value
+
+    @property
+    def health_potions(self):
+        return self.__health_potions
+    @health_potions.setter
+    def health_potions(self, value):
+        if value < 0:
+            raise ValueError("potion count can't be less than 0!")
+        self.__health_potions = value
 
     @property
     def vision(self):
@@ -68,4 +72,3 @@ class Hero(DungeonCharacter, ABC):
             self.__vision = value
         else:
             raise ValueError("vision range must be greater than 0!")
-
