@@ -348,10 +348,5 @@ class DungeonCharTests(unittest.TestCase):
         self.assertTrue(probability_isnt_a_lie)
 
 
-
-
-
-
-
 if __name__ == "__main__":
     unittest.main()
