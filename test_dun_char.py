@@ -1,5 +1,6 @@
 from logging import exception
 import unittest
+from unittest.mock import Mock
 from dungeonchar import DungeonCharacter
 
 class MockDC(DungeonCharacter):
@@ -326,7 +327,25 @@ class DungeonCharTests(unittest.TestCase):
             fast_fighter.combat(slow_fighter)
         self.assertEqual(fast_fighter.hp, 5)
 
+        # test fighting with hit chances
+        accurate_dude = MockDC("accuratedude", MockAnnouncer())
+        accurate_dude.hp_total = 1000
+        accurate_dude.hp = 1000
+        accurate_dude.damage_max = 1
+        accurate_dude.hit_chance = 0.8
 
+        drunk_dude = MockDC("drunkdude", MockAnnouncer())
+        drunk_dude.hp_total = 1000
+        drunk_dude.hp = 1000
+        drunk_dude.damage_max = 1
+        drunk_dude.hit_chance = 0.2
+
+        for _ in range(0, 1000):
+            accurate_dude.combat(drunk_dude)
+
+        # statistically speaking drunk dude should have missed more
+        probability_isnt_a_lie = accurate_dude.hp > drunk_dude.hp
+        self.assertTrue(probability_isnt_a_lie)
 
 if __name__ == "__main__":
     unittest.main()
