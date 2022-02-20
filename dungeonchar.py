@@ -25,9 +25,10 @@ class DungeonCharacter(ABC):
         return self.__hp
     @hp.setter
     def hp(self, value):
-        if not isinstance(value, int):
-            raise TypeError("hp must be a number!")
-        self.__hp = value
+        if isinstance(value, int):
+            self.__hp = value
+        else:
+            raise TypeError("hp must be an integer!")
 
     @property
     def hp_total(self):
@@ -36,7 +37,7 @@ class DungeonCharacter(ABC):
     def hp_total(self, value):
         if value < 1:
             raise ValueError("hp total must be positive!")
-        elif not isinstance(self.hp_total, int):
+        elif not isinstance(value, int):
             raise TypeError("hp total must be a number!")
         else: 
             self.__hp_total = value
@@ -48,10 +49,10 @@ class DungeonCharacter(ABC):
     def attack_speed(self, value):
         if value < 1:
             raise ValueError("attack speed cannot be less than 1")
-        elif not isinstance(self.__attack_speed, int):
-            raise TypeError("attack speed must be a number!")
-        else:
+        elif isinstance(value, int):
             self.__attack_speed = value
+        else:
+            raise TypeError("attack speed must be a number!")
 
     @property
     def hit_chance(self):
