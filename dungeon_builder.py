@@ -12,19 +12,9 @@ class DungeonBuilder:
         # result = DungeonBuilder.__distribute_entrance_exit(result)
         result = DungeonBuilder.__distribute_pillars(result)
         DungeonBuilder.__build_stairs(result)
+        DungeonBuilder.__update_floor_details(result)
         return result
 
-    # @staticmethod
-    # def __distribute_entrance_exit(array):
-    #     winning_path = array[0].dungeon.winning_path
-    #     print(winning_path)
-    #     row, col = winning_path[-1][0], winning_path[-1][1]
-    #     array[0].dungeon.maze[row, col].is_exit = False
-    #     winning_path = array[1].dungeon.winning_path
-    #     row, col = winning_path[0][0], winning_path[0][1]
-    #     array[1].dungeon.maze[row, col].is_entrance = False
-    #     return  array
-    #
     @staticmethod
     def __distribute_pillars(array):
         pillar_positions = array[0].dungeon.pillar_position
@@ -47,6 +37,18 @@ class DungeonBuilder:
         row, col = winning_path[-1][0], winning_path[-1][1]
         array[0].dungeon.maze[row, col].stairs = array[1].dungeon.maze[row, col]
         array[1].dungeon.maze[row, col].stairs = array[0].dungeon.maze[row, col]
+
+    @staticmethod
+    def __update_floor_details(array):
+        i = 0
+        while i < len(array):
+            row_count = array[i].row_Count
+            col_count = array[i].col_Count
+
+            for row in range(0, row_count):
+                for col in range(0, col_count):
+                    array[i].dungeon.maze[row, col].floor = int(i)
+            i +=1
 
 
 

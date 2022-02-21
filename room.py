@@ -11,6 +11,7 @@ class Room:
     def __init__(self):
         self.__location = None
         self.__stairs = None
+        self.__floor = None
         self.__left_room = None
         self.__right_room = None
         self.__upper_room = None
@@ -31,6 +32,15 @@ class Room:
             "Right": True
         }
         self.__visited = False
+
+    def __set_floor(self, floor_no):
+        if isinstance(floor_no, int):
+            self.__floor = floor_no
+
+    def __get_floor(self):
+        return self.__floor
+
+    floor = property(__get_floor, __set_floor)
 
     def __set_stairs(self,room):
         if isinstance(room, Room):
