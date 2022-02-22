@@ -5,6 +5,7 @@
 from dungeon import Dungeon
 from hero import Hero
 import pickle
+import os
 
 class SaveGame:
     def __init__(self):
@@ -19,6 +20,10 @@ class SaveGame:
                 raise ValueError("Game name already exist")
         except TypeError:
             raise TypeError(f"cannot save the game with {name} name")
+
+    def __remove_from_saved_games(self, name):
+        if self.check_in_saved_games(name):
+            self.__saved_games.remove(name)
 
     save_game_name = property(fset = __add_to_saved_games)
 
@@ -48,15 +53,18 @@ class SaveGame:
         """
 
         if not self.check_in_saved_games(name): # name should not be an already saved games' name
-            self.__add_to_saved_games = name
+            self.save_game_name = name
 
         game_objects = []
         i = 0
         while i < len(dungeon_list):
             if isinstance(dungeon_list[i], Dungeon):
+                i += 1
                 continue
             else:
                 raise TypeError("should be a Dungeon object")
+
+
         game_objects.append(dungeon_list)
         if isinstance(floor_num, int) and floor_num < len(dungeon_list):
             game_objects.append(floor_num)
@@ -73,7 +81,13 @@ class SaveGame:
     def load_game(self,name):
         """ return the de-serialised list of game objects"""
         if self.check_in_saved_games(name):
-            file = open(f'{name}.pkl', 'rb')
-            return pickle.load(file)
+            with open(f'{name}.pkl', 'rb') as file:
+                return pickle.load(file)
+
+
+    def delete_saved_game(self, name):
+        if self.check_in_saved_games(name):
+            os.remove(f'{name}.pkl')
+            self.__remove_from_saved_games(name)
 
 
