@@ -1,26 +1,44 @@
-from dungeon import Dungeon
+"""
+Code illustration: 4.07
 
-class Controller:
-    """
-    Class that governs player controls
-    """
-    def __init__(self, root):
-        self.__root = root
-        self.__model = None
+@ Tkinter GUI Application Development Blueprints
+"""
+import model
+import piece
 
-    def get_model(self, model):
-        self.__model = model
 
-    def bind_keys(self):
-        # self.__canvas.keybind(whatever)
+class Controller():
 
-        # if they press g they instantly die
-        # self.__root.bind("<g>", self.__model.dungeon.kill_player)
-        pass
+    def __init__(self):
+        # print("C | __init__ | Controller init calls init of Model")
+        self.init_model()
 
-    def start_game(self):
-        """
-        Initializes a dungeon and player character
-        """
-        # self__model = Dungeon(3, 3)
-        print("HEY LOOK A DUNGEON")
+    def init_model(self):
+        self.model = model.Model()
+        # print("C | init_model() | Controller stores reference to Model as self.model")
+
+    def get_all_peices_on_board(self):
+        return self.model.dict.items()
+
+    def reset_game_data(self):
+        # print("C | calls model.reset_game_data() via Controller")
+        self.model.reset_game_data()
+
+    def reset_default_characters(self):
+        # print("C | calls model.reset_default_characters() via Controller")
+        self.model.reset_default_characters()
+
+    def get_numeric_notation(self, rowcol):
+        # print("C | calls get_numeric_notation via Piece()")
+        return piece.get_numeric_notation(rowcol)
+
+    def get_alphanumeric_position(self, rowcolumntuple):
+        # print(f"C | calls get_alphanumeric_position({rowcolumntuple}) via Model")
+        return self.model.get_alphanumeric_position(rowcolumntuple)
+
+    # def get_piece_at(self, position_of_click):
+    #     # print("C | calls get_piece_at() via Model")
+    #     return self.model.get_piece_at(position_of_click)
+
+    def pre_move_validation(self, start_pos, end_pos):
+        return self.model.pre_move_validation(start_pos, end_pos)
