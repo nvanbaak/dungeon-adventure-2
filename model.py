@@ -4,6 +4,7 @@ from copy import deepcopy
 import exceptions
 import piece
 from dungeon import Dungeon
+from dungeon_builder import DungeonBuilder
 from dungeonchar import DungeonCharacter
 from test_hero import MockHero
 from configurations import *
@@ -15,7 +16,8 @@ class Model():
     dict = {}
 
     def __init__(self):
-        self.dungeon = Dungeon(4, 4)
+        d_list = DungeonBuilder.build_easy_dungeon()
+        self.dungeon = d_list[0]
         self.dungeon.enter_dungeon()
         self.reset_default_characters()
         self.player = MockHero("Test", self)

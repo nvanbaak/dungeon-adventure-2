@@ -33,23 +33,6 @@ class Piece():
 
     def moves_available(self, current_position, directions, distance):
         pass
-        model = self.model
-        allowed_moves = []
-        piece = self
-        start_row, start_column = get_numeric_notation(current_position)
-        for x, y in directions:
-            collision = False
-            for step in range(1, distance + 1):
-                if collision:
-                    break
-                destination = start_row + step * x, start_column + step * y
-                if self.possible_position(destination) not in model.all_occupied_positions():
-                    allowed_moves.append(destination)
-                else:
-                    allowed_moves.append(destination)
-                    collision = True
-        allowed_moves = filter(model.is_on_board, allowed_moves)
-        return map(model.get_alphanumeric_position, allowed_moves)
 
     def possible_position(self, destination):
         return self.model.get_alphanumeric_position(destination)

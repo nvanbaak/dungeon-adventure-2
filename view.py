@@ -75,13 +75,14 @@ class View():
         self.canvas.pack(padx=8, pady=8)
 
     def draw_board(self):
-        current_color = BOARD_COLOR_1
+        current_color = self.board_color_1
         for row in range(NUMBER_OF_ROWS):
             for col in range(NUMBER_OF_COLUMNS):
                 x1, y1 = self.get_x_y_coordinate(row, col)
                 x2, y2 = x1 + DIMENSION_OF_EACH_SQUARE, y1 + DIMENSION_OF_EACH_SQUARE
                 self.canvas.create_rectangle(
                     x1, y1, x2, y2, fill=current_color, outline="")
+                self.canvas.pack()
 
     def on_square_clicked(self, event):
         clicked_row, clicked_column = self.get_clicked_row_column(event)
@@ -127,7 +128,7 @@ class View():
             x0, y0 = self.calculate_piece_coordinate(x, y)
             self.canvas.create_image(x0, y0, image=self.images[
                                      filename], tags=("occupied"), anchor="c")
-            # print(f"FIX THIS")
+            # print(f"ADD OTHER HERO TYPES")
             if piece.name == "warrior":
                 self.selected_piece_position = position
 

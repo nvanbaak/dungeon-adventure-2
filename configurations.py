@@ -32,7 +32,6 @@ User Modifiable Options
 config = ConfigParser()
 config.read('options.ini')
 BOARD_COLOR_1 = config.get('colors', 'board_color_1', fallback="#e6a803")
-print(BOARD_COLOR_1)
 # BOARD_COLOR_2 = config.get('chess_colors', 'board_color_2', fallback="#8b8350")
 # HIGHLIGHT_COLOR = config.get(
 #     'chess_colors', 'highlight_color', fallback="#2EF70D")
