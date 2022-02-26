@@ -9,7 +9,6 @@ class RoomTestCase(unittest.TestCase):
     def test_Room_init_and_str(self):
         """checks whether the room object prints as initialized."""
         r = Room()
-<<<<<<< HEAD
         self.assertEqual("|------::------|" + "\t" + "\n" + "::            ::" + "\t" + "\n" + "|------::------|" + "\t" +"\n",
                          r.__str__(), "values don't match")
         r.pillar = "a"
@@ -44,42 +43,6 @@ class RoomTestCase(unittest.TestCase):
                          r.__str__(), "values don't match")
         r.is_exit = True
         self.assertEqual("|------==------|" + "\t" + "\n" + "|     Exit     |" + "\t" + "\n" + "|------==------|" + "\t"+"\n",
-=======
-        self.assertEqual("|-----::-----|" + "\t" + "\n" + "::          ::" + "\t" + "\n" + "|-----::-----|" + "\t" +"\n",
-                         r.__str__(), "values don't match")
-        r.pillar = "a"
-        self.assertEqual("|-----::-----|" + "\t" + "\n" + ":: I        ::" + "\t" + "\n" + "|-----::-----|" + "\t" +"\n",
-                         r.__str__(), "values don't match")
-        r.pit = True
-        self.assertEqual("|-----::-----|" + "\t" + "\n" + ":: I X      ::" + "\t" + "\n" + "|-----::-----|" + "\t" +"\n",
-                         r.__str__(), "values don't match")
-        r.heal= "y"
-        self.assertEqual("|-----::-----|" + "\t" + "\n" + ":: I X U    ::" + "\t" + "\n" + "|-----::-----|" + "\t"+"\n",
-                         r.__str__(), "values don't match")
-        r.vision = True
-        self.assertEqual("|-----::-----|" + "\t" + "\n" + ":: I X U oo ::" + "\t" + "\n" + "|-----::-----|" + "\t"+"\n",
-                         r.__str__(), "values don't match")
-        r.set_door(True, True, True, False)
-        self.assertEqual("|-----::-----|" + "\t" + "\n" + ":: I X U oo  |" + "\t" + "\n" + "|-----::-----|" + "\t"+"\n",
-                         r.__str__(), "values don't match")
-        r.set_door(True, True, False, False)
-        self.assertEqual("|-----::-----|" + "\t" + "\n" + "|  I X U oo  |" + "\t" + "\n" + "|-----::-----|" + "\t"+"\n",
-                         r.__str__(), "values don't match")
-        r.set_door(True, False, False, False)
-        self.assertEqual("|-----::-----|" + "\t" + "\n" + "|  I X U oo  |" + "\t" + "\n" + "|-----==-----|" + "\t"+"\n",
-                         r.__str__(), "values don't match")
-        r.set_door(False, False, False, False)
-        self.assertEqual("|-----==-----|" + "\t" + "\n" + "| Impassable |" + "\t" + "\n" + "|-----==-----|" + "\t"+"\n",
-                         r.__str__(), "values don't match")
-        r.is_entrance =True
-        self.assertEqual("|-----==-----|" + "\t" + "\n" + "|    Enter   |" + "\t" + "\n" + "|-----==-----|" + "\t"+"\n",
-                         r.__str__(), "values don't match")
-        r.is_entrance =False
-        self.assertEqual("|-----==-----|" + "\t" + "\n" + "| Impassable |" + "\t" + "\n" + "|-----==-----|" + "\t"+"\n",
-                         r.__str__(), "values don't match")
-        r.is_exit = True
-        self.assertEqual("|-----==-----|" + "\t" + "\n" + "|    Exit    |" + "\t" + "\n" + "|-----==-----|" + "\t"+"\n",
->>>>>>> dev
                          r.__str__(), "values don't match")
     def test_set_monster(self):
         r = Room()
@@ -93,7 +56,6 @@ class RoomTestCase(unittest.TestCase):
         r.monster = name
         self.assertEqual(None, r.monster)
 
-<<<<<<< HEAD
     def test_floor_valid_input(self):
         r = Room()
         r.floor = 1
@@ -110,8 +72,6 @@ class RoomTestCase(unittest.TestCase):
             self.assertEqual(True, True, "value error not raised.")
 
 
-=======
->>>>>>> dev
     def test_Room_set_location_list_input(self):
         """tests the set_location method when valid input (list of length 2) is given."""
         r = Room()
