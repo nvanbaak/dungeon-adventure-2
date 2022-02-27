@@ -11,8 +11,8 @@ import preferenceswindow
 
 class View():
 
-    # print("V | class variables initialized before __init__: images, piece position, board color")
-    selected_piece_position = None
+    # print("V | class variables initialized before __init__: images, sprite position, board color")
+    selected_sprite_position = None
     images = {}
     board_color_1 = BOARD_COLOR_1
 
@@ -88,11 +88,11 @@ class View():
         clicked_row, clicked_column = self.get_clicked_row_column(event)
         position_of_click = self.controller.get_alphanumeric_position(
             (clicked_row, clicked_column))
-        # print(f"V | on_square_clicked | curr pos: {self.selected_piece_position} | clicked: {position_of_click}")
-        self.shift(self.selected_piece_position, position_of_click)
-        self.selected_piece_position = position_of_click
+        # print(f"V | on_square_clicked | curr pos: {self.selected_sprite_position} | clicked: {position_of_click}")
+        self.shift(self.selected_sprite_position, position_of_click)
+        self.selected_sprite_position = position_of_click
         self.draw_board()
-        self.draw_all_pieces()
+        self.draw_all_sprites()
 
     def get_clicked_row_column(self, event):
         col_size = row_size = DIMENSION_OF_EACH_SQUARE
@@ -105,54 +105,57 @@ class View():
         y = ((6 - row) * DIMENSION_OF_EACH_SQUARE)
         return (x, y)
 
-    def calculate_piece_coordinate(self, row, col):
+    def calculate_sprite_coordinate(self, row, col):
         x0 = (col * DIMENSION_OF_EACH_SQUARE) + \
             int(DIMENSION_OF_EACH_SQUARE / 2)
         y0 = ((6 - row) * DIMENSION_OF_EACH_SQUARE) + \
             int(DIMENSION_OF_EACH_SQUARE / 2)
-        # print(f"V | calculate_piece_coordinates | return {x0}, {y0}")
+        # print(f"V | calculate_sprite_coordinates | return {x0}, {y0}")
         return (x0, y0)
 
-    def draw_single_piece(self, position, piece):
-        # print(f"V | draw_single_piece | position: {position} | piece {piece}")
+    def draw_single_sprite(self, position, sprite):
+        # print(f"V | draw_single_sprite | position: {position} | sprite {sprite}")
         # print(f"V | call get_numeric_notation(position) via Controller")
         x, y = self.controller.get_numeric_notation(position)
-        if piece:
-            filename = "pieces_image/{}.png".format(
-                piece.name.lower())
+        if sprite:
+            filename = "sprites_image/{}.png".format(
+                sprite.name.lower())
             if filename not in self.images:
                 self.images[filename] = PhotoImage(file=filename)
                 img_max = max(self.images[filename].width(), self.images[filename].height())
                 img_adj = int(1/(64/img_max))
                 self.images[filename] = self.images[filename].subsample(img_adj)
-            x0, y0 = self.calculate_piece_coordinate(x, y)
-            self.canvas.create_image(x0, y0, image=self.images[
-                                     filename], tags=("occupied"), anchor="c")
+            x0, y0 = self.calculate_sprite_coordinate(x, y)
+            ci = self.canvas.create_image(x0, y0, image=self.images[
+                                     filename], anchor="c")
+            if sprite.name == "warrior":
+                sprite.visible = True
+            if sprite.visible == False:
+                self.canvas.itemconfig(ci, state="hidden")
+            else:
+                self.canvas.itemconfig(ci, state="normal")
             # print(f"ADD OTHER HERO TYPES")
-            if piece.name == "warrior":
-                self.selected_piece_position = position
+            if sprite.name == "warrior":
+                self.selected_sprite_position = position
 
 
-    def draw_all_pieces(self):
-        self.canvas.delete("occupied")
-        # print("V | draw_all_pieces | gets position/pieces from controller.get_all_pieces_on_board()")
-        # print("V | draw_all_pieces | then passes each position/piece to draw_single_piece()")
-        for position, piece in self.controller.get_all_peices_on_board():
-            self.draw_single_piece(position, piece)
+    def draw_all_sprites(self):
+        for position, sprite in self.controller.get_all_peices_on_board():
+            self.draw_single_sprite(position, sprite)
 
     def start_new_game(self):
         # print("V | start_new_game | calls controller.reset_game_data()")
         self.controller.reset_game_data()
         # print("V | start_new_game | calls controller.reset_default_characters()()")
         self.controller.reset_default_characters()
-        # print("V | start_new_game | calls draw_all_pieces()")
-        self.draw_all_pieces()
+        # print("V | start_new_game | calls draw_all_sprites()")
+        self.draw_all_sprites()
         self.info_label.config(text="   In-Game status/instructions here  ")
 
     def reload_colors(self, color_1):
         self.board_color_1 = color_1
         self.draw_board()
-        self.draw_all_pieces()
+        self.draw_all_sprites()
 
     def on_preference_menu_clicked(self):
         self.show_preferences_window()
@@ -166,10 +169,10 @@ class View():
     def shift(self, start_pos, end_pos):
         try:
             self.controller.pre_move_validation(start_pos, end_pos)
-        except exceptions.ChessError as error:
+        except exceptions.NameError as error:
             self.info_label["text"] = error.__class__.__name__
 
-    def update_label(self, piece, start_pos, end_pos):
+    def update_label(self, sprite, start_pos, end_pos):
         pass
 
 

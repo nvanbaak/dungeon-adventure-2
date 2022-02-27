@@ -1,10 +1,7 @@
 """
-Code illustration: 4.07
-
-@ Tkinter GUI Application Development Blueprints
 """
 import model
-import piece
+import sprite
 
 
 class Controller():
@@ -29,16 +26,12 @@ class Controller():
         self.model.reset_default_characters()
 
     def get_numeric_notation(self, rowcol):
-        # print("C | calls get_numeric_notation via Piece()")
-        return piece.get_numeric_notation(rowcol)
+        # print("C | calls get_numeric_notation via Sprite()")
+        return sprite.get_numeric_notation(rowcol)
 
     def get_alphanumeric_position(self, rowcolumntuple):
         # print(f"C | calls get_alphanumeric_position({rowcolumntuple}) via Model")
         return self.model.get_alphanumeric_position(rowcolumntuple)
-
-    # def get_piece_at(self, position_of_click):
-    #     # print("C | calls get_piece_at() via Model")
-    #     return self.model.get_piece_at(position_of_click)
 
     def pre_move_validation(self, start_pos, end_pos):
         return self.model.pre_move_validation(start_pos, end_pos)

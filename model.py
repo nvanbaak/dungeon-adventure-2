@@ -2,7 +2,7 @@
 """
 from copy import deepcopy
 import exceptions
-import piece
+import sprite
 from dungeon import Dungeon
 from dungeon_builder import DungeonBuilder
 from dungeonchar import DungeonCharacter
@@ -28,10 +28,10 @@ class Model():
 
     def reset_default_characters(self):
         self.dict.clear()
-        # print("M | loops through START_PIECES_POSITION dict (model has access via import config.py)")
-        # print("M | creates Piece objects based on value in S_P_P, then keeps reference. stores in self.dict[position]")
-        for position, value in START_PIECES_POSITION.items():
-            self.dict[position] = piece.create_piece(value, True)
+        # print("M | loops through START_SPRITES_POSITION dict (model has access via import config.py)")
+        # print("M | creates Sprite objects based on value in S_P_P, then keeps reference. stores in self.dict[position]")
+        for position, value in START_SPRITES_POSITION.items():
+            self.dict[position] = sprite.create_sprite(value)
             self.dict[position].keep_reference(self)
         # print(f"M | Model dictionary after iterating S_P_P: {self.dict.items()}")
 

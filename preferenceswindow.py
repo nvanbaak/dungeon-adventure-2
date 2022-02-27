@@ -1,9 +1,7 @@
 """
 """
 
-import sys
 from tkinter import *
-from tkinter import messagebox
 from tkinter.ttk import *
 from tkinter.colorchooser import *
 from configparser import ConfigParser
@@ -64,11 +62,7 @@ class PreferencesWindow():
         config = ConfigParser()
         config.read('options.ini')
         config.set('colors', 'board_color_1', self.board_color_1)
-        # config.set('chess_colors', 'board_color_2', self.board_color_2)
-        # config.set('chess_colors', 'highlight_color', self.highlight_color)
         configurations.BOARD_COLOR_1 = self.board_color_1
-        # configurations.BOARD_COLOR_2 = self.board_color_2
-        # configurations.HIGHLIGHT_COLOR = self.highlight_color
         with open('options.ini', 'w') as config_file:
             config.write(config_file)
 
