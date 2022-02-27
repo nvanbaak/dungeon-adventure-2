@@ -25,6 +25,9 @@ class Controller():
         # print("C | calls model.reset_default_characters() via Controller")
         self.model.reset_default_characters()
 
+    def get_room_data(self):
+        return self.model.get_curr_pos()
+
     def get_numeric_notation(self, rowcol):
         # print("C | calls get_numeric_notation via Sprite()")
         return sprite.get_numeric_notation(rowcol)

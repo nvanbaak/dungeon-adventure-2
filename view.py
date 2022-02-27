@@ -21,12 +21,15 @@ class View():
         self.parent = parent
         self.create_board_base()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
+        self.canvas_width = 0
+        self.canvas_height = 0
         self.start_new_game()
 
     def create_board_base(self):
         self.create_top_menu()
         self.create_canvas()
         self.draw_board()
+        self.draw_room()
         self.create_bottom_frame()
 
     def create_top_menu(self):
@@ -68,10 +71,10 @@ class View():
         self.parent.config(menu=self.menu_bar)
 
     def create_canvas(self):
-        canvas_width = NUMBER_OF_COLUMNS * DIMENSION_OF_EACH_SQUARE
-        canvas_height = NUMBER_OF_ROWS * DIMENSION_OF_EACH_SQUARE
+        self.canvas_width = NUMBER_OF_COLUMNS * DIMENSION_OF_EACH_SQUARE
+        self.canvas_height = NUMBER_OF_ROWS * DIMENSION_OF_EACH_SQUARE
         self.canvas = Canvas(
-            self.parent, width=canvas_width, height=canvas_height)
+            self.parent, width=self.canvas_width, height=self.canvas_height)
         self.canvas.pack(padx=8, pady=8)
 
     def draw_board(self):
@@ -151,6 +154,36 @@ class View():
         # print("V | start_new_game | calls draw_all_sprites()")
         self.draw_all_sprites()
         self.info_label.config(text="   In-Game status/instructions here  ")
+
+    def draw_room(self):
+        WALL_WIDTH = 25
+        rm = self.controller.get_room_data()
+        door_dict = rm.get_doors()
+        for key, value in door_dict.items():
+            print(f"key: {key} | value: {value}")
+            if key == "Up" and value == True:
+                self.canvas.create_rectangle(0, 0, self.canvas_width/3, WALL_WIDTH, fill="black")
+                self.canvas.create_rectangle((2 * self.canvas_width)/3, 0, self.canvas_width, WALL_WIDTH, fill="black")
+            elif key == "Up" and value == False:
+                self.canvas.create_rectangle(0, 0, self.canvas_width, 25, fill="black")
+            if key == "Down" and value == True:
+                self.canvas.create_rectangle(0, self.canvas_height - WALL_WIDTH, self.canvas_width/3, self.canvas_height, fill="black")
+                self.canvas.create_rectangle((2 * self.canvas_width)/3, self.canvas_height - WALL_WIDTH, self.canvas_width, self.canvas_height, fill="black")
+            elif key == "Down" and value == False:
+                self.canvas.create_rectangle(0, self.canvas_height - WALL_WIDTH, self.canvas_width, self.canvas_height, fill="black")
+            if key == "Left" and value == True:
+                self.canvas.create_rectangle(0, 0, WALL_WIDTH, self.canvas_height/3, fill="black")
+                self.canvas.create_rectangle(0, (2 * self.canvas_height)/3, WALL_WIDTH, self.canvas_height, fill="black")
+            elif key == "Left" and value == False:
+                self.canvas.create_rectangle(0, 0, WALL_WIDTH, self.canvas_height, fill="black")
+            if key == "Right" and value == True:
+                self.canvas.create_rectangle(self.canvas_width - WALL_WIDTH, 0, self.canvas_width, self.canvas_height/3, fill="black")
+                self.canvas.create_rectangle(self.canvas_width - WALL_WIDTH, (2 * self.canvas_height)/3, self.canvas_width, self.canvas_height, fill="black")
+            elif key == "Right" and value == False:
+                self.canvas.create_rectangle(self.canvas_width - WALL_WIDTH, 0, self.canvas_height, self.canvas_height, fill="black")
+            else:
+                pass
+        print("Done with this room")
 
     def reload_colors(self, color_1):
         self.board_color_1 = color_1

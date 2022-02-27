@@ -31,6 +31,9 @@ class Room:
         }
         self.__visited = False
 
+    def get_doors(self):
+        return self.__door
+
     def __set_upper_room(self, room):
         if isinstance(room, Room):
             self.__upper_room = room

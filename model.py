@@ -18,9 +18,12 @@ class Model():
     def __init__(self):
         d_list = DungeonBuilder.build_easy_dungeon()
         self.dungeon = d_list[0]
-        self.dungeon.enter_dungeon()
+        self.curr_pos = self.dungeon.enter_dungeon()
         self.reset_default_characters()
         self.player = MockHero("Test", self)
+
+    def get_curr_pos(self):
+        return self.curr_pos
 
     def reset_game_data(self):
         # print("M | reset_game_data() | resets Model's class variables")
