@@ -2,10 +2,12 @@
 from abc import ABC, abstractmethod
 import random
 
+
 class DungeonCharacter(ABC):
     """
     Abstract base class used for all dungeon characters
     """
+
     def __init__(self, name, model) -> None:
         self.__name = name
         self.__hp_total = random.choice(range(50, 100))
@@ -15,6 +17,19 @@ class DungeonCharacter(ABC):
         self.__damage_min = 20
         self.__damage_max = 30
         self.__model = model
+        self.__healable = False
+
+
+    def __set_healable(self, t_f):
+        ##
+        if isinstance(t_f, bool):
+            self.__healable = t_f
+
+    def __get_healable(self):
+        ##
+        return self.__healable
+
+    healable = property(__get_healable, __set_healable)
 
     @property
     def name(self):
@@ -23,6 +38,7 @@ class DungeonCharacter(ABC):
     @property
     def hp(self):
         return self.__hp
+
     @hp.setter
     def hp(self, value):
         if not isinstance(value, int):
@@ -33,13 +49,14 @@ class DungeonCharacter(ABC):
     @property
     def hp_total(self):
         return self.__hp_total
+
     @hp_total.setter
     def hp_total(self, value):
         if value < 1:
             raise ValueError("hp total must be positive!")
         elif not isinstance(value, int):
             raise TypeError("hp total must be a number!")
-        else: 
+        else:
             self.__hp_total = value
             # hp can't be higher than hp_total
             if self.__hp > self.__hp_total:
@@ -48,6 +65,7 @@ class DungeonCharacter(ABC):
     @property
     def attack_speed(self):
         return self.__attack_speed
+
     @attack_speed.setter
     def attack_speed(self, value):
         if value < 1:
@@ -60,6 +78,7 @@ class DungeonCharacter(ABC):
     @property
     def hit_chance(self):
         return self.__hit_chance
+
     @hit_chance.setter
     def hit_chance(self, value):
         if not isinstance(value, float):
@@ -71,6 +90,7 @@ class DungeonCharacter(ABC):
     @property
     def damage_min(self):
         return self.__damage_min
+
     @damage_min.setter
     def damage_min(self, value):
         if not isinstance(value, int):
@@ -85,6 +105,7 @@ class DungeonCharacter(ABC):
     @property
     def damage_max(self):
         return self.__damage_max
+
     @damage_max.setter
     def damage_max(self, value):
         if not isinstance(value, int):
@@ -142,4 +163,3 @@ class DungeonCharacter(ABC):
         self.__model.announce(f"{self.__name} took {dmg} dmg from {source}!")
         if not self._is_alive:
             self.__model.announce(f"{self.__name} has died!")
-            

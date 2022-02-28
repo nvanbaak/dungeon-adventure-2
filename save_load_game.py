@@ -38,9 +38,13 @@ class SaveGame:
 
     def save_game(self, name , dungeon_list, floor_num, location, hero):
         """ creates the pickle files for the list of game objects passed"""
-        to_pickle_object_list = self.__create_objects_list(name , dungeon_list, floor_num, location, hero)
-        with open(f'{name}.pkl', 'wb') as file:
-            pickle.dump(to_pickle_object_list, file)
+        if not self.check_in_saved_games(name):
+            to_pickle_object_list = self.__create_objects_list(name , dungeon_list, floor_num, location, hero)
+            with open(f'{name}.pkl', 'wb') as file:
+                pickle.dump(to_pickle_object_list, file)
+
+        else:
+            raise ValueError(f"{name} already in use, please try a different name")
 
     def __create_objects_list(self,name , dungeon_list, floor_num, location, hero):
         """ validates the input parameters, adds it to the game_objects list and returns the game_objects list
@@ -84,10 +88,14 @@ class SaveGame:
             with open(f'{name}.pkl', 'rb') as file:
                 return pickle.load(file)
 
+        else:
+            raise ValueError(f"{name} not saved to load")
 
     def delete_saved_game(self, name):
         if self.check_in_saved_games(name):
             os.remove(f'{name}.pkl')
             self.__remove_from_saved_games(name)
 
+        else:
+            raise ValueError(f"{name} not saved to delete")
 
