@@ -5,11 +5,10 @@ from abc import ABC, abstractmethod
 import random
 
 class Healable(ABC):
-    def __init__(self, heal_chance=0.0):
+    def __init__(self):
         self.__chance_to_heal = 0.0
-        self.chance_to_heal = heal_chance
-        self.__min_heal_point = 11
-        self.__max_heal_point = 30
+        self.__min_heal_point = 0
+        self.__max_heal_point = 0
 
     def __set_chance_to_heal(self, chance_to_heal):
         if isinstance(chance_to_heal, float) and 0 < chance_to_heal <= 1:
