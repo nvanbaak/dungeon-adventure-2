@@ -2,6 +2,15 @@
 from dungeon import Dungeon
 
 class DungeonBuilder:
+
+    @staticmethod
+    def build_single_dungeon():
+        """build a single dungeon"""
+        dun0 = Dungeon(4,4)
+        result=[dun0]
+        DungeonBuilder.__update_floor_details(result)
+        return result
+
     @staticmethod
     def build_easy_dungeon():
         dun0 = Dungeon(4,4)
@@ -49,6 +58,7 @@ class DungeonBuilder:
                 for col in range(0, col_count):
                     array[i].dungeon.maze[row, col].floor = int(i)
             i +=1
+
 
 
 
