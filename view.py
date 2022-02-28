@@ -96,6 +96,7 @@ class View():
         self.selected_sprite_position = position_of_click
         self.draw_board()
         self.draw_all_sprites()
+        self.draw_room()
 
     def get_clicked_row_column(self, event):
         col_size = row_size = DIMENSION_OF_EACH_SQUARE
@@ -160,7 +161,6 @@ class View():
         rm = self.controller.get_room_data()
         door_dict = rm.get_doors()
         for key, value in door_dict.items():
-            print(f"key: {key} | value: {value}")
             if key == "Up" and value == True:
                 self.canvas.create_rectangle(0, 0, self.canvas_width/3, WALL_WIDTH, fill="black")
                 self.canvas.create_rectangle((2 * self.canvas_width)/3, 0, self.canvas_width, WALL_WIDTH, fill="black")
@@ -183,12 +183,12 @@ class View():
                 self.canvas.create_rectangle(self.canvas_width - WALL_WIDTH, 0, self.canvas_height, self.canvas_height, fill="black")
             else:
                 pass
-        print("Done with this room")
 
     def reload_colors(self, color_1):
         self.board_color_1 = color_1
         self.draw_board()
         self.draw_all_sprites()
+        self.draw_room()
 
     def on_preference_menu_clicked(self):
         self.show_preferences_window()
