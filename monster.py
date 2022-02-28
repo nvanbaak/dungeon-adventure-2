@@ -10,9 +10,10 @@ class Monster(DungeonCharacter, Healable, ABC):
     Abstract base class used for all monster. They attach the hero and heal itself after every time taking damage
     """
 
-    def __init__(self, name, model, chance_to_heal = 0.0):
-        super().__init__(name=name, model=model)
-        super(DungeonCharacter, self).__init__(chance_to_heal)
+    def __init__(self, name = "name", model = None):
+        super().__init__(name = name, model = model)
+        super(DungeonCharacter, self).__init__()
+        self.my_turn = True
 
     def combat(self, target):
         """
@@ -26,30 +27,22 @@ class Monster(DungeonCharacter, Healable, ABC):
             # or they both run out of attacks
             if my_turn:
                 if my_attacks < self.attack_speed:
-                    hp_before_attack = target.hp
                     self.attack_target(target)
-                    if not target._is_alive:
-                        break
-                    if target.healable and target.hp < hp_before_attack:  # hero is healable and has been attacked
-                        heal_message = target.heal_itself()
-                        target._DungeonCharacter__model.announce(f"{target._DungeonCharacter__name}: {heal_message}")
-
                     my_turn = False
                     my_attacks += 1
-
+                    if not target._is_alive:
+                        break
             else:
                 if target_attacks < target.attack_speed:
                     hp_before_attack = self.hp
                     target.attack_target(self)
-
-                    if not self._is_alive:
-                        break
-
                     if hp_before_attack > self.hp:
                         heal_message = self.heal_itself()
                         self._DungeonCharacter__model.announce(f"{self._DungeonCharacter__name}: {heal_message}")
                     my_turn = True
                     target_attacks += 1
+                    if not self._is_alive:
+                        break
 
 
     def attack_target(self, target):
