@@ -7,7 +7,7 @@ class MockMonster(Monster):
 
     def __init__(self, name, model):
         super().__init__(name, model)
-        self.my_turn = True
+
 
 class MockHero(Hero):
     """
@@ -92,6 +92,54 @@ class MyTestCase(unittest.TestCase):
         hero.damage_max = 11
         monster.combat(hero)
         self.assertEqual(monster.hp, monster.hp_total) # the monster hit point should always be equal to total_hp after healing
+
+    def test_attack_target_with_hero_chance_to_block_as_1(self):
+        monster = MockMonster("monster", MockAnnouncer())  # always heals after being attacked
+        monster.hp_total = 50
+        monster.chance_to_heal = 1.0
+        monster.min_heal_point = 11
+        monster.max_heal_point = 12
+        monster.hp = monster.hp_total
+        monster.attack_speed = 1
+        monster.hit_chance = 1.0  # always lands an attack
+        monster.damage_min = 10
+        monster.damage_max = 11
+
+        hero = MockHero("hero", MockAnnouncer())
+        hero.hp_total = 50
+        hero.hp = hero.hp_total
+        hero.attack_speed = 1
+        hero.hit_chance = 1.0  # always lands an attack
+        hero.damage_min = 10
+        hero.damage_max = 11
+        hero.chance_to_block = 1.0
+
+        monster.attack_target(hero)
+        self.assertEqual(hero.hp,hero.hp_total, "hero has lost hp after attack")
+
+    def test_attack_target_with_hero_chance_to_block_as_0(self):
+        monster = MockMonster("monster", MockAnnouncer())  # always heals after being attacked
+        monster.hp_total = 50
+        monster.chance_to_heal = 1.0
+        monster.min_heal_point = 11
+        monster.max_heal_point = 12
+        monster.hp = monster.hp_total
+        monster.attack_speed = 1
+        monster.hit_chance = 1.0  # always lands an attack
+        monster.damage_min = 10
+        monster.damage_max = 11
+
+        hero = MockHero("hero", MockAnnouncer())
+        hero.hp_total = 50
+        hero.hp = hero.hp_total
+        hero.attack_speed = 1
+        hero.hit_chance = 1.0  # always lands an attack
+        hero.damage_min = 10
+        hero.damage_max = 11
+        hero.chance_to_block = 0.0
+
+        monster.attack_target(hero)
+        self.assertLess(hero.hp,hero.hp_total, "hero not lost hp after attack")
 
 if __name__ == '__main__':
     unittest.main()

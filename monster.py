@@ -4,6 +4,7 @@
 from abc import ABC, abstractmethod
 from dungeonchar import DungeonCharacter
 from healable import Healable
+import random
 
 class Monster(DungeonCharacter, Healable, ABC):
     """
@@ -13,7 +14,7 @@ class Monster(DungeonCharacter, Healable, ABC):
     def __init__(self, name = "name", model = None):
         super().__init__(name = name, model = model)
         super(DungeonCharacter, self).__init__()
-        self.my_turn = True
+
 
     def combat(self, target):
         """
@@ -46,7 +47,15 @@ class Monster(DungeonCharacter, Healable, ABC):
 
 
     def attack_target(self, target):
-        return super().attack_target(target)
+        """
+                Method for attacking a target
+                """
+        if target.chance_to_block < random.random():
+            hit_landed = random.random() < self.hit_chance
+            if hit_landed:
+                damage = random.randint(self.damage_min, self.damage_max)
+                target.take_damage(damage, self.name)
+
 
     def take_damage(self, dmg, source):
         return super().take_damage(dmg, source)
