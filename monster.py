@@ -18,13 +18,8 @@ class Monster(DungeonCharacter, Healable, ABC):
     def take_damage(self, dmg, source):
         """ after taking damage, if the monster is not dead, it tries to heal itself"""
         hp_before_attack = self.hp
-        self.hp -= dmg
-
-        self._DungeonCharacter__model.announce(f"{self._DungeonCharacter__name} took {dmg} dmg from {source}!")
-
-        if not self._is_alive:
-            self._DungeonCharacter__model.announce(f"{self._DungeonCharacter__name} has died!")
-        elif hp_before_attack > self.hp:
+        super().take_damage(dmg, source)
+        if self._is_alive and hp_before_attack > self.hp:
             heal_message = self.heal_itself()
             self._DungeonCharacter__model.announce(f"{self._DungeonCharacter__name}: {heal_message}")
 
