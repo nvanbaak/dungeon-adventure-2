@@ -1,14 +1,7 @@
-"""
-"""
-from copy import deepcopy
-import exceptions
-import sprite
-from dungeon import Dungeon
 from dungeon_builder import DungeonBuilder
-from dungeonchar import DungeonCharacter
 from test_hero import MockHero
+import sprite
 from configurations import *
-
 
 class Model():
 
@@ -19,15 +12,22 @@ class Model():
         d_list = DungeonBuilder.build_easy_dungeon()
         self.dungeon = d_list[0]
         self.curr_pos = self.dungeon.enter_dungeon()
-        self.reset_default_characters()
         self.player = MockHero("Test", self)
 
     def get_curr_pos(self):
         return self.curr_pos
 
-    def reset_game_data(self):
-        # print("M | reset_game_data() | resets Model's class variables")
-        pass
+    def move_left(self):
+        self.curr_pos = self.curr_pos.left_room
+
+    def move_right(self):
+        self.curr_pos = self.curr_pos.right_room
+
+    def move_up(self):
+        self.curr_pos = self.curr_pos.upper_room
+
+    def move_down(self):
+        self.curr_pos = self.curr_pos.down_room
 
     def reset_default_characters(self):
         self.dict.clear()
@@ -36,7 +36,12 @@ class Model():
         for position, value in START_SPRITES_POSITION.items():
             self.dict[position] = sprite.create_sprite(value)
             self.dict[position].keep_reference(self)
-        # print(f"M | Model dictionary after iterating S_P_P: {self.dict.items()}")
+        print(f"M | {self.dict}")
+        # pcs_list = list(self.dict.items())
+        # print(f"Ml | {pcs_list}")
+        # nw_dct = {pcs_list[i]: pcs_list[i + 1] for i in range (0, len(pcs_list), 2)}
+        # print(f"Mn | {nw_dct}")
+        # self.update_dict(nw_dct)
 
     def get_alphanumeric_position(self, rowcol):
         if self.is_on_board(rowcol):
@@ -53,3 +58,10 @@ class Model():
     def move(self, start_pos, final_pos):
         # print(f"M | move(start, final) | self[{final_pos}] = self.dict.pop({start_pos}, None)")
         self.dict[final_pos] = self.dict.pop(start_pos, None)
+
+    def update_dict(self, new_dict):
+        self.dict = new_dict
+        print(f"n | {self.dict}")
+
+    def get_dict(self):
+        return self.dict

@@ -12,6 +12,11 @@ START_SPRITES_POSITION = {
     "D4": "w", "A1": "p", "A7": "t", "G1": "o", "G4": "g", "G7": "s"
 }
 
+# START_SPRITES_POSITION = {
+#     "w": "D4", "p": "A1", "t": "A7", "o": "G1", "g": "G4", "s": "G7"
+# }
+
+
 SHORT_NAME = {'W': 'Warrior',  'P': 'Priestess',  'T': 'Thief',  'O': 'Ogre',
               'G': 'Gremlin',  'S': 'Skeleton'}
 
