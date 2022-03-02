@@ -102,5 +102,64 @@ class Hero_Tests(unittest.TestCase):
         self.assertEqual(test_hero.vision, 10)
 
 
+<<<<<<< HEAD
+=======
+    def test_chance_to_block_setter_getter(self):
+        test_hero = MockHero("Vision", MockAnnouncer())
+
+        self.assertEqual(test_hero.chance_to_block, 0.0)
+
+        test_hero.chance_to_block = 0.8
+        self.assertEqual(test_hero.chance_to_block, 0.8)
+
+    def test_chance_to_block_setter_invalid_input(self):
+        exception_raised = False
+
+        test_hero = MockHero("Vision", MockAnnouncer())
+        try:
+            test_hero.chance_to_block = 2.0
+        except ValueError:
+            exception_raised = True
+
+        self.assertEqual(exception_raised, True)
+
+    def test_chance_to_block_setter_invalid_input_2(self):
+        exception_raised = False
+
+        test_hero = MockHero("Vision", MockAnnouncer())
+        try:
+            test_hero.chance_to_block = "abc"
+        except ValueError:
+            exception_raised = True
+
+        self.assertEqual(exception_raised, True)
+
+    def test_take_damage_pit(self):
+        test_hero = MockHero("Vision", MockAnnouncer())
+        hero_hp = test_hero.hp
+        test_hero.take_damage(10, "pit")
+
+        self.assertEqual(test_hero.hp, hero_hp - 10 )
+
+    def test_take_damage_chance_to_block_as_1(self):
+        # hero always blocks an attack
+        test_hero = MockHero("Vision", MockAnnouncer())
+        test_hero.chance_to_block = 1.0
+        test_hero.take_damage(10, "monster")
+        self.assertEqual(test_hero.hp, test_hero.hp_total)
+
+    def test_take_damage_chance_to_block_as_0(self):
+        # hero always takes a damage
+        test_hero = MockHero("Vision", MockAnnouncer())
+        test_hero.chance_to_block = 0.0
+        test_hero.take_damage(10, "monster")
+        self.assertLess(test_hero.hp, test_hero.hp_total)
+
+
+
+
+
+
+>>>>>>> sg_hero_chars
 if __name__ == "__main__":
     unittest.main()
