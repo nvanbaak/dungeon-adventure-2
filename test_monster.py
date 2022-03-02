@@ -7,7 +7,7 @@ class MockMonster(Monster):
 
     def __init__(self, name, model):
         super().__init__(name, model)
-        self.my_turn = True
+
 
 class MockHero(Hero):
     """
@@ -92,6 +92,7 @@ class MyTestCase(unittest.TestCase):
         hero.damage_max = 11
         monster.combat(hero)
         self.assertEqual(monster.hp, monster.hp_total) # the monster hit point should always be equal to total_hp after healing
+
 
 if __name__ == '__main__':
     unittest.main()
