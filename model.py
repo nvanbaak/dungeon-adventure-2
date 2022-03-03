@@ -13,6 +13,7 @@ class Model():
         self.dungeon = d_list[0]
         self.curr_pos = self.dungeon.enter_dungeon()
         self.player = MockHero("Test", self)
+        print(self.dungeon.dungeon.winning_path)
 
     def get_curr_pos(self):
         return self.curr_pos

@@ -24,13 +24,24 @@ def get_numeric_notation(rowcol):
 
 class Sprite():
 
-    def __init__(self, visible=False):
+    def __init__(self):
         self.name = self.__class__.__name__.lower()
         self.visible = False
 
     def keep_reference(self, model):
         self.model = model
 
+class Abstraction_pillar(Sprite):
+    pass
+
+class Encapsulation_pillar(Sprite):
+    pass
+
+class Inheritance_pillar(Sprite):
+    pass
+
+class Polymorphism_pillar(Sprite):
+    pass
 
 class Priestess(Sprite):
     pass

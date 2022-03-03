@@ -75,35 +75,18 @@ class Maze:
                 self.__map[r, c] = Room()
                 self.__map[r, c].location = [r, c]
 
-    def create_maze_random_entrance(self):
+    def create_maze(self):
         """the method that creates the maze of room objects """
         self.__set_entrance_room()  # sets the entrance room
         self.__set_exit_room()  # sets the exit room
         self._create_room_links()
-        self.__set_impassable()  # sets the rooms impassable (dead_ends)
+        # traverses through the __map array and checks if we can reach the exit from entrance
+        # and save the successful path
         self.__set_path()
+        self.__set_impassable()  # sets the rooms impassable (dead_ends)
         self.__set_pillars()  # places the pillars in the rooms
         self.__set_monsters() # place monsters in all the rooms with pillars
         self.__set_healing_vision_pit()  # sets the healing potion, vision potion and pits in each room randomly
-
-    def create_maze_specified_entrance(self, row, col):
-        self.__specified_entrance = True
-        self.__set_specified_entrance(row, col)
-        self.__set_exit_room()  # sets the exit room
-        self._create_room_links()
-        self.__set_impassable()  # sets the rooms impassable (dead_ends)
-        self.__set_path()
-        self.__set_pillars()  # places the pillars in the rooms
-        self.__set_monsters()  # place monsters in all the rooms with pillars
-        self.__set_healing_vision_pit()  # sets the healing potion, vision potion and pits in each room randomly
-
-    def __set_specified_entrance(self,row, col):
-        self.__create_maze_of_empty_rooms()
-        if 0 <= row < self.__rowCount and 0 <= col < self.__colCount:
-            self.__i_entry, self.__j_entry = row, col
-            self.__map[self.__i_entry, self.__j_entry].is_entrance = True
-        else:
-            raise ValueError(f"{row},{col} not is correct range")
 
     def __set_entrance_room(self):
         """ chooses an entrance randomly from sides of the __map_blueprint"""
@@ -145,10 +128,7 @@ class Maze:
 
     def __set_path(self):
         """ with entrance, exit and dead-ends randomly set finds one random winning path from entrance to exit"""
-        self.__path_taken = []
-        self.__depth_first_search_traversal()
-        # print(self.__path_taken)
-        self.__path_correction()
+        self.__path_taken = self.__depth_first_search_traversal()
         # print(self.__path_taken)
         # print(self.__path_taken[0])
         # print(self.__path_taken[-1])
@@ -156,86 +136,60 @@ class Maze:
     def __depth_first_search_traversal(self):
         stack = []
         p = []
-        # visited = []
+        visited = []
         stack.append(self.__map[self.__i_entry, self.__j_entry].location)
         while len(stack) > 0:
-            # possible_neighbor = []
+            possible_neighbor = []
             node = stack.pop()
             p.append(node)
+            visited.append(node)
             row, col = node[0], node[1]
-            self.__map[row, col].is_visited = True
 
-            if self.__valid_room(self.__map[row, col].down_room):
+            if self.__map[row, col].down_room:
                 if self.__map[row, col].down_room.is_exit and len(p) >= 4:
                     p.append(self.__map[row, col].down_room.location)
-                    self.__path_taken = p
-                    break
-                elif not self.__map[row, col].down_room.is_exit and self.__map[row, col].down_room.location not in stack:
-                    stack.append(self.__map[row, col].down_room.location)
+                    return p
+                elif not self.__map[row, col].down_room.is_exit and self.__map[row, col].down_room.location not in visited and self.__map[row, col].down_room.location not in stack:
+                    possible_neighbor.append(self.__map[row, col].down_room.location)
                 elif self.__map[row, col].down_room.is_exit:
                     del p[-1]
 
-            if self.__valid_room(self.__map[row, col].upper_room):
+            if self.__map[row, col].upper_room:
                 if self.__map[row, col].upper_room.is_exit and len(p) >= 4:
                     p.append(self.__map[row, col].upper_room.location)
-                    self.__path_taken = p
-                    break
-                elif not self.__map[row, col].upper_room.is_exit and self.__map[row, col].upper_room.location not in stack:
-                    stack.append(self.__map[row, col].upper_room.location)
+                    return p
+                elif not self.__map[row, col].upper_room.is_exit and self.__map[row, col].upper_room.location not in visited and self.__map[row, col].upper_room.location not in stack:
+                    possible_neighbor.append(self.__map[row, col].upper_room.location)
                 elif self.__map[row, col].upper_room.is_exit:
                     del p[-1]
 
-            if self.__valid_room(self.__map[row, col].left_room):
+            if self.__map[row, col].left_room:
                 if self.__map[row, col].left_room.is_exit and len(p) >= 4:
                     p.append(self.__map[row, col].left_room.location)
-                    self.__path_taken = p
-                    break
-                elif not self.__map[row, col].left_room.is_exit and self.__map[row, col].left_room.location not in stack:
-                    stack.append(self.__map[row, col].left_room.location)
+                    return p
+                elif not self.__map[row, col].left_room.is_exit and self.__map[row, col].left_room.location not in visited and self.__map[row, col].left_room.location not in stack:
+                    possible_neighbor.append(self.__map[row, col].left_room.location)
                 elif self.__map[row, col].left_room.is_exit:
                     del p[-1]
 
-            if self.__valid_room(self.__map[row, col].right_room):
+            if self.__map[row, col].right_room:
                 if self.__map[row, col].right_room.is_exit and len(p) >= 4:
                     p.append(self.__map[row, col].right_room.location)
-                    self.__path_taken = p
-                    break
-                elif not self.__map[row, col].right_room.is_exit and self.__map[row, col].right_room.location not in stack:
-                    stack.append(self.__map[row, col].right_room.location)
+                    return p
+                elif not self.__map[row, col].right_room.is_exit and self.__map[row, col].right_room.location not in visited and self.__map[row, col].right_room.location not in stack:
+                    possible_neighbor.append(self.__map[row, col].right_room.location)
                 elif self.__map[row, col].right_room.is_exit:
                     del p[-1]
 
             if not self.__map[row, col].down_room and not self.__map[row, col].upper_room and \
                     not self.__map[row, col].left_room and not self.__map[row, col].right_room:
                     del p[-1]
-            if len(stack) == 0:
-                self.__set_specified_entrance(self.__i_entry, self.__j_entry)
-                self.__set_exit_room()  # sets the exit room
-                self._create_room_links()
-                self.__set_impassable()  # sets the rooms impassable (dead_ends)
-                self.__set_path()
-                break
-
-    def __path_correction(self):
-        p = self.__path_taken[::-1]
-        # print(p)
-        i = 0
-        while i < len(p) - 1:
-            row, col = p[i][0], p[i][1]
-            if p[i + 1] not in [[row - 1, col], [row + 1, col], [row, col - 1], [row, col + 1]]:
-                self.__path_taken.remove(p[i + 1])
-                p.remove(p[i + 1])
-                continue
-            i += 1
-
-    @staticmethod
-    def __valid_room(room):
-        if isinstance(room, Room):
-            if not room.is_visited and not room.is_impassable:
-                return True
-        else:
-            return False
-
+            else:
+                count = len(possible_neighbor)
+                for i in range(count):
+                    choice = random.choice(len(possible_neighbor))
+                    stack.append(possible_neighbor[choice])
+                    possible_neighbor.remove(possible_neighbor[choice])
 
     def __set_impassable(self):
         """
@@ -245,7 +199,7 @@ class Maze:
         for row in range(0, self.__rowCount):
             for col in range(0, self.__colCount):
                 number = random.randint(1, 10)
-                if number >= 7 and not self.__map[row, col].is_entrance and not self.__map[row, col].is_exit:
+                if number >= 6 and [row, col] not in self.__path_taken:
                     self.__map[row, col].is_impassable = True
                     self.__impassable_rooms.append([row, col])
 
@@ -335,10 +289,6 @@ class Maze:
     winning_path = property(_get_winning_path)  # property to access the winning_path
     pillar_position = property(_get_pillar_positions)
 
-# #
 # maze = Maze(4,4)
-# #
-# # # maze.path_correction()
 # maze.create_maze()
-# print(maze.winning_path)
 # print(maze)

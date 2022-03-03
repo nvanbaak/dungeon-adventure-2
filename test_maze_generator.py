@@ -21,44 +21,44 @@ class MyTestCase(unittest.TestCase):
 
     def test_set_entrance_room(self):
         m = Maze(4, 4)
-        m.create_maze()
+        m.create_maze_random_entrance()
         row, col = m.winning_path[0]
         self.assertEqual(True, m.maze[row, col].is_entrance, "room is not set as entrance")
 
     def test_set_entrance_room_wrong_room(self):
         m = Maze(4, 4)
-        m.create_maze()
+        m.create_maze_random_entrance()
         row, col = m.winning_path[1]
         self.assertEqual(False, m.maze[row, col].is_entrance, "room is somehow set as entrance")
 
     def test_set_exit_room(self):
         m = Maze(4, 4)
-        m.create_maze()
+        m.create_maze_random_entrance()
         row, col = m.winning_path[-1]
         self.assertEqual(True, m.maze[row, col].is_exit, "room is not set as exit")
 
     def test_set_exit_room_wrong_room(self):
         m = Maze(4, 4)
-        m.create_maze()
+        m.create_maze_random_entrance()
         row, col = m.winning_path[1]
         self.assertEqual(False, m.maze[row, col].is_entrance, "room is somehow set as exit")
 
     def test__set_impassable_rooms(self):
         m = Maze(4, 4)
-        m.create_maze()
+        m.create_maze_random_entrance()
         for i in range(0, len(m.impassable_rooms)):
             row, col = m.impassable_rooms[i]
             self.assertEqual(True, m.maze[row, col].is_impassable, "room is not set as impassable")
 
     def test_set_impassable_room_wrong_room(self):
         m = Maze(4, 4)
-        m.create_maze()
+        m.create_maze_random_entrance()
         row, col = m.winning_path[0]
         self.assertEqual(False, m.maze[row, col].is_impassable, "entrance is set as impassable")
 
     def test_set_path(self):  # validates the path generated
         m = Maze(4, 4)
-        m.create_maze()
+        m.create_maze_random_entrance()
         row, col = m.winning_path[0]  # check if the path starts at the entrance
         self.assertEqual(True, m.maze[row, col].is_entrance, "the path does not start at the entrance")
         row, col = m.winning_path[-1]  # checks if the path ends at the exit
@@ -70,7 +70,7 @@ class MyTestCase(unittest.TestCase):
     def test_set_pillar(self):
         # validates if all pillars are placed in the path generated, to confirm that there is atleast one sure way to win
         m = Maze(4, 4)
-        m.create_maze()
+        m.create_maze_random_entrance()
         row, col = m.winning_path[0]
         self.assertEqual(None, m.maze[row, col].pillar, "the pillar is placed in the entrance")
         row, col = m.winning_path[-1]
@@ -87,7 +87,7 @@ class MyTestCase(unittest.TestCase):
 
     def test__set_healing_vision_pit_test_healing_potion(self):
         m = Maze(4, 4)
-        m.create_maze()
+        m.create_maze_random_entrance()
         if len(m.healing_potion_rooms) > 0:
             for i in range(0, len(m.healing_potion_rooms)):
                 # validates if all the rooms randomly generated to hold healing potion sets the
@@ -96,7 +96,7 @@ class MyTestCase(unittest.TestCase):
 
     def test__set_healing_vision_pit_test_vision_potion(self):
         m = Maze(4, 4)
-        m.create_maze()
+        m.create_maze_random_entrance()
         if len(m.vision_potion_rooms) > 0:
             for i in range(0, len(m.vision_potion_rooms)):
                 # validates if all the rooms randomly generated to hold vision potion sets the
@@ -105,12 +105,17 @@ class MyTestCase(unittest.TestCase):
 
     def test__set_healing_vision_pit_test_pit_rooms(self):
         m = Maze(4, 4)
-        m.create_maze()
+        m.create_maze_random_entrance()
         if len(m.pit_rooms) > 0:
             for i in range(0, len(m.pit_rooms)):
                 # validates if all the rooms randomly generated to hold healing potion sets the
                 # healing_potion param in the room properly
                 self.assertEqual(True, m.pit_rooms[i].pit)
+
+    def test__create_maze_specified_entrance(self):
+        m = Maze(4,4)
+        m.create_maze_specified_entrance(0,0)
+        self.assertEqual(True, m.maze[0, 0].is_entrance, "room at location(0,0) is not set as entrance")
 
 if __name__ == '__main__':
     unittest.main()

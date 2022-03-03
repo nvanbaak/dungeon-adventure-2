@@ -1,13 +1,17 @@
 from tkinter import Tk, Menu, Label, Frame, Canvas, RIGHT, PhotoImage, messagebox
+from PIL import Image, ImageTk, ImageOps
 import controller
 from configurations import *
 import exceptions
+import random
 
 class View():
 
     sprite_position = None
     images = {}
     board_color_1 = BOARD_COLOR_1
+    sprite_xy = (0, 0)
+    sprite_mirror = False
 
     def __init__(self, parent, controller):
         self.controller = controller
@@ -69,6 +73,9 @@ class View():
             else:
                 pass
             self.canvas.pack()
+        rm_contents = rm.get_contents()
+        rm_loc = rm.get_location()
+        print(f"{rm_loc} {rm_contents}")
 
     def start_new_game(self):
         # print("V | start_new_game | calls controller.reset_default_characters()()")
@@ -76,6 +83,26 @@ class View():
         # print("V | start_new_game | calls draw_all_sprites()")
         self.draw_all_sprites()
         self.info_label.config(text="   In-Game status/instructions here  ")
+
+    def doorway_refresh(self, model_dict, clicked):
+        sprite = model_dict[self.sprite_position]
+        doors = ["C1", "D1", "E1", "C7", "D7", "E7", "G3", "G4", "G5", "A3", "A4", "A5"]
+        new = ""
+        if sprite.name == "warrior" and self.sprite_position in doors:
+            for al_nu in doors:
+                if self.sprite_position == al_nu:
+                    # if al_nu[1] == "1":
+                    #     new = al_nu[0] + "2"
+                    # if al_nu[1] == "7":
+                    #     new = al_nu[0] + "6"
+                    # if al_nu[0] == "G":
+                    #     new = "F" + al_nu[1]
+                    # if al_nu[0] == "A":
+                    #     new = "B" + al_nu[1]
+                    # del model_dict[self.sprite_position]
+                    # self.sprite_position = new
+                    # model_dict[self.sprite_position] = sprite
+                    self.on_square_clicked_manual(self.sprite_position, False)
 
     def draw_all_sprites(self):
         for position, sprite in self.controller.get_all_peices_on_board():
@@ -88,11 +115,16 @@ class View():
         if sprite:
             filename = "sprites_image/{}.png".format(
                 sprite.name.lower())
-            if filename not in self.images:
-                self.images[filename] = PhotoImage(file=filename)
-                img_max = max(self.images[filename].width(), self.images[filename].height())
-                img_adj = int(1/(64/img_max))
-                self.images[filename] = self.images[filename].subsample(img_adj)
+            image = Image.open(filename)
+            w, h = image.size
+            image = ImageOps.contain(image, (64, 64))
+            # self.images[filename] = image.resize((64, 64))
+            # self.images[filename] = ImageOps.contain(image, (64, 64))
+
+            if self.sprite_mirror == True:
+                image = image.transpose(Image.FLIP_LEFT_RIGHT)
+            self.images[filename] = ImageTk.PhotoImage(image)
+
             x0, y0 = self.calculate_sprite_coordinate(x, y)
             ci = self.canvas.create_image(x0, y0, image=self.images[
                                      filename], anchor="c")
@@ -105,6 +137,7 @@ class View():
             # print(f"ADD OTHER HERO TYPES")
             if sprite.name == "warrior":
                 self.sprite_position = position
+                self.sprite_xy = (x0, y0)
 
     def calculate_sprite_coordinate(self, row, col):
         x0 = (col * DIMENSION_OF_EACH_SQUARE) + \
@@ -119,49 +152,136 @@ class View():
     #     res_dct = dict(zip(it, it))
     #     return res_dct
 
-    def on_square_clicked(self, event):
-        clicked_row, clicked_column = self.get_clicked_row_column(event)
-        rc = (clicked_row, clicked_column)
-        position_of_click = self.controller.get_alphanumeric_position(
-            (clicked_row, clicked_column))
-        self.shift(self.sprite_position, position_of_click)
-        self.sprite_position = position_of_click
-
+    def on_square_clicked_manual(self, position, clicked):
         rm = self.controller.get_room_data()
         door_dict = rm.get_doors()
+        str = ""
+        self.update_label("")
+        rm_contents = rm.get_contents()
+        items = rm_contents.items()
+        for k, v in items:
+            if k == "pillar":
+                if v == "p":
+                    self.draw_pillar("polymorphism_pillar")
+                    str += " POLYMORPHISM_PILLAR "
+                if v == "e":
+                    self.draw_pillar("encapusulation_pillar")
+                    str += " ENCAPSULATION_PILLAR "
+                if v == "a":
+                    self.draw_pillar("abstraction_pillar")
+                    str += " ABSTRACTION_PILLAR "
+                if v == "i":
+                    self.draw_pillar("inheritance_pillar")
+                    str += " INHERITANCE_PILLAR "
+            if k == "pit" and v == True:
+                str += " PIT "
+            if k == "monster" and v == "Gremlin":
+                str += " MONSTER "
+            if k == "vision_potion" and v == True:
+                str += " VISION_POTION "
+            if k == "healing_potion" and v == "g" or k == "healing_potion" and v == "y":
+                str += " HEALING_POTION "
+        self.update_label(str)
+
+        self.canvas.pack()
 
         model_dict = self.controller.get_dict()
 
         sprite_obj = model_dict[self.sprite_position]
 
-        if self.sprite_position == "G5" or self.sprite_position == "G4" or self.sprite_position == "G3":
-            if door_dict["Right"] == True:
-                self.controller.get_right_room()
-                del model_dict[self.sprite_position]
-                self.sprite_position = self.sprite_position.replace("G", "A")
-                model_dict[self.sprite_position] = sprite_obj
-        if self.sprite_position == "C1" or self.sprite_position == "D1" or self.sprite_position =="E1":
-            if door_dict["Down"] == True:
-                self.controller.get_down_room()
-                del model_dict[self.sprite_position]
-                self.sprite_position = self.sprite_position.replace("1", "7")
-                model_dict[self.sprite_position] = sprite_obj
-        if self.sprite_position == "A5" or self.sprite_position == "A4" or self.sprite_position == "A3":
-            if door_dict["Left"] == True:
-                self.controller.get_left_room()
-                del model_dict[self.sprite_position]
-                self.sprite_position = self.sprite_position.replace("A", "G")
-                model_dict[self.sprite_position] = sprite_obj
-        if self.sprite_position == "C7" or self.sprite_position == "D7" or self.sprite_position == "E7":
-            if door_dict["Up"] == True:
-                self.controller.get_upper_room()
-                del model_dict[self.sprite_position]
-                self.sprite_position = self.sprite_position.replace("7", "1")
-                model_dict[self.sprite_position] = sprite_obj
+        if clicked == True:
+            if self.sprite_position == "G5" or self.sprite_position == "G4" or self.sprite_position == "G3":
+                if door_dict["Right"] == True:
+                    self.controller.move_right()
+                    del model_dict[self.sprite_position]
+                    self.sprite_position = self.sprite_position.replace("G", "A")
+                    model_dict[self.sprite_position] = sprite_obj
+            elif self.sprite_position == "C1" or self.sprite_position == "D1" or self.sprite_position =="E1":
+                if door_dict["Down"] == True:
+                    self.controller.move_down()
+                    del model_dict[self.sprite_position]
+                    self.sprite_position = self.sprite_position.replace("1", "7")
+                    model_dict[self.sprite_position] = sprite_obj
+            elif self.sprite_position == "A5" or self.sprite_position == "A4" or self.sprite_position == "A3":
+                if door_dict["Left"] == True:
+                    self.controller.move_left()
+                    del model_dict[self.sprite_position]
+                    self.sprite_position = self.sprite_position.replace("A", "G")
+                    model_dict[self.sprite_position] = sprite_obj
+            elif self.sprite_position == "C7" or self.sprite_position == "D7" or self.sprite_position == "E7":
+                if door_dict["Up"] == True:
+                    self.controller.move_upper()
+                    del model_dict[self.sprite_position]
+                    self.sprite_position = self.sprite_position.replace("7", "1")
+                    model_dict[self.sprite_position] = sprite_obj
+            else:
+                pass
 
         self.canvas.delete("all")
         self.draw_room()
         self.draw_all_sprites()
+        if clicked == True:
+            self.doorway_refresh(model_dict, clicked)
+
+    def on_square_clicked(self, event):
+        clicked = True
+        clicked_row, clicked_column = self.get_clicked_row_column(event)
+        xy = self.get_clicked_xy(event)
+        position_of_click = self.controller.get_alphanumeric_position(
+            (clicked_row, clicked_column))
+        self.shift(self.sprite_position, position_of_click)
+        self.sprite_position = position_of_click
+        if self.sprite_xy[0] < xy[0]:
+            self.sprite_mirror = False
+        else:
+            self.sprite_mirror = True
+
+        self.on_square_clicked_manual(self.sprite_position, clicked)
+
+    def draw_pillar(self, pillr):
+
+        model_dict = self.controller.get_dict()
+
+        for position, value in model_dict.items():
+            s_obj = model_dict[position]
+            if s_obj.name == pillr:
+                s_obj.visible = True
+
+        # while True:
+        #     r_x = random.randint(0, 64*7)
+        #     r_y = random.randint(0, 64*7)
+        #     r, c = self.get_row_column(r_x, r_y)
+        #     rand_grid = self.controller.get_alphanumeric_position((r, c))
+        #     if rand_grid in model_dict:
+        #         # occupied, so get another
+        #         pass
+        #     else:
+        #         # empty, so make new location for this pillar
+        #         new_loc = rand_grid
+        #         break
+
+        # for key, value in model_dict.items():
+        #     if pillr == value.name:
+        #         p_loc = key
+        #         p_obj = value
+        #         model_dict[new_loc] = p_obj
+        #         del model_dict[p_loc]
+        #         break
+        #     else:
+        #         p_obj = None
+
+        # filename = "sprites_image/{}.png".format(
+        #     pillr.lower())
+        # image = Image.open(filename)
+        # w, h = image.size
+        # image = ImageOps.contain(image, (64, 64))
+        #
+        # self.images[filename] = ImageTk.PhotoImage(image)
+        #
+        # self.canvas.create_image(r_x, r_y, image=self.images[
+        #     filename], anchor="c")
+        #
+        # self.canvas.pack()
 
     def get_clicked_row_column(self, event):
         col_size = row_size = DIMENSION_OF_EACH_SQUARE
@@ -169,12 +289,25 @@ class View():
         clicked_row = 6 - (event.y // row_size)
         return (clicked_row, clicked_column)
 
+    def get_row_column(self, x, y):
+        col_size = row_size = DIMENSION_OF_EACH_SQUARE
+        xcol = x // col_size
+        xrow = y // row_size
+        return (xrow, xcol)
+
+    def get_clicked_xy(self, event):
+        x = event.x
+        y = event.y
+        return (x, y)
+
     def shift(self, start_pos, end_pos):
         try:
             self.controller.pre_move_validation(start_pos, end_pos)
         except exceptions.NameError as error:
             self.info_label["text"] = error.__class__.__name__
 
+    def update_label(self, txt):
+        self.info_label["text"] = txt
 
 def main(ctl):
     # print("V | main(ctl) | passed Controller object")

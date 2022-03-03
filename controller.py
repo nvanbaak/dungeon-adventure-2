@@ -11,16 +11,16 @@ class Controller:
     def get_room_data(self):
         return self.model.get_curr_pos()
 
-    def get_left_room(self):
+    def move_left(self):
         return self.model.move_left()
 
-    def get_right_room(self):
+    def move_right(self):
         return self.model.move_right()
 
-    def get_upper_room(self):
+    def move_upper(self):
         return self.model.move_up()
 
-    def get_down_room(self):
+    def move_down(self):
         return self.model.move_down()
 
     def reset_default_characters(self):
