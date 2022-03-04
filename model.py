@@ -32,17 +32,44 @@ class Model():
 
     def reset_default_characters(self):
         self.dict.clear()
-        # print("M | loops through START_SPRITES_POSITION dict (model has access via import config.py)")
-        # print("M | creates Sprite objects based on value in S_P_P, then keeps reference. stores in self.dict[position]")
         for position, value in START_SPRITES_POSITION.items():
             self.dict[position] = sprite.create_sprite(value)
             self.dict[position].keep_reference(self)
         print(f"M | {self.dict}")
-        # pcs_list = list(self.dict.items())
-        # print(f"Ml | {pcs_list}")
-        # nw_dct = {pcs_list[i]: pcs_list[i + 1] for i in range (0, len(pcs_list), 2)}
-        # print(f"Mn | {nw_dct}")
-        # self.update_dict(nw_dct)
+        self.refresh_room()
+
+    """{'D4': <sprite.Warrior object at 0x00000263B73F30D0>, 'F6': <sprite.Polymorphism_pillar object at 0x00000263B73F3DC0>, 
+    'B2': <sprite.Abstraction_pillar object at 0x00000263B73FEE20>, 'F2': <sprite.Encapsulation_pillar object at 0x00000263B73FEDC0>, 
+    'B6': <sprite.Inheritance_pillar object at 0x00000263B73FED00>, 'A1': <sprite.Priestess object at 0x00000263B73FEC10>, 
+    'G1': <sprite.Thief object at 0x00000263B73FE850>, 'C7': <sprite.Ogre object at 0x00000263B73FEAF0>, 
+    'D7': <sprite.Gremlin object at 0x00000263B73FE940>, 'E7': <sprite.Skeleton object at 0x00000263B73FEFD0>, 
+    'C4': <sprite.Pit object at 0x00000263B73EABE0>}"""
+
+    def refresh_room(self):
+        for position, value in self.dict.items():
+            spr = value
+            if value.name == "abstraction_pillar" and self.curr_pos.pillar == "a":
+                spr.visible = True
+            if value.name == "encapsulation_pillar" and self.curr_pos.pillar == "e":
+                spr.visible = True
+            if value.name == "polymorphism_pillar" and self.curr_pos.pillar == "p":
+                spr.visible = True
+            if value.name == "inheritance_pillar" and self.curr_pos.pillar == "i":
+                spr.visible = True
+            if value.name == "pit" and self.curr_pos.pit == True:
+                spr.visible = True
+            if value.name == "healing_potion_y" and self.curr_pos.heal == "y":
+                spr.visible = True
+            if value.name == "healing_potion_g" and self.curr_pos.heal == "g":
+                spr.visible = True
+            if value.name == "vision_potion" and self.curr_pos.vision == True:
+                spr.visible = True
+            if value.name == "gremlin" and self.curr_pos.monster == "Gremlin":
+                spr.visible = True
+            if value.name == "skeleton" and self.curr_pos.monster == "Skeleton":
+                spr.visible = True
+            if value.name == "ogre" and self.curr_pos.monster == "Ogre":
+                spr.visible = True
 
     def get_alphanumeric_position(self, rowcol):
         if self.is_on_board(rowcol):
@@ -59,10 +86,6 @@ class Model():
     def move(self, start_pos, final_pos):
         # print(f"M | move(start, final) | self[{final_pos}] = self.dict.pop({start_pos}, None)")
         self.dict[final_pos] = self.dict.pop(start_pos, None)
-
-    def update_dict(self, new_dict):
-        self.dict = new_dict
-        print(f"n | {self.dict}")
 
     def get_dict(self):
         return self.dict

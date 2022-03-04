@@ -23,6 +23,9 @@ class Controller:
     def move_down(self):
         return self.model.move_down()
 
+    def refresh_room(self):
+        return self.model.refresh_room()
+
     def reset_default_characters(self):
         # print("C | calls model.reset_default_characters() via Controller")
         self.model.reset_default_characters()

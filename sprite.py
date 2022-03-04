@@ -52,18 +52,23 @@ class Priestess(Sprite):
 class Thief(Sprite):
     pass
 
-
 class Warrior(Sprite):
     pass
-
 
 class Ogre(Sprite):
     pass
 
+class Healing_potion_g(Sprite):
+    pass
+
+class Healing_potion_y(Sprite):
+    pass
+
+class Vision_potion(Sprite):
+    pass
 
 class Gremlin(Sprite):
     pass
-
 
 class Skeleton(Sprite):
     pass

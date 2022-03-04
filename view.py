@@ -87,22 +87,10 @@ class View():
     def doorway_refresh(self, model_dict, clicked):
         sprite = model_dict[self.sprite_position]
         doors = ["C1", "D1", "E1", "C7", "D7", "E7", "G3", "G4", "G5", "A3", "A4", "A5"]
-        new = ""
         if sprite.name == "warrior" and self.sprite_position in doors:
             for al_nu in doors:
                 if self.sprite_position == al_nu:
-                    # if al_nu[1] == "1":
-                    #     new = al_nu[0] + "2"
-                    # if al_nu[1] == "7":
-                    #     new = al_nu[0] + "6"
-                    # if al_nu[0] == "G":
-                    #     new = "F" + al_nu[1]
-                    # if al_nu[0] == "A":
-                    #     new = "B" + al_nu[1]
-                    # del model_dict[self.sprite_position]
-                    # self.sprite_position = new
-                    # model_dict[self.sprite_position] = sprite
-                    self.on_square_clicked_manual(self.sprite_position, False)
+                    self.on_square_clicked_manual(False)
 
     def draw_all_sprites(self):
         for position, sprite in self.controller.get_all_peices_on_board():
@@ -150,12 +138,7 @@ class View():
         # print(f"V | calculate_sprite_coordinates | return {x0}, {y0}")
         return (x0, y0)
 
-    # def Convert(self, a):
-    #     it = iter(a)
-    #     res_dct = dict(zip(it, it))
-    #     return res_dct
-
-    def on_square_clicked_manual(self, position, clicked):
+    def on_square_clicked_manual(self, clicked):
         rm = self.controller.get_room_data()
         door_dict = rm.get_doors()
         str = ""
@@ -163,35 +146,35 @@ class View():
         rm_contents = rm.get_contents()
         items = rm_contents.items()
         self.hide_all_sprites()
-        for k, v in items:
-            if k == "pit" and v == True:
-                self.draw_pit()
-                str += " PIT "
-            elif k == "pillar":
-                if v == "p":
-                    self.draw_pillar("polymorphism_pillar")
-                    str += " POLYMORPHISM_PILLAR "
-                if v == "e":
-                    self.draw_pillar("encapsulation_pillar")
-                    str += " ENCAPSULATION_PILLAR "
-                if v == "a":
-                    self.draw_pillar("abstraction_pillar")
-                    str += " ABSTRACTION_PILLAR "
-                if v == "i":
-                    self.draw_pillar("inheritance_pillar")
-                    str += " INHERITANCE_PILLAR "
-            elif k == "monster" and v == "Gremlin":
-                str += " MONSTER "
-            elif k == "vision_potion" and v == True:
-                str += " VISION_POTION "
-            elif k == "healing_potion" and v == "g" or k == "healing_potion" and v == "y":
-                str += " HEALING_POTION "
-            else:
-                pass
+        # for k, v in items:
+        #     if k == "pit" and v == True:
+        #         self.draw_pit()
+        #         str += " PIT "
+        #     elif k == "pillar":
+        #         if v == "p":
+        #             self.draw_pillar("polymorphism_pillar")
+        #             str += " POLYMORPHISM_PILLAR "
+        #         if v == "e":
+        #             self.draw_pillar("encapsulation_pillar")
+        #             str += " ENCAPSULATION_PILLAR "
+        #         if v == "a":
+        #             self.draw_pillar("abstraction_pillar")
+        #             str += " ABSTRACTION_PILLAR "
+        #         if v == "i":
+        #             self.draw_pillar("inheritance_pillar")
+        #             str += " INHERITANCE_PILLAR "
+        #     elif k == "monster" and v == "Gremlin":
+        #         str += " MONSTER "
+        #     elif k == "vision_potion" and v == True:
+        #         str += " VISION_POTION "
+        #     elif k == "healing_potion" and v == "g" or k == "healing_potion" and v == "y":
+        #         str += " HEALING_POTION "
+        #     else:
+        #         pass
 
-        self.update_label(str)
-
-        self.canvas.pack()
+        # self.update_label(str)
+        #
+        # self.canvas.pack()
 
         model_dict = self.controller.get_dict()
 
@@ -226,6 +209,7 @@ class View():
                 pass
 
         self.canvas.delete("all")
+        self.controller.refresh_room()
         self.draw_room()
         self.draw_all_sprites()
         if clicked == True:
@@ -244,7 +228,7 @@ class View():
         else:
             self.sprite_mirror = True
 
-        self.on_square_clicked_manual(self.sprite_position, clicked)
+        self.on_square_clicked_manual(clicked)
 
     def hide_all_sprites(self):
 
@@ -258,23 +242,23 @@ class View():
                 s_obj.visible = False
 
 
-    def draw_pillar(self, pillr):
-
-        model_dict = self.controller.get_dict()
-
-        for position, value in model_dict.items():
-            s_obj = model_dict[position]
-            if s_obj.name == pillr:
-                s_obj.visible = True
-
-    def draw_pit(self):
-
-        model_dict = self.controller.get_dict()
-
-        for position, value in model_dict.items():
-            s_obj = model_dict[position]
-            if s_obj.name == "pit":
-                s_obj.visible = True
+    # def draw_pillar(self, pillr):
+    #
+    #     model_dict = self.controller.get_dict()
+    #
+    #     for position, value in model_dict.items():
+    #         s_obj = model_dict[position]
+    #         if s_obj.name == pillr:
+    #             s_obj.visible = True
+    #
+    # def draw_pit(self):
+    #
+    #     model_dict = self.controller.get_dict()
+    #
+    #     for position, value in model_dict.items():
+    #         s_obj = model_dict[position]
+    #         if s_obj.name == "pit":
+    #             s_obj.visible = True
 
     def get_clicked_row_column(self, event):
         col_size = row_size = DIMENSION_OF_EACH_SQUARE
