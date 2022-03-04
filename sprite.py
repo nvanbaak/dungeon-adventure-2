@@ -43,6 +43,9 @@ class Inheritance_pillar(Sprite):
 class Polymorphism_pillar(Sprite):
     pass
 
+class Pit(Sprite):
+    pass
+
 class Priestess(Sprite):
     pass
 

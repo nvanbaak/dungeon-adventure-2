@@ -9,7 +9,7 @@ class Model():
     dict = {}
 
     def __init__(self):
-        d_list = DungeonBuilder.build_easy_dungeon()
+        d_list = DungeonBuilder.build_single_dungeon()
         self.dungeon = d_list[0]
         self.curr_pos = self.dungeon.enter_dungeon()
         self.player = MockHero("Test", self)

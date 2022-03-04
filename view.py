@@ -111,17 +111,20 @@ class View():
     def draw_single_sprite(self, position, sprite):
         # print(f"V | draw_single_sprite | position: {position} | sprite {sprite}")
         # print(f"V | call get_numeric_notation(position) via Controller")
+        UNDER_64 = (64, 64)
+        EXTRA_LARGE = (256, 256)
         x, y = self.controller.get_numeric_notation(position)
         if sprite:
             filename = "sprites_image/{}.png".format(
                 sprite.name.lower())
             image = Image.open(filename)
             w, h = image.size
-            image = ImageOps.contain(image, (64, 64))
-            # self.images[filename] = image.resize((64, 64))
-            # self.images[filename] = ImageOps.contain(image, (64, 64))
+            if sprite.name == "pit":
+                image = ImageOps.contain(image, EXTRA_LARGE)
+            else:
+                image = ImageOps.contain(image, UNDER_64)
 
-            if self.sprite_mirror == True:
+            if self.sprite_mirror == True and sprite.name == "warrior":
                 image = image.transpose(Image.FLIP_LEFT_RIGHT)
             self.images[filename] = ImageTk.PhotoImage(image)
 
@@ -159,13 +162,17 @@ class View():
         self.update_label("")
         rm_contents = rm.get_contents()
         items = rm_contents.items()
+        self.hide_all_sprites()
         for k, v in items:
-            if k == "pillar":
+            if k == "pit" and v == True:
+                self.draw_pit()
+                str += " PIT "
+            elif k == "pillar":
                 if v == "p":
                     self.draw_pillar("polymorphism_pillar")
                     str += " POLYMORPHISM_PILLAR "
                 if v == "e":
-                    self.draw_pillar("encapusulation_pillar")
+                    self.draw_pillar("encapsulation_pillar")
                     str += " ENCAPSULATION_PILLAR "
                 if v == "a":
                     self.draw_pillar("abstraction_pillar")
@@ -173,14 +180,15 @@ class View():
                 if v == "i":
                     self.draw_pillar("inheritance_pillar")
                     str += " INHERITANCE_PILLAR "
-            if k == "pit" and v == True:
-                str += " PIT "
-            if k == "monster" and v == "Gremlin":
+            elif k == "monster" and v == "Gremlin":
                 str += " MONSTER "
-            if k == "vision_potion" and v == True:
+            elif k == "vision_potion" and v == True:
                 str += " VISION_POTION "
-            if k == "healing_potion" and v == "g" or k == "healing_potion" and v == "y":
+            elif k == "healing_potion" and v == "g" or k == "healing_potion" and v == "y":
                 str += " HEALING_POTION "
+            else:
+                pass
+
         self.update_label(str)
 
         self.canvas.pack()
@@ -238,6 +246,18 @@ class View():
 
         self.on_square_clicked_manual(self.sprite_position, clicked)
 
+    def hide_all_sprites(self):
+
+        model_dict = self.controller.get_dict()
+
+        for position, value in model_dict.items():
+            if value.name == "warrior":
+                pass
+            else:
+                s_obj = model_dict[position]
+                s_obj.visible = False
+
+
     def draw_pillar(self, pillr):
 
         model_dict = self.controller.get_dict()
@@ -247,41 +267,14 @@ class View():
             if s_obj.name == pillr:
                 s_obj.visible = True
 
-        # while True:
-        #     r_x = random.randint(0, 64*7)
-        #     r_y = random.randint(0, 64*7)
-        #     r, c = self.get_row_column(r_x, r_y)
-        #     rand_grid = self.controller.get_alphanumeric_position((r, c))
-        #     if rand_grid in model_dict:
-        #         # occupied, so get another
-        #         pass
-        #     else:
-        #         # empty, so make new location for this pillar
-        #         new_loc = rand_grid
-        #         break
+    def draw_pit(self):
 
-        # for key, value in model_dict.items():
-        #     if pillr == value.name:
-        #         p_loc = key
-        #         p_obj = value
-        #         model_dict[new_loc] = p_obj
-        #         del model_dict[p_loc]
-        #         break
-        #     else:
-        #         p_obj = None
+        model_dict = self.controller.get_dict()
 
-        # filename = "sprites_image/{}.png".format(
-        #     pillr.lower())
-        # image = Image.open(filename)
-        # w, h = image.size
-        # image = ImageOps.contain(image, (64, 64))
-        #
-        # self.images[filename] = ImageTk.PhotoImage(image)
-        #
-        # self.canvas.create_image(r_x, r_y, image=self.images[
-        #     filename], anchor="c")
-        #
-        # self.canvas.pack()
+        for position, value in model_dict.items():
+            s_obj = model_dict[position]
+            if s_obj.name == "pit":
+                s_obj.visible = True
 
     def get_clicked_row_column(self, event):
         col_size = row_size = DIMENSION_OF_EACH_SQUARE
