@@ -7,6 +7,7 @@ class Model():
 
     # print("M | class variables initialized before __init__")
     dict = {}
+    hero = {}
 
     def __init__(self):
         d_list = DungeonBuilder.build_single_dungeon()
@@ -32,18 +33,14 @@ class Model():
 
     def reset_default_characters(self):
         self.dict.clear()
+        self.hero.clear()
         for position, value in START_SPRITES_POSITION.items():
             self.dict[position] = sprite.create_sprite(value)
             self.dict[position].keep_reference(self)
+        self.hero[HERO_POSITION] = sprite.create_sprite(HERO_SPRITE)
+
         print(f"M | {self.dict}")
         self.refresh_room()
-
-    """{'D4': <sprite.Warrior object at 0x00000263B73F30D0>, 'F6': <sprite.Polymorphism_pillar object at 0x00000263B73F3DC0>, 
-    'B2': <sprite.Abstraction_pillar object at 0x00000263B73FEE20>, 'F2': <sprite.Encapsulation_pillar object at 0x00000263B73FEDC0>, 
-    'B6': <sprite.Inheritance_pillar object at 0x00000263B73FED00>, 'A1': <sprite.Priestess object at 0x00000263B73FEC10>, 
-    'G1': <sprite.Thief object at 0x00000263B73FE850>, 'C7': <sprite.Ogre object at 0x00000263B73FEAF0>, 
-    'D7': <sprite.Gremlin object at 0x00000263B73FE940>, 'E7': <sprite.Skeleton object at 0x00000263B73FEFD0>, 
-    'C4': <sprite.Pit object at 0x00000263B73EABE0>}"""
 
     def refresh_room(self):
         for position, value in self.dict.items():
@@ -85,7 +82,10 @@ class Model():
 
     def move(self, start_pos, final_pos):
         # print(f"M | move(start, final) | self[{final_pos}] = self.dict.pop({start_pos}, None)")
-        self.dict[final_pos] = self.dict.pop(start_pos, None)
+        self.hero[final_pos] = self.hero.pop(start_pos, None)
 
     def get_dict(self):
         return self.dict
+
+    def get_hero_dict(self):
+        return self.hero

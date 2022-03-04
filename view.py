@@ -84,8 +84,8 @@ class View():
         self.draw_all_sprites()
         self.info_label.config(text="   In-Game status/instructions here  ")
 
-    def doorway_refresh(self, model_dict, clicked):
-        sprite = model_dict[self.sprite_position]
+    def doorway_refresh(self, hero_dict, clicked):
+        sprite = hero_dict[self.sprite_position]
         doors = ["C1", "D1", "E1", "C7", "D7", "E7", "G3", "G4", "G5", "A3", "A4", "A5"]
         if sprite.name == "warrior" and self.sprite_position in doors:
             for al_nu in doors:
@@ -94,6 +94,8 @@ class View():
 
     def draw_all_sprites(self):
         for position, sprite in self.controller.get_all_peices_on_board():
+            self.draw_single_sprite(position, sprite)
+        for position, sprite in self.controller.get_hero_dict():
             self.draw_single_sprite(position, sprite)
 
     def draw_single_sprite(self, position, sprite):
@@ -146,65 +148,37 @@ class View():
         rm_contents = rm.get_contents()
         items = rm_contents.items()
         self.hide_all_sprites()
-        # for k, v in items:
-        #     if k == "pit" and v == True:
-        #         self.draw_pit()
-        #         str += " PIT "
-        #     elif k == "pillar":
-        #         if v == "p":
-        #             self.draw_pillar("polymorphism_pillar")
-        #             str += " POLYMORPHISM_PILLAR "
-        #         if v == "e":
-        #             self.draw_pillar("encapsulation_pillar")
-        #             str += " ENCAPSULATION_PILLAR "
-        #         if v == "a":
-        #             self.draw_pillar("abstraction_pillar")
-        #             str += " ABSTRACTION_PILLAR "
-        #         if v == "i":
-        #             self.draw_pillar("inheritance_pillar")
-        #             str += " INHERITANCE_PILLAR "
-        #     elif k == "monster" and v == "Gremlin":
-        #         str += " MONSTER "
-        #     elif k == "vision_potion" and v == True:
-        #         str += " VISION_POTION "
-        #     elif k == "healing_potion" and v == "g" or k == "healing_potion" and v == "y":
-        #         str += " HEALING_POTION "
-        #     else:
-        #         pass
-
-        # self.update_label(str)
-        #
-        # self.canvas.pack()
 
         model_dict = self.controller.get_dict()
+        hero_dict = self.controller.get_hero()
 
-        sprite_obj = model_dict[self.sprite_position]
+        sprite_obj = hero_dict[self.sprite_position]
 
         if clicked == True:
             if self.sprite_position == "G5" or self.sprite_position == "G4" or self.sprite_position == "G3":
                 if door_dict["Right"] == True:
                     self.controller.move_right()
-                    del model_dict[self.sprite_position]
+                    del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("G", "A")
-                    model_dict[self.sprite_position] = sprite_obj
+                    hero_dict[self.sprite_position] = sprite_obj
             elif self.sprite_position == "C1" or self.sprite_position == "D1" or self.sprite_position =="E1":
                 if door_dict["Down"] == True:
                     self.controller.move_down()
-                    del model_dict[self.sprite_position]
+                    del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("1", "7")
-                    model_dict[self.sprite_position] = sprite_obj
+                    hero_dict[self.sprite_position] = sprite_obj
             elif self.sprite_position == "A5" or self.sprite_position == "A4" or self.sprite_position == "A3":
                 if door_dict["Left"] == True:
                     self.controller.move_left()
-                    del model_dict[self.sprite_position]
+                    del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("A", "G")
-                    model_dict[self.sprite_position] = sprite_obj
+                    hero_dict[self.sprite_position] = sprite_obj
             elif self.sprite_position == "C7" or self.sprite_position == "D7" or self.sprite_position == "E7":
                 if door_dict["Up"] == True:
                     self.controller.move_upper()
-                    del model_dict[self.sprite_position]
+                    del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("7", "1")
-                    model_dict[self.sprite_position] = sprite_obj
+                    hero_dict[self.sprite_position] = sprite_obj
             else:
                 pass
 
@@ -213,7 +187,7 @@ class View():
         self.draw_room()
         self.draw_all_sprites()
         if clicked == True:
-            self.doorway_refresh(model_dict, clicked)
+            self.doorway_refresh(hero_dict, clicked)
 
     def on_square_clicked(self, event):
         clicked = True
@@ -240,25 +214,6 @@ class View():
             else:
                 s_obj = model_dict[position]
                 s_obj.visible = False
-
-
-    # def draw_pillar(self, pillr):
-    #
-    #     model_dict = self.controller.get_dict()
-    #
-    #     for position, value in model_dict.items():
-    #         s_obj = model_dict[position]
-    #         if s_obj.name == pillr:
-    #             s_obj.visible = True
-    #
-    # def draw_pit(self):
-    #
-    #     model_dict = self.controller.get_dict()
-    #
-    #     for position, value in model_dict.items():
-    #         s_obj = model_dict[position]
-    #         if s_obj.name == "pit":
-    #             s_obj.visible = True
 
     def get_clicked_row_column(self, event):
         col_size = row_size = DIMENSION_OF_EACH_SQUARE
