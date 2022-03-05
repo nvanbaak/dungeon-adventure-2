@@ -52,3 +52,47 @@ class Controller:
 
     def get_hero(self):
         return self.model.get_hero_dict()
+
+    def gather(self):
+        curr_pos = self.model.get_curr_pos()
+        if curr_pos.heal == "y":
+            self.model.player.health_potions += 1
+            self.model.game_stats["Healing Potions"] = self.model.player.health_potions
+        if curr_pos.heal == "g":
+            self.model.player.health_potions += 1
+            self.model.game_stats["Healing Potions"] = self.model.player.health_potions
+        if curr_pos.vision == True:
+            self.model.player.vision_potions += 1
+            self.model.game_stats["Vision Potions"] = self.model.player.vision_potions
+        if curr_pos.pillar == "a":
+            self.model.pillars["A"] = True
+            self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "A "
+        if curr_pos.pillar == "e":
+            self.model.pillars["E"] = True
+            self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "E "
+        if curr_pos.pillar == "p":
+            self.model.pillars["P"] = True
+            self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "P "
+        if curr_pos.pillar == "i":
+            self.model.pillars["I"] = True
+            self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "I "
+
+    def expunge(self):
+        curr_pos = self.model.get_curr_pos()
+        if curr_pos.heal == "y":
+            curr_pos.heal = None
+        if curr_pos.heal == "g":
+            curr_pos.heal = None
+        if curr_pos.vision == True:
+            curr_pos.vision = False
+        if curr_pos.pillar == "a":
+            curr_pos.pillar = None
+        if curr_pos.pillar == "e":
+            curr_pos.pillar = None
+        if curr_pos.pillar == "p":
+            curr_pos.pillar = None
+        if curr_pos.pillar == "i":
+            curr_pos.pillar = None
+
+    def get_game_stats (self):
+        return self.model.game_stats

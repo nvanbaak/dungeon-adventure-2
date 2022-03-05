@@ -8,6 +8,8 @@ class Model():
     # print("M | class variables initialized before __init__")
     dict = {}
     hero = {}
+    pillars = {"A": "", "E": "", "P": "", "I": ""}
+    game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
 
     def __init__(self):
         d_list = DungeonBuilder.build_single_dungeon()
@@ -39,7 +41,7 @@ class Model():
             self.dict[position].keep_reference(self)
         self.hero[HERO_POSITION] = sprite.create_sprite(HERO_SPRITE)
 
-        print(f"M | {self.dict}")
+        # print(f"M | {self.dict}")
         self.refresh_room()
 
     def refresh_room(self):

@@ -41,8 +41,8 @@ class View():
     def create_bottom_frame(self):
         self.bottom_frame = Frame(self.parent, height=64)
         self.info_label = Label(
-            self.bottom_frame, text="   In-Game Instructions Here  ")
-        self.info_label.pack(side=RIGHT, padx=8, pady=5)
+            self.bottom_frame, text="")
+        self.info_label.pack(side="left", padx=8, pady=5)
         self.bottom_frame.pack(fill="x", side="bottom")
 
     def draw_room(self):
@@ -75,14 +75,15 @@ class View():
             self.canvas.pack()
         rm_contents = rm.get_contents()
         rm_loc = rm.get_location()
-        print(f"{rm_loc} {rm_contents}")
+        # print(f"{rm_loc} {rm_contents}")
 
     def start_new_game(self):
         # print("V | start_new_game | calls controller.reset_default_characters()()")
         self.controller.reset_default_characters()
         # print("V | start_new_game | calls draw_all_sprites()")
         self.draw_all_sprites()
-        self.info_label.config(text="   In-Game status/instructions here  ")
+        self.update_score_label()
+        # self.info_label.config(text="")
 
     def doorway_refresh(self, hero_dict, clicked):
         sprite = hero_dict[self.sprite_position]
@@ -131,6 +132,7 @@ class View():
             if sprite.name == "warrior":
                 self.sprite_position = position
                 self.sprite_xy = (x0, y0)
+        self.update_score_label()
 
     def calculate_sprite_coordinate(self, row, col):
         x0 = (col * DIMENSION_OF_EACH_SQUARE) + \
@@ -144,7 +146,7 @@ class View():
         rm = self.controller.get_room_data()
         door_dict = rm.get_doors()
         str = ""
-        self.update_label("")
+        # self.update_label("")
         rm_contents = rm.get_contents()
         items = rm_contents.items()
         self.hide_all_sprites()
@@ -161,24 +163,28 @@ class View():
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("G", "A")
                     hero_dict[self.sprite_position] = sprite_obj
+                    self.controller.gather()
             elif self.sprite_position == "C1" or self.sprite_position == "D1" or self.sprite_position =="E1":
                 if door_dict["Down"] == True:
                     self.controller.move_down()
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("1", "7")
                     hero_dict[self.sprite_position] = sprite_obj
+                    self.controller.gather()
             elif self.sprite_position == "A5" or self.sprite_position == "A4" or self.sprite_position == "A3":
                 if door_dict["Left"] == True:
                     self.controller.move_left()
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("A", "G")
                     hero_dict[self.sprite_position] = sprite_obj
+                    self.controller.gather()
             elif self.sprite_position == "C7" or self.sprite_position == "D7" or self.sprite_position == "E7":
                 if door_dict["Up"] == True:
                     self.controller.move_upper()
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("7", "1")
                     hero_dict[self.sprite_position] = sprite_obj
+                    self.controller.gather()
             else:
                 pass
 
@@ -238,8 +244,12 @@ class View():
         except exceptions.NameError as error:
             self.info_label["text"] = error.__class__.__name__
 
-    def update_label(self, txt):
-        self.info_label["text"] = txt
+    def update_score_label(self):
+        stat_dict = self.controller.get_game_stats()
+        lbl_txt = ""
+        for key, value in stat_dict.items():
+            lbl_txt = lbl_txt + str(key) + ": " + str(value) + " | "
+        self.info_label["text"] = lbl_txt
 
 def main(ctl):
     # print("V | main(ctl) | passed Controller object")
