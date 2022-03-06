@@ -3,6 +3,9 @@ from PIL import Image, ImageTk, ImageOps
 import controller
 from configurations import *
 import exceptions
+from pydub import AudioSegment
+from pydub.playback import play
+import threading
 # from game_observer import Publisher, Subscriber
 import random
 
@@ -199,6 +202,7 @@ class View():
         self.controller.refresh_room()
         self.draw_room()
         self.draw_all_sprites()
+        self.controller.gather_sounds()
         # self.controller.dispatch()
         if clicked == True:
             self.doorway_refresh(hero_dict, clicked)
@@ -276,8 +280,10 @@ def init_new_game():
     # print("V | init new_game() | pass initial_game_data to main()")
     # print("V _ View now has enough initial game data to draw game screen")
     # print("V _ though View object has still not been initialized. need tk root created first")
+    sound = AudioSegment.from_wav('audio/cyberpunk.wav')
+    t = threading.Thread(target=play, args=(sound,))
+    t.start()
     main(initial_game_data)
-
 
 if __name__ == "__main__":
     init_new_game()

@@ -1,5 +1,7 @@
 import model
 import sprite
+from playsound import playsound
+import pygame
 # from game_observer import Publisher, Subscriber
 
 class Controller:
@@ -9,6 +11,7 @@ class Controller:
         self.model = model.Model()
         # self.pub = Publisher()
         # self.view = ""
+        pygame.init()
 
     # def setup_observer(self):
     #     self.pub.register(self.view.subscriber_v)
@@ -90,6 +93,30 @@ class Controller:
             self.model.pillars["I"] = True
             self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "I "
         self.model.game_stats["Hit Points"] = self.model.player.hp
+
+    def gather_sounds(self):
+        curr_pos = self.model.get_curr_pos()
+        if curr_pos.heal == "y":
+            self.play("magic_harp")
+        if curr_pos.heal == "g":
+            self.play("magic_harp")
+        if curr_pos.vision == True:
+            self.play("magic_harp")
+        if curr_pos.pillar == "a":
+            self.play("magic_harp")
+        if curr_pos.pillar == "e":
+            self.play("magic_harp")
+        if curr_pos.pillar == "p":
+            self.play("magic_harp")
+        if curr_pos.pillar == "i":
+            self.play("magic_harp")
+
+    def play(self, file):
+        filename = "audio/{}.wav".format(
+            file)
+        sound = pygame.mixer.Sound(filename)
+        pygame.mixer.Sound.play(sound)
+        pygame.mixer.music.stop()
 
     def load_initial_points(self):
         self.model.game_stats["Hit Points"] = self.model.player.hp
