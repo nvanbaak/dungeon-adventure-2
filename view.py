@@ -3,6 +3,7 @@ from PIL import Image, ImageTk, ImageOps
 import controller
 from configurations import *
 import exceptions
+# from game_observer import Publisher, Subscriber
 import random
 
 class View():
@@ -20,6 +21,7 @@ class View():
         self.canvas_height = 0
         self.create_board_base()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
+        # self.subscriber_v = Subscriber(self)
         self.start_new_game()
 
     def create_board_base(self):
@@ -73,6 +75,7 @@ class View():
             else:
                 pass
             self.canvas.pack()
+        self.controller.load_initial_points()
         rm_contents = rm.get_contents()
         rm_loc = rm.get_location()
         # print(f"{rm_loc} {rm_contents}")
@@ -80,10 +83,14 @@ class View():
     def start_new_game(self):
         # print("V | start_new_game | calls controller.reset_default_characters()()")
         self.controller.reset_default_characters()
+        self.send_view_reference_to_controller()
         # print("V | start_new_game | calls draw_all_sprites()")
         self.draw_all_sprites()
         self.update_score_label()
         # self.info_label.config(text="")
+
+    def send_view_reference_to_controller(self):
+        self.controller.accept_view_reference(self)
 
     def doorway_refresh(self, hero_dict, clicked):
         sprite = hero_dict[self.sprite_position]
@@ -192,6 +199,7 @@ class View():
         self.controller.refresh_room()
         self.draw_room()
         self.draw_all_sprites()
+        # self.controller.dispatch()
         if clicked == True:
             self.doorway_refresh(hero_dict, clicked)
 
@@ -256,9 +264,10 @@ def main(ctl):
     # print("V | main(ctl) | create new Tk object as root")
     root = Tk()
     root.title("Dungeon Adventure II")
-    # print("V | main(ctl) | create new View object with root & model as parameters")
+    # print("V | main(ctl) | create new View object with root & ctl as parameters")
     View(root, ctl)
     # print("V | main(ctl) | last step of View init is start_game() | last step of main is root.mainloop()")
+    # ctl.setup_observer()
     root.mainloop()
 
 def init_new_game():

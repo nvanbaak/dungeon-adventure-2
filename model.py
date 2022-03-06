@@ -2,12 +2,13 @@ from dungeon_builder import DungeonBuilder
 from test_hero import MockHero
 import sprite
 from configurations import *
+# from game_observer import Publisher, Subscriber
 
 class Model():
 
     # print("M | class variables initialized before __init__")
     dict = {}
-    hero = {}
+    hero_dict = {}
     pillars = {"A": "", "E": "", "P": "", "I": ""}
     game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
 
@@ -17,6 +18,7 @@ class Model():
         self.curr_pos = self.dungeon.enter_dungeon()
         self.player = MockHero("Test", self)
         print(self.dungeon.dungeon.winning_path)
+        # self.subscriber_m = Subscriber(self)
 
     def get_curr_pos(self):
         return self.curr_pos
@@ -35,11 +37,11 @@ class Model():
 
     def reset_default_characters(self):
         self.dict.clear()
-        self.hero.clear()
+        self.hero_dict.clear()
         for position, value in START_SPRITES_POSITION.items():
             self.dict[position] = sprite.create_sprite(value)
             self.dict[position].keep_reference(self)
-        self.hero[HERO_POSITION] = sprite.create_sprite(HERO_SPRITE)
+        self.hero_dict[HERO_POSITION] = sprite.create_sprite(HERO_SPRITE)
 
         # print(f"M | {self.dict}")
         self.refresh_room()
@@ -84,10 +86,10 @@ class Model():
 
     def move(self, start_pos, final_pos):
         # print(f"M | move(start, final) | self[{final_pos}] = self.dict.pop({start_pos}, None)")
-        self.hero[final_pos] = self.hero.pop(start_pos, None)
+        self.hero_dict[final_pos] = self.hero_dict.pop(start_pos, None)
 
     def get_dict(self):
         return self.dict
 
     def get_hero_dict(self):
-        return self.hero
+        return self.hero_dict
