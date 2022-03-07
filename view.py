@@ -174,6 +174,7 @@ class View():
                     self.sprite_position = self.sprite_position.replace("G", "A")
                     hero_dict[self.sprite_position] = sprite_obj
                     self.controller.gather()
+                    self.sound_effect_play_count = 0
             elif self.sprite_position == "C1" or self.sprite_position == "D1" or self.sprite_position =="E1":
                 if door_dict["Down"] == True:
                     self.controller.move_down()
@@ -181,6 +182,7 @@ class View():
                     self.sprite_position = self.sprite_position.replace("1", "7")
                     hero_dict[self.sprite_position] = sprite_obj
                     self.controller.gather()
+                    self.sound_effect_play_count = 0
             elif self.sprite_position == "A5" or self.sprite_position == "A4" or self.sprite_position == "A3":
                 if door_dict["Left"] == True:
                     self.controller.move_left()
@@ -188,6 +190,7 @@ class View():
                     self.sprite_position = self.sprite_position.replace("A", "G")
                     hero_dict[self.sprite_position] = sprite_obj
                     self.controller.gather()
+                    self.sound_effect_play_count = 0
             elif self.sprite_position == "C7" or self.sprite_position == "D7" or self.sprite_position == "E7":
                 if door_dict["Up"] == True:
                     self.controller.move_upper()
@@ -195,6 +198,7 @@ class View():
                     self.sprite_position = self.sprite_position.replace("7", "1")
                     hero_dict[self.sprite_position] = sprite_obj
                     self.controller.gather()
+                    self.sound_effect_play_count = 0
             else:
                 pass
 
@@ -202,7 +206,9 @@ class View():
         self.controller.refresh_room()
         self.draw_room()
         self.draw_all_sprites()
-        self.controller.gather_sounds()
+        self.sound_effect_play_count = self.sound_effect_play_count + 1
+        if self.sound_effect_play_count == 1:
+            self.controller.gather_sounds()
         # self.controller.dispatch()
         if clicked == True:
             self.doorway_refresh(hero_dict, clicked)
@@ -280,9 +286,9 @@ def init_new_game():
     # print("V | init new_game() | pass initial_game_data to main()")
     # print("V _ View now has enough initial game data to draw game screen")
     # print("V _ though View object has still not been initialized. need tk root created first")
-    sound = AudioSegment.from_wav('audio/cyberpunk.wav')
-    t = threading.Thread(target=play, args=(sound,))
-    t.start()
+    # sound = AudioSegment.from_wav('audio/cyberpunk.wav')
+    # t = threading.Thread(target=play, args=(sound,))
+    # t.start()
     main(initial_game_data)
 
 if __name__ == "__main__":

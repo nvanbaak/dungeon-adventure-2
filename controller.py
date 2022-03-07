@@ -3,6 +3,7 @@ import sprite
 from playsound import playsound
 import pygame
 # from game_observer import Publisher, Subscriber
+import time
 
 class Controller:
 
@@ -103,13 +104,17 @@ class Controller:
         if curr_pos.vision == True:
             self.play("magic_harp")
         if curr_pos.pillar == "a":
-            self.play("magic_harp")
+            self.play("pillar")
         if curr_pos.pillar == "e":
-            self.play("magic_harp")
+            self.play("pillar")
         if curr_pos.pillar == "p":
-            self.play("magic_harp")
+            self.play("pillar")
         if curr_pos.pillar == "i":
-            self.play("magic_harp")
+            self.play("pillar")
+        if curr_pos.monster == "Gremlin" or curr_pos.monster == "Ogre" or curr_pos.monster == "Skeleton":
+            self.play("monster")
+        if curr_pos.pit == True:
+            self.play("welcome_pit")
 
     def play(self, file):
         filename = "audio/{}.wav".format(
