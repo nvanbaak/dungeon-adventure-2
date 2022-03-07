@@ -20,6 +20,9 @@ class Model():
         print(self.dungeon.dungeon.winning_path)
         # self.subscriber_m = Subscriber(self)
 
+    def announce(self, message):
+        print(message)
+
     def get_curr_pos(self):
         return self.curr_pos
 

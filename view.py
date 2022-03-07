@@ -287,7 +287,8 @@ def init_new_game():
     # print("V _ View now has enough initial game data to draw game screen")
     # print("V _ though View object has still not been initialized. need tk root created first")
     sound = AudioSegment.from_wav('audio/cyberpunk.wav')
-    t = threading.Thread(target=play, args=(sound,))
+    quieter_song = sound - 3
+    t = threading.Thread(target=play, args=(quieter_song,))
     t.start()
     main(initial_game_data)
 

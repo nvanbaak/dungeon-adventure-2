@@ -3,7 +3,10 @@ import sprite
 from playsound import playsound
 import pygame
 # from game_observer import Publisher, Subscriber
-import time
+from dungeonchar import DungeonCharacter
+from healable import Healable
+from hero import Hero
+from monster import Monster
 
 class Controller:
 
@@ -113,8 +116,21 @@ class Controller:
             self.play("pillar")
         if curr_pos.monster == "Gremlin" or curr_pos.monster == "Ogre" or curr_pos.monster == "Skeleton":
             self.play("monster")
+            self.combat()
         if curr_pos.pit == True:
             self.play("welcome_pit")
+        if self.model.player.hp <= 0:
+            self.play("game_over")
+
+
+    def combat(self):
+        curr_pos = self.model.get_curr_pos()
+        if curr_pos.monster == "Gremlin" or curr_pos.monster == "Ogre" or curr_pos.monster == "Skeleton":
+            print(f"Pre-battle hit points: {self.model.player.hp}")
+            monster = Monster(curr_pos.monster, self.model)
+            monster.attack_target(self.model.player)
+            self.model.player.combat(monster)
+            print(f"Post-battle hit points: Player: {self.model.player.hp} | Monster: {monster.hp}")
 
     def play(self, file):
         filename = "audio/{}.wav".format(
