@@ -286,9 +286,9 @@ def init_new_game():
     # print("V | init new_game() | pass initial_game_data to main()")
     # print("V _ View now has enough initial game data to draw game screen")
     # print("V _ though View object has still not been initialized. need tk root created first")
-    # sound = AudioSegment.from_wav('audio/cyberpunk.wav')
-    # t = threading.Thread(target=play, args=(sound,))
-    # t.start()
+    sound = AudioSegment.from_wav('audio/cyberpunk.wav')
+    t = threading.Thread(target=play, args=(sound,))
+    t.start()
     main(initial_game_data)
 
 if __name__ == "__main__":
