@@ -8,30 +8,11 @@ class Hero(DungeonCharacter, ABC):
     """
     def __init__(self, name, model) -> None:
         super().__init__(name, model)
-<<<<<<< HEAD
-=======
         self.__chance_to_block = 0.0
->>>>>>> sg_hero_chars
         self.__health_potions = 0
         self.__vision_potions = 0
         self.__vision = 3
 
-<<<<<<< HEAD
-    @abstractmethod
-    def attack_target(self, target):
-        return super().attack_target(target)
-
-    @abstractmethod
-    def combat(self, target):
-        return super().combat(target)
-
-    @abstractmethod
-    def take_damage(self, dmg, source):
-        return super().take_damage(dmg, source)
-
-    @abstractmethod
-=======
->>>>>>> sg_hero_chars
     def use_health_potion(self):
         """
         Uses a health potion if available
@@ -41,10 +22,6 @@ class Hero(DungeonCharacter, ABC):
             amount_healed = random.randint(20, 40)
             self.hp += amount_healed
 
-<<<<<<< HEAD
-    @abstractmethod
-=======
->>>>>>> sg_hero_chars
     def use_vision_potion(self):
         """
         Uses a vision potion if available
@@ -83,8 +60,6 @@ class Hero(DungeonCharacter, ABC):
             self.__vision = value
         else:
             raise ValueError("vision range must be greater than 0!")
-<<<<<<< HEAD
-=======
 
     def __set_chance_to_block(self, value):
         """ validates and sets the value for chance_to_block"""
@@ -118,12 +93,8 @@ class Hero(DungeonCharacter, ABC):
         else:
             if self.chance_to_block < random.random():
                 self.__take_damage(dmg, source)
-<<<<<<< HEAD
->>>>>>> sg_hero_chars
-=======
 
     def fall_into_pit(self):
         """generates a random value range 10 to 20 and reduce it from the hero's hp"""
         ret = random.randint(10, 20)
         self.take_damage(ret, "pit")
->>>>>>> sg_hero_chars

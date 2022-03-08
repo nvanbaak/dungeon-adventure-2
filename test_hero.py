@@ -102,8 +102,6 @@ class Hero_Tests(unittest.TestCase):
         self.assertEqual(test_hero.vision, 10)
 
 
-<<<<<<< HEAD
-=======
     def test_chance_to_block_setter_getter(self):
         test_hero = MockHero("Vision", MockAnnouncer())
 
@@ -166,6 +164,5 @@ class Hero_Tests(unittest.TestCase):
 
 
 
->>>>>>> sg_hero_chars
 if __name__ == "__main__":
     unittest.main()
