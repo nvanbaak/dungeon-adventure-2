@@ -9,8 +9,6 @@ class Model():
     # print("M | class variables initialized before __init__")
     dict = {}
     hero_dict = {}
-    pillars = {"A": "", "E": "", "P": "", "I": ""}
-    game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
 
     def __init__(self):
         d_list = DungeonBuilder.build_single_dungeon()
@@ -19,6 +17,8 @@ class Model():
         self.player = MockHero("Test", self)
         print(self.dungeon.dungeon.winning_path)
         # self.subscriber_m = Subscriber(self)
+        self.pillars = {"A": "", "E": "", "P": "", "I": ""}
+        self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
 
     def announce(self, message):
         print(message)

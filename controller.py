@@ -84,6 +84,10 @@ class Controller:
         if curr_pos.vision == True:
             self.model.player.vision_potions += 1
             self.model.game_stats["Vision Potions"] = self.model.player.vision_potions
+            self.view.vision = True
+            self.view.vision_button.pack()
+        if curr_pos.pit == True:
+            pass
         if curr_pos.pillar == "a":
             self.model.pillars["A"] = True
             self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "A "
@@ -161,3 +165,6 @@ class Controller:
 
     def get_game_stats (self):
         return self.model.game_stats
+
+    def use_vision(self):
+        self.model.player.use_vision_potion()

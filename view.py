@@ -1,4 +1,4 @@
-from tkinter import Tk, Menu, Label, Frame, Canvas, RIGHT, PhotoImage, messagebox
+from tkinter import Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, PhotoImage, messagebox
 from PIL import Image, ImageTk, ImageOps
 import controller
 from configurations import *
@@ -9,9 +9,7 @@ import threading
 from tkinter import messagebox
 import sys
 import time
-import multiprocessing
 # from game_observer import Publisher, Subscriber
-import random
 
 class View():
 
@@ -21,6 +19,7 @@ class View():
     sprite_xy = (0, 0)
     sprite_mirror = False
     sound_effect_play_count = 0
+    vision = False
 
     def __init__(self, parent, controller):
         self.controller = controller
@@ -37,6 +36,7 @@ class View():
         self.create_canvas()
         self.draw_room()
         self.create_bottom_frame()
+        self.create_vision_button()
 
     def create_top_menu(self):
         self.menu_bar = Menu(self.parent)
@@ -54,6 +54,13 @@ class View():
             self.bottom_frame, text="")
         self.info_label.pack(side="left", padx=8, pady=5)
         self.bottom_frame.pack(fill="x", side="bottom")
+
+    def create_vision_button(self):
+        self.vision_button = Button(self.bottom_frame, text="Use Vision", command=self.use_vision)
+        self.vision_button.configure(activebackground="#33B5E5")
+        self.vision_button.pack()
+        if self.vision == False:
+            self.vision_button.pack_forget()
 
     def draw_room(self):
         WALL_WIDTH = 25
@@ -274,6 +281,9 @@ class View():
             lbl_txt = lbl_txt + str(key) + ": " + str(value) + " | "
         self.info_label["text"] = lbl_txt
 
+    def use_vision(self):
+        self.controller.use_vision()
+
     def ask_new_game(self):
         self.parent.quit()
         res = messagebox.askyesno("Yes|No", "Would you like to play again?")
@@ -303,11 +313,11 @@ def init_new_game():
     # print("V | init new_game() | pass initial_game_data to main()")
     # print("V _ View now has enough initial game data to draw game screen")
     # print("V _ though View object has still not been initialized. need tk root created first")
-    sound = AudioSegment.from_wav('audio/cyberpunk.wav')
-    quieter_song = sound - 4
-    initial_game_data.thread = threading.Thread(target=play, args=(quieter_song,))
-    initial_game_data.thread.daemon = True
-    initial_game_data.thread.start()
+    # sound = AudioSegment.from_wav('audio/cyberpunk.wav')
+    # quieter_song = sound - 4
+    # initial_game_data.thread = threading.Thread(target=play, args=(quieter_song,))
+    # initial_game_data.thread.daemon = True
+    # initial_game_data.thread.start()
     main(initial_game_data)
 
 if __name__ == "__main__":
