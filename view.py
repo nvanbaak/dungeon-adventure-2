@@ -6,6 +6,10 @@ import exceptions
 from pydub import AudioSegment
 from pydub.playback import play
 import threading
+from tkinter import messagebox
+import sys
+import time
+import multiprocessing
 # from game_observer import Publisher, Subscriber
 import random
 
@@ -16,6 +20,7 @@ class View():
     board_color_1 = BOARD_COLOR_1
     sprite_xy = (0, 0)
     sprite_mirror = False
+    sound_effect_play_count = 0
 
     def __init__(self, parent, controller):
         self.controller = controller
@@ -269,6 +274,18 @@ class View():
             lbl_txt = lbl_txt + str(key) + ": " + str(value) + " | "
         self.info_label["text"] = lbl_txt
 
+    def ask_new_game(self):
+        self.parent.quit()
+        res = messagebox.askyesno("Yes|No", "Would you like to play again?")
+        if res == True:
+            self.parent.destroy()
+            time.sleep(5)
+            init_new_game()
+        else:
+            self.parent.destroy()
+            sys.exit()
+
+
 def main(ctl):
     # print("V | main(ctl) | passed Controller object")
     # print("V | main(ctl) | create new Tk object as root")
@@ -287,9 +304,10 @@ def init_new_game():
     # print("V _ View now has enough initial game data to draw game screen")
     # print("V _ though View object has still not been initialized. need tk root created first")
     sound = AudioSegment.from_wav('audio/cyberpunk.wav')
-    quieter_song = sound - 3
-    t = threading.Thread(target=play, args=(quieter_song,))
-    t.start()
+    quieter_song = sound - 4
+    initial_game_data.thread = threading.Thread(target=play, args=(quieter_song,))
+    initial_game_data.thread.daemon = True
+    initial_game_data.thread.start()
     main(initial_game_data)
 
 if __name__ == "__main__":

@@ -121,7 +121,7 @@ class Controller:
             self.play("welcome_pit")
         if self.model.player.hp <= 0:
             self.play("game_over")
-
+            self.view.ask_new_game()
 
     def combat(self):
         curr_pos = self.model.get_curr_pos()
