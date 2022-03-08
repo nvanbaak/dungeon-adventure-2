@@ -33,15 +33,14 @@ class Room:
         }
         self.__visited = False
 
-    def __get_room_contents(self):
-        return self.__room_contents
-
-    room_contents = property(__get_room_contents)
-
-    def __get_door(self):
+    def get_doors(self):
         return self.__door
 
-    door_value = property(__get_door)
+    def get_contents(self):
+        return self.__room_contents
+
+    def get_location(self):
+        return self.__location
 
     def __set_floor(self, floor_no):
         if isinstance(floor_no, int) and floor_no >= 0:

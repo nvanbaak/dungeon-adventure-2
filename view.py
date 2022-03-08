@@ -65,7 +65,7 @@ class View():
     def draw_room(self):
         WALL_WIDTH = 25
         rm = self.controller.get_room_data()
-        door_dict = rm.get_doors()
+        door_dict = rm.door_value
         for key, value in door_dict.items():
             if key == "Up" and value == True:
                 self.canvas.create_rectangle(0, 0, self.canvas_width/3, WALL_WIDTH, fill="black")
@@ -91,8 +91,8 @@ class View():
                 pass
             self.canvas.pack()
         self.controller.load_initial_points()
-        rm_contents = rm.get_contents()
-        rm_loc = rm.get_location()
+        rm_contents = rm.room_contents
+        rm_loc = rm.location
         # print(f"{rm_loc} {rm_contents}")
 
     def start_new_game(self):
@@ -166,10 +166,10 @@ class View():
 
     def on_square_clicked_manual(self, clicked):
         rm = self.controller.get_room_data()
-        door_dict = rm.get_doors()
+        door_dict = rm.door_value
         str = ""
         # self.update_label("")
-        rm_contents = rm.get_contents()
+        rm_contents = rm.room_contents
         items = rm_contents.items()
         self.hide_all_sprites()
 
@@ -313,11 +313,11 @@ def init_new_game():
     # print("V | init new_game() | pass initial_game_data to main()")
     # print("V _ View now has enough initial game data to draw game screen")
     # print("V _ though View object has still not been initialized. need tk root created first")
-    # sound = AudioSegment.from_wav('audio/cyberpunk.wav')
-    # quieter_song = sound - 4
-    # initial_game_data.thread = threading.Thread(target=play, args=(quieter_song,))
-    # initial_game_data.thread.daemon = True
-    # initial_game_data.thread.start()
+    sound = AudioSegment.from_wav('audio/cyberpunk.wav')
+    quieter_song = sound - 4
+    initial_game_data.thread = threading.Thread(target=play, args=(quieter_song,))
+    initial_game_data.thread.daemon = True
+    initial_game_data.thread.start()
     main(initial_game_data)
 
 if __name__ == "__main__":

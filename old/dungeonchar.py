@@ -21,12 +21,12 @@ class DungeonCharacter(ABC):
 
 
     def __set_healable(self, t_f):
-
+        ##
         if isinstance(t_f, bool):
             self.__healable = t_f
 
     def __get_healable(self):
-        
+        ##
         return self.__healable
 
     healable = property(__get_healable, __set_healable)
@@ -121,7 +121,7 @@ class DungeonCharacter(ABC):
     def _is_alive(self):
         return self.__hp > 0
 
-
+    @abstractmethod
     def attack_target(self, target):
         """
         Method for attacking a target
@@ -131,7 +131,7 @@ class DungeonCharacter(ABC):
             damage = random.randint(self.damage_min, self.damage_max)
             target.take_damage(damage, self.name)
 
-
+    @abstractmethod
     def combat(self, target):
         """
         Method for executing a full round of combat where this character attacks first
@@ -157,6 +157,7 @@ class DungeonCharacter(ABC):
                     if not self._is_alive:
                         break
 
+    @abstractmethod
     def take_damage(self, dmg, source):
         self.hp -= dmg
         self.__model.announce(f"{self.__name} took {dmg} dmg from {source}!")

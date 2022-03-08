@@ -262,30 +262,6 @@ class RoomTestCase(unittest.TestCase):
         r.is_impassable = True
         self.assertEqual(True, r.is_impassable, "values don't match.")
 
-    def test_door_value(self):
-        r = Room()
-        r.set_door(False, True,True,False)
-        self.assertEqual(False, r.door_value["Up"])
-        self.assertEqual(True, r.door_value["Down"])
-        self.assertEqual(True, r.door_value["Left"])
-        self.assertEqual(False, r.door_value["Right"])
-
-    def test_room_contents(self):
-        r = Room()
-        r.pillar ='i'
-        r.pit = True
-        r.heal = 'g'
-        r.vision = True
-        r.monster = "Ogre"
-
-        self.assertEqual('i', r.room_contents["pillar"])
-        self.assertEqual(True, r.room_contents["pit"])
-        self.assertEqual('g', r.room_contents["healing_potion"])
-        self.assertEqual(True, r.room_contents["vision_potion"])
-        self.assertEqual("Ogre", r.room_contents["monster"])
-
-
-
 
 
 if __name__ == '__main__':

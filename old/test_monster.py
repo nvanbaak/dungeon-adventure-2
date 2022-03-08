@@ -1,12 +1,24 @@
 import unittest
-from monster import Monster
+from dungeonchar import DungeonCharacter
+from healable import Healable
 from hero import Hero
 
 
-class MockMonster(Monster):
+class MockMonster(DungeonCharacter, Healable):
 
     def __init__(self, name, model):
         super().__init__(name, model)
+        super(DungeonCharacter, self).__init__()
+        self.my_turn = True
+
+    def attack_target(self, target):
+        return super().attack_target(target)
+
+    def take_damage(self, dmg, source):
+        return super().take_damage(dmg, source)
+
+    def combat(self, target):
+        pass
 
 
 class MockHero(Hero):
@@ -75,8 +87,6 @@ class MyTestCase(unittest.TestCase):
         monster = MockMonster("monster", MockAnnouncer())  # always heals after being attacked
         monster.hp_total = 50
         monster.chance_to_heal = 1.0
-        monster.min_heal_point = 11
-        monster.max_heal_point = 12
         monster.hp = monster.hp_total
         monster.attack_speed = 1
         monster.hit_chance = 1.0  # always lands an attack
@@ -92,7 +102,6 @@ class MyTestCase(unittest.TestCase):
         hero.damage_max = 11
         monster.combat(hero)
         self.assertEqual(monster.hp, monster.hp_total) # the monster hit point should always be equal to total_hp after healing
-
 
 if __name__ == '__main__':
     unittest.main()
