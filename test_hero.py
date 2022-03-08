@@ -154,6 +154,12 @@ class Hero_Tests(unittest.TestCase):
         self.assertLess(test_hero.hp, test_hero.hp_total)
 
 
+    def test_fall_into_pit(self):
+        test_hero = MockHero("hero", MockAnnouncer())
+        hero_hp_before_fall = test_hero.hp
+        test_hero.fall_into_pit()
+        self.assertLess(test_hero.hp, hero_hp_before_fall - 9)
+        self.assertGreater(test_hero.hp, hero_hp_before_fall - 20)
 
 
 
