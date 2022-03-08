@@ -74,6 +74,7 @@ class Hero(DungeonCharacter, ABC):
     @property
     def vision(self):
         return self.__vision
+
     @vision.setter
     def vision(self, value):
         if not isinstance(value, int):
@@ -117,4 +118,12 @@ class Hero(DungeonCharacter, ABC):
         else:
             if self.chance_to_block < random.random():
                 self.__take_damage(dmg, source)
+<<<<<<< HEAD
+>>>>>>> sg_hero_chars
+=======
+
+    def fall_into_pit(self):
+        """generates a random value range 10 to 20 and reduce it from the hero's hp"""
+        ret = random.randint(10, 20)
+        self.take_damage(ret, "pit")
 >>>>>>> sg_hero_chars
