@@ -30,6 +30,18 @@ class MockMonster(DungeonCharacter, Healable):
         pass
 
 
+class MockHealable(Healable):
+    def __init__(self):
+        super().__init__()
+
+    def hp(self, value):
+        pass
+
+    def hp_total(self):
+        pass
+
+
+
 class MyTestCase(unittest.TestCase):
 
     def test_heal_itself(self):
@@ -94,6 +106,21 @@ class MyTestCase(unittest.TestCase):
             exception_raised = True
 
         self.assertEqual(True, exception_raised)
+
+
+    def test_inherit_only_healable(self):
+        exception_raised = False
+
+        try:
+            mock = MockHealable()
+            mock.heal_itself()
+
+        except TypeError:
+            exception_raised = True
+
+        self.assertEqual(True, exception_raised)
+
+
 
 
 
