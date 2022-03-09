@@ -2,13 +2,19 @@
 # net id: shoby
 
 from abc import ABC, abstractmethod
+from dungeonchar import DungeonCharacter
 import random
 
 class Healable(ABC):
     def __init__(self):
-        self.__chance_to_heal = 0.0
-        self.__min_heal_point = 0
-        self.__max_heal_point = 0
+        if issubclass(type(self), DungeonCharacter):
+            self.__chance_to_heal = 0.0
+            self.__min_heal_point = 0
+            self.__max_heal_point = 0
+
+        else:
+            raise TypeError("should inherit Dungeonchar class")
+
 
     def __set_chance_to_heal(self, chance_to_heal):
         if isinstance(chance_to_heal, float) and 0 < chance_to_heal <= 1:
@@ -65,7 +71,9 @@ class Healable(ABC):
             return str("not healed")
 
 
-
+    @abstractmethod
+    def take_damage(self, dmg, source):
+        pass
 
 
 
