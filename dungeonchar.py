@@ -17,19 +17,6 @@ class DungeonCharacter(ABC):
         self.__damage_min = 20
         self.__damage_max = 30
         self.__model = model
-        self.__healable = False
-
-
-    def __set_healable(self, t_f):
-
-        if isinstance(t_f, bool):
-            self.__healable = t_f
-
-    def __get_healable(self):
-        
-        return self.__healable
-
-    healable = property(__get_healable, __set_healable)
 
     @property
     def name(self):
