@@ -9,6 +9,7 @@ import threading
 from tkinter import messagebox
 import sys
 import time
+import preferenceswindow
 # from game_observer import Publisher, Subscriber
 
 class View():
@@ -40,12 +41,46 @@ class View():
 
     def create_top_menu(self):
         self.menu_bar = Menu(self.parent)
+        self.create_file_menu()
+        self.create_edit_menu()
+
+
+    def create_file_menu(self):
+        self.file_menu = Menu(self.menu_bar, tearoff=0)
+        self.file_menu.add_command(
+            label="New Game", command=self.on_new_game_menu_clicked)
+        self.menu_bar.add_cascade(label="File", menu=self.file_menu)
+        self.parent.config(menu=self.menu_bar)
+
+    def create_edit_menu(self):
+        self.edit_menu = Menu(self.menu_bar, tearoff=0)
+        self.edit_menu.add_command(
+            label="Preferences", command=self.on_preference_menu_clicked)
+        self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
+        self.parent.config(menu=self.menu_bar)
+
+    def on_preference_menu_clicked(self):
+        self.show_preferences_window()
+
+    def show_preferences_window(self):
+        preferenceswindow.PreferencesWindow(self)
+
+    def on_new_game_menu_clicked(self):
+        self.parent.destroy()
+        init_new_game()
+
+    def reload_colors(self, color_1):
+        self.board_color_1 = color_1
+        self.draw_room()
+        self.canvas.config(bg=self.board_color_1)
+        self.canvas.pack()
+        self.draw_all_sprites()
 
     def create_canvas(self):
         self.canvas_width = NUMBER_OF_COLUMNS * DIMENSION_OF_EACH_SQUARE
         self.canvas_height = NUMBER_OF_ROWS * DIMENSION_OF_EACH_SQUARE
         self.canvas = Canvas(
-            self.parent, width=self.canvas_width, height=self.canvas_height, bg="#800040")
+            self.parent, width=self.canvas_width, height=self.canvas_height, bg=self.board_color_1)
         self.canvas.pack(padx=8, pady=8)
 
     def create_bottom_frame(self):
