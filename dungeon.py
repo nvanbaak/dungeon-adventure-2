@@ -1,12 +1,6 @@
 
 # name  : Shoby Gnanasekaran
 # net id: shoby
-<<<<<<< HEAD
-
-from maze_generator import Maze
-from room import Room
-
-=======
 import numpy as np
 
 from maze_generator import Maze
@@ -14,7 +8,6 @@ from room import Room
 from ogre import Ogre
 from gremlin import Gremlin
 from skeleton import Skeleton
->>>>>>> sg_dungeon_new
 
 class Dungeon:
     """
@@ -61,10 +54,6 @@ class Dungeon:
             except RecursionError:
                 self.__maze.create_maze_specified_entrance(entrance_row_value, entrance_col_value)
 
-<<<<<<< HEAD
-
-=======
->>>>>>> sg_dungeon_new
     def __create_maze_random_entrance(self):
         try:
             self.__maze.create_maze_random_entrance()  # creates a playable maze(array) of Rooms
@@ -108,41 +97,6 @@ class Dungeon:
 
     dungeon = property(_get_maze)  # Property to get maze
 
-<<<<<<< HEAD
-    # def __create_room_links(self):
-    #     """creates pointers between each rooms"""
-    #     for row in range(0, self.__rowCount):
-    #         for col in range(0, self.__colCount):
-    #             self._valid_movements(row, col)
-
-    # def _valid_movements(self, row, col):
-    #     # method is made protected(not private) to create mock dungeon for testing purposes
-    #     """ validates and assigns links to down_room,upper_room,right_room and left_room
-    #     the down_room of a room on the last row is linked to the room on the first row on the same column
-    #     the upper_room of a room on the first row is linked to the room on the last row on the same column
-    #     the left_room of a room on the first column is linked to the room on the last column on the same row
-    #     the right_room of a room on the last column is linked to the room on the first column on the same row
-    #     """
-    #
-    #     if 0 <= row + 1 < self.__rowCount and 0 <= col < self.__colCount:  # link to the down_room
-    #         self.__maze.maze[row, col].down_room = self.__maze.maze[row + 1, col]
-    #     else:  # the down_room of a room on the last row is linked to the room on the first row on the same column
-    #         self.__maze.maze[row, col].down_room = self.__maze.maze[0, col]
-    #     if 0 <= row - 1 < self.__rowCount and 0 <= col < self.__colCount:  # link to the upper_room
-    #         self.__maze.maze[row, col].upper_room = self.__maze.maze[row - 1, col]
-    #     else:  # the upper_room of a room on the first row is linked to the room on the last row on the same column
-    #         self.__maze.maze[row, col].upper_room = self.__maze.maze[self.__rowCount - 1, col]
-    #     if 0 <= row < self.__rowCount and 0 <= col - 1 < self.__colCount:  # link to the left_room
-    #         self.__maze.maze[row, col].left_room = self.__maze.maze[row, col - 1]
-    #     else:  # the left_room of a room on the first column is linked to the room on the last column on the same row
-    #         self.__maze.maze[row, col].left_room = self.__maze.maze[row, self.__colCount - 1]
-    #     if 0 <= row < self.__rowCount and 0 <= col + 1 < self.__colCount:  # link to the right_room
-    #         self.__maze.maze[row, col].right_room = self.__maze.maze[row, col + 1]
-    #     else:  # the right_room of a room on the last column is linked to the room on the first column on the same row
-    #         self.__maze.maze[row, col].right_room = self.__maze.maze[row, 0]
-
-=======
->>>>>>> sg_dungeon_new
     def _setting_doors(self):
         # method is made protected(not private) to create mock dungeon for testing purposes
         """" updates the __door dictionary of the Room
@@ -177,8 +131,6 @@ class Dungeon:
         row, col = self.__maze.winning_path[0]
         return self.__maze.maze[row, col]
 
-<<<<<<< HEAD
-=======
     def re_enter_dungeon(self, room_obj):
         """ Takes to the room in the specified location
         :param room_obj Room
@@ -198,7 +150,6 @@ class Dungeon:
                 if self.dungeon.maze[i, j].monster == "Skeleton":
                     self.dungeon.maze[i, j].monster_obj = Skeleton("skeleton", self)
 
->>>>>>> sg_dungeon_new
     def __set_dungeon_str(self):
         """creates a string representation of the Dungeon  """
         dungeon_str =""
@@ -239,8 +190,6 @@ class Dungeon:
         dungeon_str += "\n"+"+here+ is your current room"
         return dungeon_str
 
-<<<<<<< HEAD
-=======
     def vision_potion_rooms(self, room_obj):
         """return the adjacent rooms of the input room_obj
         :param room_obj type Room
@@ -262,7 +211,6 @@ class Dungeon:
                     col += 1
             row +=1
         return vision_rooms
->>>>>>> sg_dungeon_new
 
     def use_vision_potion(self, room_obj):
         """
@@ -317,19 +265,6 @@ class Dungeon:
                 room_obj.heal = None   # sets the healing_potion to None in the room_content dictionary of the Room
 
 
-<<<<<<< HEAD
-
-# dun = Dungeon(4, 4)
-# print(dun.dungeon.winning_path)
-# print(dun)
-# for i in range(4):
-#     for j in range(4):
-#         dun.clear_healing_pillar_vision(dun.dungeon.maze[i, j])
-#
-# curr = dun.enter_dungeon()
-# print(dun.print_dungeon_live_location(curr))
-# print(dun.use_vision_potion(curr))
-=======
 if __name__ == '__main__':
     dun = Dungeon(4, 4)
     # print(dun.dungeon.winning_path)
@@ -341,4 +276,3 @@ if __name__ == '__main__':
     curr = dun.enter_dungeon()
     print(dun.print_dungeon_live_location(curr))
     print(dun.vision_potion_rooms(curr))
->>>>>>> sg_dungeon_new
