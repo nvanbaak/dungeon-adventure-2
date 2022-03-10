@@ -40,3 +40,12 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(sg.check_in_saved_games("game1"), True)
         sg.delete_saved_game("game1")
         self.assertEqual(sg.check_in_saved_games("game1"), False)
+
+    def test_saved_games(self):
+        m1 = Model()
+        sg = SaveGame()
+        sg.save_game("game1", m1)
+        m2 = Model()
+        sg.save_game("game2", m2)
+
+        self.assertEqual(sg.saved_games, ["game1","game2"])
