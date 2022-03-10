@@ -1,6 +1,10 @@
 # name  : Shoby Gnanasekaran
 # net id: shoby
 
+<<<<<<< HEAD
+=======
+from monster import Monster
+>>>>>>> sg_dungeon_new
 
 class Room:
     """represents a room inside a rectangular dungeon/maze. If the room is an entrance or an exit, it should be an empty
@@ -32,6 +36,21 @@ class Room:
             "Right": True
         }
         self.__visited = False
+<<<<<<< HEAD
+=======
+        self.__monster_obj = None
+
+    def __set_monster_obj(self, mons):
+        if issubclass(type(mons), Monster):
+            self.__monster_obj = mons
+        else:
+            raise TypeError(f"{mons} not a monster")
+
+    def __get_monster_obj(self):
+        return self.__monster_obj
+
+    monster_obj = property(__get_monster_obj, __set_monster_obj)
+>>>>>>> sg_dungeon_new
 
     def __get_room_contents(self):
         return self.__room_contents
@@ -383,6 +402,7 @@ class Room:
             return "|   +here+    ::" + "\t"
 
 
+<<<<<<< HEAD
 # class Main:
 #     r = Room()
 #     print(r)
@@ -405,3 +425,11 @@ class Room:
     # print(t)
     # r.set_exit(True)
     # print(r)
+=======
+
+if __name__ == "__main__":
+    r = Room()
+    r.monster = "Gremlin"
+    print(r.monster)
+
+>>>>>>> sg_dungeon_new
