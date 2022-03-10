@@ -1,10 +1,12 @@
 from tkinter import Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, PhotoImage, messagebox
+import simpleaudio
 from PIL import Image, ImageTk, ImageOps
 import controller
 from configurations import *
 import exceptions
 from pydub import AudioSegment
 from pydub.playback import play
+from pydub.playback import _play_with_simpleaudio
 import threading
 from tkinter import messagebox
 import sys
@@ -21,6 +23,8 @@ class View():
     sprite_mirror = False
     sound_effect_play_count = 0
     vision = False
+    music_on = True
+    play_obj = ""
 
     def __init__(self, parent, controller):
         self.controller = controller
@@ -55,9 +59,19 @@ class View():
     def create_edit_menu(self):
         self.edit_menu = Menu(self.menu_bar, tearoff=0)
         self.edit_menu.add_command(
-            label="Preferences", command=self.on_preference_menu_clicked)
+            label="Background Color", command=self.on_preference_menu_clicked)
+        self.edit_menu.add_command(
+            label="Sound", command=self.toggle_bkg_music)
         self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
         self.parent.config(menu=self.menu_bar)
+
+    def toggle_bkg_music(self):
+        if self.music_on == False:
+            self.music_on = True
+            start_music_2(True)
+        else:
+            self.music_on = False
+            start_music_2(False)
 
     def on_preference_menu_clicked(self):
         self.show_preferences_window()
@@ -82,6 +96,14 @@ class View():
         self.canvas = Canvas(
             self.parent, width=self.canvas_width, height=self.canvas_height, bg=self.board_color_1)
         self.canvas.pack(padx=8, pady=8)
+
+    def create_vision_window(self):
+        self.vision_window = Tk()
+        self.vision_canvas_width = 1.5 * self.canvas_width
+        self.vision_canvas_height = 1.5 * self.canvas_height
+        self.vision_canvas = Canvas(
+            self.vision_window, width=self.vision_canvas_width, height=self.vision_canvas_height, bg=self.board_color_1)
+        self.vision_canvas.pack(padx=8, pady=8)
 
     def create_bottom_frame(self):
         self.bottom_frame = Frame(self.parent, height=64)
@@ -318,6 +340,7 @@ class View():
 
     def use_vision(self):
         self.controller.use_vision()
+        self.create_vision_window()
 
     def ask_new_game(self):
         self.parent.quit()
@@ -348,12 +371,27 @@ def init_new_game():
     # print("V | init new_game() | pass initial_game_data to main()")
     # print("V _ View now has enough initial game data to draw game screen")
     # print("V _ though View object has still not been initialized. need tk root created first")
+    # start_music(initial_game_data, True)
+    start_music_2(True)
+    main(initial_game_data)
+
+def start_music(ctrl, tf):
     sound = AudioSegment.from_wav('audio/cyberpunk.wav')
     quieter_song = sound - 4
-    initial_game_data.thread = threading.Thread(target=play, args=(quieter_song,))
-    initial_game_data.thread.daemon = True
-    initial_game_data.thread.start()
-    main(initial_game_data)
+    ctrl.thread = threading.Thread(target=play, args=(quieter_song,))
+    ctrl.thread.daemon = tf
+    ctrl.thread.start()
+
+def start_music_2(tf):
+    # song = AudioSegment.from_wav('audio/cyberpunk.wav')
+    # playback = _play_with_simpleaudio(song)
+    # if tf == False:
+    #     playback.stop()
+    wav_obj = simpleaudio.WaveObject.from_wave_file('audio/cyberpunk.wav')
+    play_obj = wav_obj.play()
+
+    if tf == False:
+        play_obj.stop()
 
 if __name__ == "__main__":
     init_new_game()
