@@ -80,9 +80,9 @@ class Hero(DungeonCharacter, ABC):
         """ Reduces the hp by the dmg value"""
 
         self.hp -= dmg
-        self._DungeonCharacter__model.announce(f"{self._DungeonCharacter__name} took {dmg} dmg from {source}!")
+        self._DungeonCharacter__model.announce(f"{self.name} took {dmg} dmg from {source}!")
         if not self._is_alive:
-            self._DungeonCharacter__model.announce(f"{self._DungeonCharacter__name} has died!")
+            self._DungeonCharacter__model.announce(f"{self.name} has died!")
 
 
     def take_damage(self, dmg, source):
