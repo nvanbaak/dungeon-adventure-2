@@ -34,6 +34,8 @@ class SaveGame:
     def __get_saved_games(self):
         return self.__saved_games
 
+    saved_games = property(__get_saved_games)
+
     def save_game(self, name , model):
         """ creates the pickle files for the list of game objects passed"""
         if not self.check_in_saved_games(name) and isinstance(model, Model):
