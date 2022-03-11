@@ -1,148 +1,51 @@
 import unittest
-from dungeon_builder import DungeonBuilder
-from hero import Hero
+from model import Model
 from save_load_game import SaveGame
 
 
-class MockHero(Hero):
-    """mock hero class to check the save and load of hero objects """
-    def __init__(self, name, model):
-        super().__init__(name, model)
-
-    def attack_target(self, target):
-        pass
-
-    def combat(self, target):
-        pass
-
-    def take_damage(self, dmg, source):
-        pass
-
-    def use_health_potion(self):
-        pass
-
-    def use_vision_potion(self):
-        pass
-
 class MyTestCase(unittest.TestCase):
 
-
     def test_save_and_load_game(self):
-
-        game = DungeonBuilder.build_easy_dungeon()
-        row1, col1 = game[0].dungeon.winning_path[2][0], game[0].dungeon.winning_path[2][1]
-        curr1 = game[0].dungeon.maze[row1, col1]
-        curr1_map = game[0].print_dungeon_live_location(curr1)
-
-        hero = MockHero("hero", "model")
-        hero_hp = hero.hp
-
+        m = Model()
+        m.player.hp = 50
+        curr_room_location = m.dungeon.dungeon.winning_path[3]
+        curr_room = m.dungeon.dungeon.maze[curr_room_location[0], curr_room_location[1]]
+        m.curr_pos = m.dungeon.re_enter_dungeon(curr_room)
         sg = SaveGame()
-        sg.save_game("game1",game,curr1.floor,curr1.location,hero)
-        game_objects = sg.load_game("game1")
-
-        # test if hero hp is same as before
-
-        self.assertEqual(hero_hp, game_objects[-1].hp, "values don't match.")
-
-        # test if the player is in the same position as before
-        floor = game_objects[1]
-
-        row, col = game_objects[2][0], game_objects[2][1]
-        curr = game_objects[0][floor].dungeon.maze[row, col]
-        self.assertEqual(game_objects[0][floor].print_dungeon_live_location(curr), curr1_map, "values dont match")
-
-
-
-    def test_single_dungeon_save_and_load(self):
-        game = DungeonBuilder.build_single_dungeon()
-        row1, col1 = game[0].dungeon.winning_path[2][0], game[0].dungeon.winning_path[2][1]
-        curr1 = game[0].dungeon.maze[row1, col1]
-        curr1_map = game[0].print_dungeon_live_location(curr1)
-
-        hero = MockHero("hero", "model")
-        hero_hp = hero.hp
-
-        sg = SaveGame()
-        sg.save_game("game1", game, curr1.floor, curr1.location, hero)
-        game_objects = sg.load_game("game1")
-
-        # test if hero hp is same as before
-
-        self.assertEqual(hero_hp, game_objects[-1].hp, "values don't match.")
-
-        # test if the player is in the same position as before
-        floor = game_objects[1]
-        row, col = game_objects[2][0], game_objects[2][1]
-        curr = game_objects[0][floor].dungeon.maze[row, col]
-        self.assertEqual(game_objects[0][floor].print_dungeon_live_location(curr), curr1_map, "values dont match")
-
-    def test_del_game_load_deleted_game(self):
-        game = DungeonBuilder.build_single_dungeon()
-        row1, col1 = game[0].dungeon.winning_path[2][0], game[0].dungeon.winning_path[2][1]
-        curr1 = game[0].dungeon.maze[row1, col1]
-        curr1_map = game[0].print_dungeon_live_location(curr1)
-
-        hero = MockHero("hero", "model")
-        hero_hp = hero.hp
-
-        sg = SaveGame()
-        sg.save_game("game1", game, curr1.floor, curr1.location, hero)
-        game_objects = sg.load_game("game1")
-
-        # test if hero hp is same as before
-
-        self.assertEqual(hero_hp, game_objects[-1].hp, "values don't match.")
-
-        # test if the player is in the same position as before
-        floor = game_objects[1]
-        row, col = game_objects[2][0], game_objects[2][1]
-        curr = game_objects[0][floor].dungeon.maze[row, col]
-        self.assertEqual(game_objects[0][floor].print_dungeon_live_location(curr), curr1_map, "values dont match")
-
-        sg.delete_saved_game("game1")
-        exception_raised = False
-        try:
-            game_objects = sg.load_game("game1")
-
-        except ValueError:
-            exception_raised = True
-
-        self.assertEqual(True, exception_raised, "exception not raised")
-
-    def test_delete_invalid_game_name(self):
-        sg = SaveGame()
-        exception_raised = False
-        try:
-            sg.delete_saved_game("game1")
-
-        except ValueError:
-            exception_raised = True
-
-        self.assertEqual(True, exception_raised, "exception not raised")
-
+        sg.save_game("game1", m)
+        mod = sg.load_game("game1")
+        self.assertEqual(m.player.hp, mod.player.hp)
+        self.assertEqual(m.curr_pos, curr_room)
+        self.assertEqual(mod.curr_pos.location, m.curr_pos.location)
 
     def test_save_duplicate_name(self):
-
-        game = DungeonBuilder.build_single_dungeon()
-        row1, col1 = game[0].dungeon.winning_path[2][0], game[0].dungeon.winning_path[2][1]
-        curr1 = game[0].dungeon.maze[row1, col1]
-
-        hero = MockHero("hero", "model")
+        m = Model()
         sg = SaveGame()
-        sg.save_game("game1", game, curr1.floor, curr1.location, hero)
+        sg.save_game("game1", m)
 
-        game2 = DungeonBuilder.build_single_dungeon()
-        row1, col1 = game2[0].dungeon.winning_path[2][0], game2[0].dungeon.winning_path[2][1]
-        curr1 = game[0].dungeon.maze[row1, col1]
-
-        hero1 = MockHero("hero", "model")
         exception_raised = False
-        try:
-            # save a different game with same name "game1" as earlier
-            sg.save_game("game1", game2, curr1.floor, curr1.location, hero1)
+        m2 = Model()
+        try :
+            sg.save_game("game1", m2)
 
         except ValueError:
             exception_raised = True
 
-        self.assertEqual(True, exception_raised, "exception not raised")
+        self.assertEqual(True, exception_raised)
+
+    def test_delete_saved_game(self):
+        m = Model()
+        sg = SaveGame()
+        sg.save_game("game1", m)
+        self.assertEqual(sg.check_in_saved_games("game1"), True)
+        sg.delete_saved_game("game1")
+        self.assertEqual(sg.check_in_saved_games("game1"), False)
+
+    def test_saved_games(self):
+        m1 = Model()
+        sg = SaveGame()
+        sg.save_game("game1", m1)
+        m2 = Model()
+        sg.save_game("game2", m2)
+
+        self.assertEqual(sg.saved_games, ["game1","game2"])

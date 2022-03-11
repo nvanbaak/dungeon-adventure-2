@@ -1,3 +1,6 @@
+# name  : Shoby Gnanasekaran
+# net id: shoby
+
 import unittest
 from warrior import Warrior
 

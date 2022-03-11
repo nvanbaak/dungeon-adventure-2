@@ -6,17 +6,17 @@ class DungeonBuilder:
     @staticmethod
     def build_single_dungeon():
         """build a single dungeon"""
-        dun0 = Dungeon(4,4)
+        dun0 = Dungeon(6,6)
         result=[dun0]
         DungeonBuilder.__update_floor_details(result)
         return result
 
     @staticmethod
     def build_easy_dungeon():
-        dun0 = Dungeon(4,4)
+        dun0 = Dungeon(6,6)
         exit_value = dun0.dungeon.winning_path[-1]
         entrance_row,entrance_col = exit_value[0], exit_value[1]
-        dun1 = Dungeon(4,4, entrance = True, entrance_row_value = entrance_row, entrance_col_value = entrance_col)
+        dun1 = Dungeon(6,6, entrance = True, entrance_row_value = entrance_row, entrance_col_value = entrance_col)
         result = [dun0, dun1]
         # result = DungeonBuilder.__distribute_entrance_exit(result)
         result = DungeonBuilder.__distribute_pillars(result)
