@@ -1,14 +1,9 @@
 import tkinter as tk
 from tkinter import Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, PhotoImage, messagebox
-import simpleaudio
 from PIL import Image, ImageTk, ImageOps
-import controller
+from controller import Controller
 from configurations import *
 import exceptions
-from pydub import AudioSegment
-from pydub.playback import play
-from pydub.playback import _play_with_simpleaudio
-import threading
 from tkinter import messagebox
 import sys
 import time
@@ -16,28 +11,30 @@ import preferenceswindow
 import save_load_game
 import sprite
 from sprite import Sprite
-# from game_observer import Publisher, Subscriber
+from musicplayer import MusicPlayer
+
 
 class View():
+    def __init__(self, root, controller):
+        self.sprite_position = None
+        self.images = {}
+        self.board_color_1 = BOARD_COLOR_1
+        self.sprite_xy = (0, 0)
+        self.sprite_mirror = False
 
-    sprite_position = None
-    images = {}
-    board_color_1 = BOARD_COLOR_1
-    sprite_xy = (0, 0)
-    sprite_mirror = False
-    sound_effect_play_count = 0
-    vision = False
-    music_on = True
-    play_obj = ""
+        self.music_player = MusicPlayer()
+        self.sound_effect_play_count = 0
+        self.vision = False
+        self.music_on = True
 
-    def __init__(self, parent, controller):
-        self.controller = controller
-        self.parent = parent
+        self.play_obj = ""
+        self.controller : Controller = controller 
+
+        self.root = root
         self.canvas_width = 0
         self.canvas_height = 0
         self.create_board_base()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
-        # self.subscriber_v = Subscriber(self)
         self.start_new_game()
 
     def create_board_base(self):
@@ -48,7 +45,7 @@ class View():
         self.create_vision_button()
 
     def create_top_menu(self):
-        self.menu_bar = Menu(self.parent)
+        self.menu_bar = Menu(self.root)
         self.create_file_menu()
         self.create_edit_menu()
 
@@ -61,24 +58,16 @@ class View():
         self.file_menu.add_command(
             label="Load Game", command=self.on_load_game_menu_clicked)
         self.menu_bar.add_cascade(label="File", menu=self.file_menu)
-        self.parent.config(menu=self.menu_bar)
+        self.root.config(menu=self.menu_bar)
 
     def create_edit_menu(self):
         self.edit_menu = Menu(self.menu_bar, tearoff=0)
         self.edit_menu.add_command(
             label="Background Color", command=self.on_preference_menu_clicked)
         self.edit_menu.add_command(
-            label="Sound", command=self.toggle_bkg_music)
+            label="Sound", command=self.music_player.toggle_music)
         self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
-        self.parent.config(menu=self.menu_bar)
-
-    def toggle_bkg_music(self):
-        if self.music_on == False:
-            self.music_on = True
-            start_music_2(True)
-        else:
-            self.music_on = False
-            start_music_2(False)
+        self.root.config(menu=self.menu_bar)
 
     def on_preference_menu_clicked(self):
         self.show_preferences_window()
@@ -87,7 +76,7 @@ class View():
         preferenceswindow.PreferencesWindow(self)
 
     def on_new_game_menu_clicked(self):
-        self.parent.destroy()
+        self.root.destroy()
         init_new_game()
 
     def on_save_game_menu_clicked(self):
@@ -111,7 +100,7 @@ class View():
         self.canvas_width = NUMBER_OF_COLUMNS * DIMENSION_OF_EACH_SQUARE
         self.canvas_height = NUMBER_OF_ROWS * DIMENSION_OF_EACH_SQUARE
         self.canvas = Canvas(
-            self.parent, width=self.canvas_width, height=self.canvas_height, bg=self.board_color_1)
+            self.root, width=self.canvas_width, height=self.canvas_height, bg=self.board_color_1)
         self.canvas.pack(padx=8, pady=8)
 
     def create_vision_window(self):
@@ -123,7 +112,7 @@ class View():
         self.vision_canvas.pack(padx=8, pady=8)
 
     def create_bottom_frame(self):
-        self.bottom_frame = Frame(self.parent, height=64)
+        self.bottom_frame = Frame(self.root, height=64)
         self.info_label = Label(
             self.bottom_frame, text="")
         self.info_label.pack(side="left", padx=8, pady=5)
@@ -491,7 +480,7 @@ class View():
         #     w, h = image.size
         #     image = ImageOps.contain(image, UNDER_100)
         #
-        #     s_img = ImageTk.PhotoImage(image, master=self.parent)
+        #     s_img = ImageTk.PhotoImage(image, master=self.root)
         #
         #     ci = self.vision_canvas.create_image(x, y, image=s_img, anchor="c")
         #     self.vision_canvas.itemconfig(ci, state="normal")
@@ -537,55 +526,12 @@ class View():
             label.place(x=x_pos, y=y_pos)
 
     def ask_new_game(self):
-        self.parent.quit()
+        self.root.quit()
         res = messagebox.askyesno("Yes|No", "Would you like to play again?")
         if res == True:
-            self.parent.destroy()
+            self.root.destroy()
             time.sleep(5)
             init_new_game()
         else:
-            self.parent.destroy()
+            self.root.destroy()
             sys.exit()
-
-
-def main(ctl):
-    # print("V | main(ctl) | passed Controller object")
-    # print("V | main(ctl) | create new Tk object as root")
-    root = Tk()
-    root.title("Dungeon Adventure II")
-    # print("V | main(ctl) | create new View object with root & ctl as parameters")
-    View(root, ctl)
-    # print("V | main(ctl) | last step of View init is start_game() | last step of main is root.mainloop()")
-    # ctl.setup_observer()
-    root.mainloop()
-
-def init_new_game():
-    # print("V | init_new_game() | call init of controller object from View, save as initial_game_data")
-    initial_game_data = controller.Controller()
-    # print("V | init new_game() | pass initial_game_data to main()")
-    # print("V _ View now has enough initial game data to draw game screen")
-    # print("V _ though View object has still not been initialized. need tk root created first")
-    # start_music(initial_game_data, True)
-    start_music_2(True)
-    main(initial_game_data)
-
-def start_music(ctrl, tf):
-    sound = AudioSegment.from_wav('audio/cyberpunk.wav')
-    quieter_song = sound - 4
-    ctrl.thread = threading.Thread(target=play, args=(quieter_song,))
-    ctrl.thread.daemon = tf
-    ctrl.thread.start()
-
-def start_music_2(tf):
-    # song = AudioSegment.from_wav('audio/cyberpunk.wav')
-    # playback = _play_with_simpleaudio(song)
-    # if tf == False:
-    #     playback.stop()
-    wav_obj = simpleaudio.WaveObject.from_wave_file('audio/cyberpunk.wav')
-    play_obj = wav_obj.play()
-
-    if tf == False:
-        play_obj.stop()
-
-if __name__ == "__main__":
-    init_new_game()
