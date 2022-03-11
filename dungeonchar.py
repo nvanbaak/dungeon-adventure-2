@@ -2,10 +2,12 @@
 from abc import ABC, abstractmethod
 import random
 
+
 class DungeonCharacter(ABC):
     """
     Abstract base class used for all dungeon characters
     """
+
     def __init__(self, name, model) -> None:
         self.__name = name
         self.__hp_total = random.choice(range(50, 100))
@@ -23,6 +25,7 @@ class DungeonCharacter(ABC):
     @property
     def hp(self):
         return self.__hp
+
     @hp.setter
     def hp(self, value):
         if not isinstance(value, int):
@@ -33,13 +36,14 @@ class DungeonCharacter(ABC):
     @property
     def hp_total(self):
         return self.__hp_total
+
     @hp_total.setter
     def hp_total(self, value):
         if value < 1:
             raise ValueError("hp total must be positive!")
         elif not isinstance(value, int):
             raise TypeError("hp total must be a number!")
-        else: 
+        else:
             self.__hp_total = value
             # hp can't be higher than hp_total
             if self.__hp > self.__hp_total:
@@ -48,6 +52,7 @@ class DungeonCharacter(ABC):
     @property
     def attack_speed(self):
         return self.__attack_speed
+
     @attack_speed.setter
     def attack_speed(self, value):
         if value < 1:
@@ -60,6 +65,7 @@ class DungeonCharacter(ABC):
     @property
     def hit_chance(self):
         return self.__hit_chance
+
     @hit_chance.setter
     def hit_chance(self, value):
         if not isinstance(value, float):
@@ -71,6 +77,7 @@ class DungeonCharacter(ABC):
     @property
     def damage_min(self):
         return self.__damage_min
+
     @damage_min.setter
     def damage_min(self, value):
         if not isinstance(value, int):
@@ -85,6 +92,7 @@ class DungeonCharacter(ABC):
     @property
     def damage_max(self):
         return self.__damage_max
+
     @damage_max.setter
     def damage_max(self, value):
         if not isinstance(value, int):
@@ -100,7 +108,7 @@ class DungeonCharacter(ABC):
     def _is_alive(self):
         return self.__hp > 0
 
-    @abstractmethod
+
     def attack_target(self, target):
         """
         Method for attacking a target
@@ -110,7 +118,7 @@ class DungeonCharacter(ABC):
             damage = random.randint(self.damage_min, self.damage_max)
             target.take_damage(damage, self.name)
 
-    @abstractmethod
+
     def combat(self, target):
         """
         Method for executing a full round of combat where this character attacks first
@@ -136,10 +144,8 @@ class DungeonCharacter(ABC):
                     if not self._is_alive:
                         break
 
-    @abstractmethod
     def take_damage(self, dmg, source):
         self.hp -= dmg
         self.__model.announce(f"{self.__name} took {dmg} dmg from {source}!")
         if not self._is_alive:
             self.__model.announce(f"{self.__name} has died!")
-            
