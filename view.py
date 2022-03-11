@@ -570,19 +570,21 @@ def init_new_game():
     main(initial_game_data)
 
 def start_music(ctrl, tf):
-    sound = AudioSegment.from_wav('audio/cyberpunk.wav')
-    quieter_song = sound - 4
-    ctrl.thread = threading.Thread(target=play, args=(quieter_song,))
-    ctrl.thread.daemon = tf
-    ctrl.thread.start()
+    pass
+    # sound = AudioSegment.from_wav('audio/cyberpunk.wav')
+    # quieter_song = sound - 4
+    # ctrl.thread = threading.Thread(target=play, args=(quieter_song,))
+    # ctrl.thread.daemon = tf
+    # ctrl.thread.start()
 
 def start_music_2(tf):
+    pass
     # song = AudioSegment.from_wav('audio/cyberpunk.wav')
     # playback = _play_with_simpleaudio(song)
     # if tf == False:
     #     playback.stop()
-    wav_obj = simpleaudio.WaveObject.from_wave_file('audio/cyberpunk.wav')
-    play_obj = wav_obj.play()
+    # wav_obj = simpleaudio.WaveObject.from_wave_file('audio/cyberpunk.wav')
+    # play_obj = wav_obj.play()
 
     if tf == False:
         play_obj.stop()

@@ -1,5 +1,8 @@
 from dungeon_builder import DungeonBuilder
 from hero import Hero
+from warrior import Warrior
+from priestess import Priestess
+from thief import Thief
 from ogre import Ogre
 from gremlin import Gremlin
 from skeleton import Skeleton
@@ -13,18 +16,21 @@ class Model():
     dict = {}
     hero_dict = {}
 
-    def __init__(self):
+    def __init__(self, hero = "warrior"):
         self.game = DungeonBuilder.build_single_dungeon()
         self.dungeon = self.game[0]
         self.curr_pos = self.dungeon.enter_dungeon()
-        self.player = Hero("Test", self)
-        self.ogre = Ogre("Ogre", self)
-        self.gremlin = Gremlin("Gremlin", self)
-        self.skeleton = Skeleton("Skeleton", self)
+        if hero == "warrior":
+            self.player = Warrior("TestWarrior", self)
+        elif hero == "priestess":
+            self.player = Priestess("TestPriestess", self)
+        else:
+            self.player = Thief("TestThief", self)
         print(self.dungeon.dungeon.winning_path)
         # self.subscriber_m = Subscriber(self)
         self.pillars = {"A": "", "E": "", "P": "", "I": ""}
         self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
+        self.dungeon.update_monsters_to_room(self)
 
     def announce(self, message):
         print(message)
