@@ -77,7 +77,7 @@ class View():
 
     def on_new_game_menu_clicked(self):
         self.root.destroy()
-        init_new_game()
+        # init_new_game()
 
     def on_save_game_menu_clicked(self):
         rm = self.controller.get_room_data()
@@ -531,7 +531,7 @@ class View():
         if res == True:
             self.root.destroy()
             time.sleep(5)
-            init_new_game()
+            # init_new_game()
         else:
             self.root.destroy()
             sys.exit()
