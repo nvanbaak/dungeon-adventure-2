@@ -140,15 +140,15 @@ class Dungeon:
             row, col = current_location[0], current_location[1]
             return self.__maze.maze[row, col]
 
-    def update_monsters_to_room(self):
+    def update_monsters_to_room(self, model):
         for i in range (self.row_Count):
             for j in range (self.col_Count):
                 if self.dungeon.maze[i, j].monster == "Ogre":
-                    self.dungeon.maze[i, j].monster_obj = Ogre("ogre", self)
+                    self.dungeon.maze[i, j].monster_obj = Ogre("ogre", model)
                 if self.dungeon.maze[i, j].monster == "Gremlin":
-                    self.dungeon.maze[i, j].monster_obj = Gremlin("gremlin", self)
+                    self.dungeon.maze[i, j].monster_obj = Gremlin("gremlin", model)
                 if self.dungeon.maze[i, j].monster == "Skeleton":
-                    self.dungeon.maze[i, j].monster_obj = Skeleton("skeleton", self)
+                    self.dungeon.maze[i, j].monster_obj = Skeleton("skeleton", model)
 
     def __set_dungeon_str(self):
         """creates a string representation of the Dungeon  """

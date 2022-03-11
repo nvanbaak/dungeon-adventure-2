@@ -78,38 +78,6 @@ class Room:
 
     stairs = property(__get_stairs, __set_stairs)
 
-    def __get_room_contents(self):
-        return self.__room_contents
-
-    room_contents = property(__get_room_contents)
-
-    def __get_door(self):
-        return self.__door
-
-    door_value = property(__get_door)
-
-    def __set_floor(self, floor_no):
-        if isinstance(floor_no, int) and floor_no >= 0:
-            self.__floor = floor_no
-        else:
-            raise ValueError("invalid input for floor number")
-
-    def __get_floor(self):
-        return self.__floor
-
-    floor = property(__get_floor, __set_floor)
-
-    def __set_stairs(self,room):
-        if isinstance(room, Room):
-            self.__stairs = room
-        else:
-            self.__stairs = None
-
-    def __get_stairs(self):
-        return self.__stairs
-
-    stairs = property(__get_stairs, __set_stairs)
-
     def __set_upper_room(self, room):
         if isinstance(room, Room):
             self.__upper_room = room
