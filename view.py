@@ -63,17 +63,17 @@ class View():
     def create_edit_menu(self):
         self.edit_menu = Menu(self.menu_bar, tearoff=0)
         self.edit_menu.add_command(
-            label="Background Color", command=self.on_preference_menu_clicked)
+            label="Preferences", command=self.on_preference_menu_clicked)
         self.edit_menu.add_command(
             label="Sound", command=self.music_player.toggle_music)
         self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
         self.root.config(menu=self.menu_bar)
 
     def on_preference_menu_clicked(self):
-        self.show_preferences_window()
-
-    def show_preferences_window(self):
         preferenceswindow.PreferencesWindow(self)
+
+    # def show_preferences_window(self):
+        
 
     def on_new_game_menu_clicked(self):
         self.root.destroy()
