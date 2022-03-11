@@ -1,3 +1,5 @@
+# name  : Shoby Gnanasekaran
+# net id: shoby
 
 import sqlite3
 from sqlite3 import Error

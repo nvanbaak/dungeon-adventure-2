@@ -128,30 +128,19 @@ class Controller:
             self.view.ask_new_game()
 
     def combat(self):
-        curr_pos = self.model.get_curr_pos()
-        if curr_pos.monster == "Gremlin" or curr_pos.monster == "Ogre" or curr_pos.monster == "Skeleton":
-            print(f"Pre-battle hit points: {self.model.player.hp}")
-            monster = Monster(curr_pos.monster, self.model)
-            monster.attack_target(self.model.player)
-            self.model.player.combat(monster)
-            print(f"Post-battle hit points: Player: {self.model.player.hp} | Monster: {monster.hp}")
-
         # curr_pos = self.model.get_curr_pos()
-        # if curr_pos.monster == "Gremlin":
-        #     print(f"Pre-battle hit points: Player: {self.model.player.hp} | Gremlin: {self.model.gremlin.hp}")
-        #     self.model.gremlin.attack_target(self.model.player)
-        #     self.model.player.combat(self.model.gremlin)
-        #     print(f"Post-battle hit points: Player: {self.model.player.hp} | Gremlin: {self.model.gremlin.hp}")
-        # if curr_pos.monster == "Ogre":
-        #     print(f"Pre-battle hit points: Player: {self.model.player.hp} | Gremlin: {self.model.ogre.hp}")
-        #     self.model.ogre.attack_target(self.model.player)
-        #     self.model.player.combat(self.model.ogre)
-        #     print(f"Post-battle hit points: Player: {self.model.player.hp} | Ogre: {self.model.ogre.hp}")
-        # if curr_pos.monster == "Skeleton":
-        #     print(f"Pre-battle hit points: Player: {self.model.player.hp} | Skeleton: {self.model.skeleton.hp}")
-        #     self.model.skeleton.attack_target(self.model.player)
-        #     self.model.player.combat(self.model.skeleton)
-        #     print(f"Post-battle hit points: Player: {self.model.player.hp} | Skeleton: {self.model.skeleton.hp}")
+        # if curr_pos.monster == "Gremlin" or curr_pos.monster == "Ogre" or curr_pos.monster == "Skeleton":
+        #     print(f"Pre-battle hit points: {self.model.player.hp}")
+        #     monster = Monster(curr_pos.monster, self.model)
+        #     monster.attack_target(self.model.player)
+        #     self.model.player.combat(monster)
+        #     print(f"Post-battle hit points: Player: {self.model.player.hp} | Monster: {monster.hp}")
+
+        curr_pos = self.model.get_curr_pos()
+        if curr_pos.monster == "Gremlin" or curr_pos.monster == "Skeleton" or curr_pos.monster == "Ogre":
+            print(f"Pre-battle hit points: Player: {self.model.player.hp} | {curr_pos.monster} | {curr_pos.monster_obj.hp}")
+            self.model.player.combat(curr_pos.monster_obj)
+            print(f"Post-battle hit points: Player: {self.model.player.hp} | {curr_pos.monster} | {curr_pos.monster_obj.hp}")
 
 
     def play(self, file):
