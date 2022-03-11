@@ -1,5 +1,8 @@
 from dungeon_builder import DungeonBuilder
-from test_hero import MockHero
+from hero import Hero
+from ogre import Ogre
+from gremlin import Gremlin
+from skeleton import Skeleton
 import sprite
 from configurations import *
 # from game_observer import Publisher, Subscriber
@@ -14,7 +17,10 @@ class Model():
         self.game = DungeonBuilder.build_single_dungeon()
         self.dungeon = self.game[0]
         self.curr_pos = self.dungeon.enter_dungeon()
-        self.player = MockHero("Test", self)
+        self.player = Hero("Test", self)
+        self.ogre = Ogre("Ogre", self)
+        self.gremlin = Gremlin("Gremlin", self)
+        self.skeleton = Skeleton("Skeleton", self)
         print(self.dungeon.dungeon.winning_path)
         # self.subscriber_m = Subscriber(self)
         self.pillars = {"A": "", "E": "", "P": "", "I": ""}

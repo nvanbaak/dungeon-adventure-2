@@ -21,7 +21,7 @@ class Monster(DungeonCharacter, Healable, ABC):
         super().take_damage(dmg, source)
         if self._is_alive and hp_before_attack > self.hp:
             heal_message = self.heal_itself()
-            self._DungeonCharacter__model.announce(f"{self._DungeonCharacter__name}: {heal_message}")
+            self._DungeonCharacter__model.announce(f"{self.name}: {heal_message}")
 
 
 
