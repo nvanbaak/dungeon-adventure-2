@@ -1,3 +1,4 @@
+import tkinter as tk
 from tkinter import Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, PhotoImage, messagebox
 import simpleaudio
 from PIL import Image, ImageTk, ImageOps
@@ -12,6 +13,9 @@ from tkinter import messagebox
 import sys
 import time
 import preferenceswindow
+import save_load_game
+import sprite
+from sprite import Sprite
 # from game_observer import Publisher, Subscriber
 
 class View():
@@ -48,11 +52,14 @@ class View():
         self.create_file_menu()
         self.create_edit_menu()
 
-
     def create_file_menu(self):
         self.file_menu = Menu(self.menu_bar, tearoff=0)
         self.file_menu.add_command(
             label="New Game", command=self.on_new_game_menu_clicked)
+        self.file_menu.add_command(
+            label="Save Game", command=self.on_save_game_menu_clicked)
+        self.file_menu.add_command(
+            label="Load Game", command=self.on_load_game_menu_clicked)
         self.menu_bar.add_cascade(label="File", menu=self.file_menu)
         self.parent.config(menu=self.menu_bar)
 
@@ -83,6 +90,16 @@ class View():
         self.parent.destroy()
         init_new_game()
 
+    def on_save_game_menu_clicked(self):
+        rm = self.controller.get_room_data()
+        sg = save_load_game.SaveGame()
+        sg.save_game("game1", self.controller.get_model())
+        print (" ")
+
+    def on_load_game_menu_clicked(self):
+        sg = save_load_game.SaveGame()
+        game_objects = sg.load_game("game1")
+
     def reload_colors(self, color_1):
         self.board_color_1 = color_1
         self.draw_room()
@@ -98,9 +115,9 @@ class View():
         self.canvas.pack(padx=8, pady=8)
 
     def create_vision_window(self):
-        self.vision_window = Tk()
-        self.vision_canvas_width = 1.5 * self.canvas_width
-        self.vision_canvas_height = 1.5 * self.canvas_height
+        self.vision_window = tk.Tk()
+        self.vision_canvas_width = 900
+        self.vision_canvas_height = 900
         self.vision_canvas = Canvas(
             self.vision_window, width=self.vision_canvas_width, height=self.vision_canvas_height, bg=self.board_color_1)
         self.vision_canvas.pack(padx=8, pady=8)
@@ -147,10 +164,7 @@ class View():
             else:
                 pass
             self.canvas.pack()
-        self.controller.load_initial_points()
-        rm_contents = rm.room_contents
-        rm_loc = rm.location
-        # print(f"{rm_loc} {rm_contents}")
+        self.controller.load_hit_points()
 
     def start_new_game(self):
         # print("V | start_new_game | calls controller.reset_default_characters()()")
@@ -339,8 +353,188 @@ class View():
         self.info_label["text"] = lbl_txt
 
     def use_vision(self):
-        self.controller.use_vision()
         self.create_vision_window()
+        vision_grid = self.controller.use_vision_potion(self.controller.get_room_data())
+        row_min = 100
+        row_max = 0
+        col_min = 100
+        col_max = 0
+        for r in range(0, len(vision_grid[0])):
+            for c in range(0, len(vision_grid[1])):
+                if vision_grid[r][c]:
+                    row_min = min(row_min, vision_grid[r][c].location[0])
+                    row_max = max(row_max, vision_grid[r][c].location[0])
+                    col_min = min(col_min, vision_grid[r][c].location[1])
+                    col_max = max(col_max, vision_grid[r][c].location[1])
+                    print(f"i, j ({r}, {c}) | game r, c: ({vision_grid[r][c].location[0]}, {vision_grid[r][c].location[1]})")
+                    game_r = vision_grid[r][c].location[0]
+                    game_c = vision_grid[r][c].location[1]
+                    self.draw_vision_room(vision_grid[r][c], c, r)
+                else:
+                    print(f"N/A at ({r}, {c}) | {vision_grid[r][c]}")
+
+    def draw_vision_room(self, rm, i, j):
+        WALL_WIDTH = 10
+        door_dict = rm.door_value
+        vision_square_width = self.vision_canvas_width / 3
+        vision_square_height = self.vision_canvas_height / 3
+        vi = i * vision_square_width
+        vj = j * vision_square_height
+
+        vrs = []
+
+        VISION_SQUARE = 100
+        if rm.heal == "y":
+            vrs.append([sprite.create_sprite("healing_potion_y"), 0, 0])
+        if rm.heal == "g":
+            vrs.append([sprite.create_sprite("healing_potion_g"), 0, 2 * VISION_SQUARE])
+        if rm.vision == True:
+            vrs.append([sprite.create_sprite("vision_potion"), 0, 1 * VISION_SQUARE])
+        if rm.pillar == "a":
+            vrs.append([sprite.create_sprite("abstraction_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
+        if rm.pillar == "e":
+            vrs.append([sprite.create_sprite("encapsulation_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
+        if rm.pillar == "p":
+            vrs.append([sprite.create_sprite("polymorphism_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
+        if rm.pillar == "i":
+            vrs.append([sprite.create_sprite("inheritance_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
+        if rm.monster == "Gremlin":
+            vrs.append([sprite.create_sprite("gremlin"), 2 * VISION_SQUARE, 0])
+        if rm.monster == "Ogre":
+            vrs.append([sprite.create_sprite("ogre"), 2 * VISION_SQUARE, 0])
+        if rm.monster == "Skeleton":
+            vrs.append([sprite.create_sprite("skeleton"), 2 * VISION_SQUARE, 0])
+        if rm.pit == True:
+            vrs.append([sprite.create_sprite("pit"), 2 * VISION_SQUARE, 2 * VISION_SQUARE])
+        vrs.append([sprite.create_sprite(HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
+        print(vrs)
+        for i in range(0, len(vrs)):
+            self.draw_vision_sprite(vrs[i][0], vrs[i][1], vrs[i][2], vi, vj)
+
+        # print(door_dict.items())
+        for key, value in door_dict.items():
+            self.vision_canvas.pack()
+            if key == "Up" and value == True:
+                self.vision_canvas.create_rectangle(vi, vj, vi + (vision_square_width/3), vj + WALL_WIDTH, fill="black")
+                # print(vi, vj, vi + (vision_square_width/3), vj + WALL_WIDTH)
+                self.vision_canvas.create_rectangle(vi + (2 * (vision_square_width/3)), vj, vi + vision_square_width,
+                                                     vj + WALL_WIDTH, fill="black")
+                # print(vi + (2 * (vision_square_width / 3)), vj, vi + vision_square_width,
+                #                                     vj + WALL_WIDTH)
+            if key == "Up" and value == False:
+                self.vision_canvas.create_rectangle(vi, vj, (vi + vision_square_width), vj + WALL_WIDTH, fill="black")
+                # print(vi, vj, (vi + vision_square_width), vj + WALL_WIDTH)
+            if key == "Down" and value == True:
+                self.vision_canvas.create_rectangle(vi, vj + vision_square_height - WALL_WIDTH, vi + (vision_square_width/3),
+                                             vj + vision_square_height, fill="black")
+                # print(vi, vj + vision_square_height - WALL_WIDTH, vi + (vision_square_width/3),
+                #                              vj + vision_square_height)
+                self.vision_canvas.create_rectangle(vi + (2 * (vision_square_width/3)), vj + vision_square_height - WALL_WIDTH,
+                                             vi + vision_square_width, vj + vision_square_height, fill="black")
+                # print(vi + (2 * (vision_square_width/3)), vj + vision_square_height - WALL_WIDTH,
+                #                              vi + vision_square_width, vj + vision_square_height)
+            if key == "Down" and value == False:
+                self.vision_canvas.create_rectangle(vi, vj + vision_square_height - WALL_WIDTH, vi + vision_square_width,
+                                             vj + vision_square_height, fill="black")
+                # print(vi, vj + vision_square_height - WALL_WIDTH, vi + vision_square_width,
+                #                              vj + vision_square_height)
+            if key == "Left" and value == True:
+                self.vision_canvas.create_rectangle(vi, vj, vi + WALL_WIDTH, vj + (vision_square_height/3), fill="black")
+                # print(vi, vj, vi + WALL_WIDTH, vj + (vision_square_height/3))
+                self.vision_canvas.create_rectangle(vi, vj + (2 * (vision_square_height/3)), vi + WALL_WIDTH,
+                                             vj + vision_square_height, fill="black")
+                # print(vi, vj + (2 * (vision_square_height/3)), vi + WALL_WIDTH,
+                #                              vj + vision_square_height)
+            if key == "Left" and value == False:
+                self.vision_canvas.create_rectangle(vi, vj, vi + WALL_WIDTH, vj + vision_square_height, fill="black")
+                # print(vi, vj, vi + WALL_WIDTH, vj + vision_square_height)
+            if key == "Right" and value == True:
+                self.vision_canvas.create_rectangle(vi + vision_square_width - WALL_WIDTH, vj, vi + vision_square_width,
+                                             vj + (vision_square_height/3), fill="black")
+                # print(vi + vision_square_width - WALL_WIDTH, vj, vi + vision_square_width,
+                #                              vj + (vision_square_height/3))
+                self.vision_canvas.create_rectangle(vi + vision_square_width - WALL_WIDTH, vj + (2 * (vision_square_height/3)),
+                                             vi + vision_square_width, vj + vision_square_height, fill="black")
+                # print(vi + vision_square_width - WALL_WIDTH, vj + (2 * (vision_square_height/3)),
+                #                              vi + vision_square_width, vj + vision_square_height)
+            if key == "Right" and value == False:
+                self.vision_canvas.create_rectangle(vi + vision_square_width - WALL_WIDTH, vj, vi + vision_square_height,
+                                             vj + vision_square_height, fill="black")
+                # print(vi + vision_square_width - WALL_WIDTH, vj, vi + vision_square_height,
+                #                              vj + vision_square_height)
+            else:
+                pass
+            self.vision_canvas.pack()
+        # for position, value in START_SPRITES_POSITION.items():
+        #     tmp = sprite.create_sprite(value)
+
+
+    def draw_vision_sprite(self, sprite, x_pos, y_pos, vi, vj):
+        UNDER_100 = (100, 100)
+        # print(sprite.name.lower())
+        # if sprite:
+        #     filename = "sprites_image/{}.png".format(
+        #         sprite.name.lower())
+        #     s_image = Image.open(filename)
+        #     s_image.thumbnail = ((100,100))
+        #
+        #     ci = self.vision_canvas.create_image(x, y, image=s_image, anchor="c")
+        #     self.vision_canvas.itemconfig(ci, state="normal")
+        #     self.vision_canvas.pack()
+        # print(f"V | draw_single_sprite | position: {position} | sprite {sprite}")
+        # print(f"V | call get_numeric_notation(position) via Controller")
+
+        # if isinstance(sprite, Sprite):
+        #     filename = "sprites_image/{}.png".format(
+        #         sprite.name.lower())
+        #     image = Image.open(filename)
+        #     w, h = image.size
+        #     image = ImageOps.contain(image, UNDER_100)
+        #
+        #     s_img = ImageTk.PhotoImage(image, master=self.parent)
+        #
+        #     ci = self.vision_canvas.create_image(x, y, image=s_img, anchor="c")
+        #     self.vision_canvas.itemconfig(ci, state="normal")
+        #     self.vision_canvas.pack()
+
+        # if isinstance(sprite, Sprite):
+        #     filename = "sprites_image/{}.png".format(
+        #         sprite.name.lower())
+        #     im = Image.open(filename)
+        #     ph = ImageTk.PhotoImage(im, master=self.vision_canvas)
+        #     label = Label(self.vision_canvas, image=ph)
+        #     label.image = ph
+        #     self.vision_canvas.pack()
+
+        # if isinstance(sprite, Sprite):
+        #     filename = "sprites_image/{}.png".format(
+        #         sprite.name.lower())
+        #     print(filename)
+        #     im = Image.open(filename)
+        #     image = ImageOps.contain(im, UNDER_100)
+        #     ph = ImageTk.PhotoImage(image, master=self.vision_canvas)
+        #     label = tk.Label(self.vision_canvas, image=ph)
+        #     label.place(x=x_pos, y=y_pos)
+        #     label.image = ph
+        #     label.pack()
+
+        if isinstance(sprite, Sprite):
+            filename = "sprites_image/{}.png".format(
+                sprite.name.lower())
+            print(filename)
+            im = Image.open(filename)
+            image = ImageOps.contain(im, UNDER_100)
+            ph = ImageTk.PhotoImage(image, master=self.vision_canvas)
+            x_pos = x_pos + vi
+            y_pos = y_pos + vj
+            print(f"sprite: {sprite.name} | x: {x_pos} | y: {y_pos} ")
+            ### CANVAS NOT SHOWING IMAGES SO DOING IT WITH LABEL, BUT LABEL WON'T SHOW IMAGE TRANSPARENCY
+            # self.vision_canvas.create_image(x_pos, y_pos, image=ph, anchor="c")
+            # self.vision_canvas.pack()
+            label = tk.Label(self.vision_canvas, image=ph)
+            label.config(width=100, height=100)
+            label.image = ph
+            label.place(x=x_pos, y=y_pos)
 
     def ask_new_game(self):
         self.parent.quit()

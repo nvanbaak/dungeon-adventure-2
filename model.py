@@ -11,8 +11,8 @@ class Model():
     hero_dict = {}
 
     def __init__(self):
-        d_list = DungeonBuilder.build_single_dungeon()
-        self.dungeon = d_list[0]
+        self.game = DungeonBuilder.build_single_dungeon()
+        self.dungeon = self.game[0]
         self.curr_pos = self.dungeon.enter_dungeon()
         self.player = MockHero("Test", self)
         print(self.dungeon.dungeon.winning_path)
@@ -45,8 +45,8 @@ class Model():
             self.dict[position] = sprite.create_sprite(value)
             self.dict[position].keep_reference(self)
         self.hero_dict[HERO_POSITION] = sprite.create_sprite(HERO_SPRITE)
-
         # print(f"M | {self.dict}")
+        # print(f"M | {self.hero_dict}")
         self.refresh_room()
 
     def refresh_room(self):

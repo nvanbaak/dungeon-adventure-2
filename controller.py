@@ -143,7 +143,7 @@ class Controller:
         pygame.mixer.Sound.play(sound)
         pygame.mixer.music.stop()
 
-    def load_initial_points(self):
+    def load_hit_points(self):
         self.model.game_stats["Hit Points"] = self.model.player.hp
 
     def expunge(self):
@@ -166,5 +166,11 @@ class Controller:
     def get_game_stats (self):
         return self.model.game_stats
 
-    def use_vision(self):
+    def use_vision_potion(self, room):
         self.model.player.use_vision_potion()
+        str_vision = self.model.dungeon.use_vision_potion(room)
+        print(str_vision)
+        return self.model.dungeon.vision_potion_rooms(room)
+
+    def get_model(self):
+        return self.model
