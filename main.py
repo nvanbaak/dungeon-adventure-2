@@ -1,7 +1,9 @@
 from view import View
 from controller import Controller
+import tkinter as tk
 
-new_game = View()
-control = Controller(new_game.get_root())
-new_game.set_controller(control)
-new_game.start_loop()
+
+root = tk.Tk()
+root.title("Dungeon Adventure II: Dungeon Harder")
+View(root, Controller())
+root.mainloop()

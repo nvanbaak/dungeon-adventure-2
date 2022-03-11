@@ -1,0 +1,3 @@
+"""
+"""
+class NameError(Exception): pass
