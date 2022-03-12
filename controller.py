@@ -175,9 +175,11 @@ class Controller:
 
     def use_vision_potion(self, room):
         self.model.player.use_vision_potion()
-        str_vision = self.model.dungeon.use_vision_potion(room)
-        print(str_vision)
+        # str_vision = self.model.dungeon.use_vision_potion(room)
         return self.model.dungeon.vision_potion_rooms(room)
 
     def get_model(self):
         return self.model
+
+    def set_model(self, saved_model):
+        self.model = saved_model
