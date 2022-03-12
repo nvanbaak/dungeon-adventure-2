@@ -60,6 +60,37 @@ class DungeonCharDb:
         value = cur.fetchone()
         return value[0]
 
+    def select_column_from_table(self, table_name, column_name):
+        conn = self.create_connection()
+        cur = conn.cursor()
+        cur.execute(f"SELECT {column_name} FROM {table_name}")
+        value = cur.fetchall()
+        return value
+
+    def save_game(self, name, game_file):
+        conn = self.create_connection()
+        cur = conn.cursor()
+        cur.execute(f"INSERT INTO saved_games(name,game_file) VALUES(?,?)",(name,game_file))
+        conn.commit()
+
+    def load_game(self, game_name):
+        conn = self.create_connection()
+        cur = conn.cursor()
+        cur.execute(f"SELECT game_file FROM saved_games WHERE name =?", (game_name,))
+        value = cur.fetchone()
+        return value
+
+    def delete_single_game(self, game_name):
+        conn = self.create_connection()
+        cur = conn.cursor()
+        cur.execute(f"DELETE FROM saved_games WHERE name=?",(game_name,))
+        conn.commit()
+
+    def delete_all_saved_games(self):
+        conn = self.create_connection()
+        cur = conn.cursor()
+        cur.execute(f"DELETE FROM saved_games")
+        conn.commit()
 
 if __name__ == '__main__':
     db = DungeonCharDb()
@@ -68,5 +99,6 @@ if __name__ == '__main__':
     print(db.get_crush_blow_stats("Warrior","crushing_blow_min"))
     print(db.get_healable_stats("Priestess", "chance_to_heal"))
     print(db.get_special_attack_stats("Thief", "caught_chance"))
+    print(db.load_game("game1"))
 
 
