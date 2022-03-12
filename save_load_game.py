@@ -62,7 +62,6 @@ class SaveGame:
     def game_name_generator():
         db = DungeonCharDb()
         existing_saved_games = db.select_column_from_table("saved_games", "name")
-        print(existing_saved_games)
         count = 1
         for i in existing_saved_games:
             value = int(i[0][-1])
@@ -73,8 +72,21 @@ class SaveGame:
 
         return f"Game{count}"
 
+    @staticmethod
+
+    def saved_games_list():
+        db = DungeonCharDb()
+        saved_games =[]
+        existing_saved_games = db.select_column_from_table("saved_games", "name")
+        for i in existing_saved_games:
+            saved_games.append(i[0])
+
+        return saved_games
+
+
 
 if __name__ == '__main__':
+
     m = Model()
     m.player.hp =10
     sg = SaveGame()
@@ -85,8 +97,8 @@ if __name__ == '__main__':
     m2 = Model()
     sg = SaveGame()
     sg.save_game("Game2", m2)
-    sg.delete_single_game("Game1")
     print(sg.game_name_generator())
+    print(sg.saved_games_list())
     sg.delete_all_saved_games()
 
 
