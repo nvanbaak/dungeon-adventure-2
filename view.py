@@ -31,8 +31,9 @@ class View():
         self.controller : Controller = controller 
 
         self.root = root
-        self.canvas_width = 0
-        self.canvas_height = 0
+        self.canvas = None
+        self.canvas_width = 800
+        self.canvas_height = 600
 
         self.start_menu()
 
@@ -42,8 +43,9 @@ class View():
         """
         self.create_top_menu()
 
+        self.canvas = Canvas(self.root, width=self.canvs_width, height=self.canvas_height, bg="#476E22")
 
-        self.start_new_game()
+        # self.start_new_game()
 
     def create_HUD(self):
         self.create_canvas()
