@@ -1,6 +1,7 @@
 import tkinter as tk
-from tkinter import Menu, Button, Label, Frame, Canvas, messagebox
+from tkinter import CENTER, Menu, Button, Label, Frame, Canvas, messagebox
 from PIL import Image, ImageTk, ImageOps
+from math import floor
 from configurations import *
 import exceptions
 from tkinter import messagebox
@@ -43,7 +44,17 @@ class View():
         """
         self.create_top_menu()
 
-        self.canvas = Canvas(self.root, width=self.canvs_width, height=self.canvas_height, bg="#476E22")
+        self.canvas = Canvas(self.root, width=self.canvas_width, height=self.canvas_height, bg="#476E22")
+
+        self.canvas.pack(expand=True)
+
+        title_image = Image.open("title_text.png")
+
+        title = ImageTk.PhotoImage(title_image)
+        title_x = self.canvas_width // 2
+        title_y = self.canvas_height // 0.25
+
+        title_text = self.canvas.create_image(title_x, title_y, image=title, anchor=CENTER)
 
         # self.start_new_game()
 
@@ -188,8 +199,6 @@ class View():
             self.draw_single_sprite(position, sprite)
 
     def draw_single_sprite(self, position, sprite):
-        # print(f"V | draw_single_sprite | position: {position} | sprite {sprite}")
-        # print(f"V | call get_numeric_notation(position) via Controller")
         UNDER_64 = (64, 64)
         EXTRA_LARGE = (256, 256)
         x, y = self.controller.get_numeric_notation(position)
