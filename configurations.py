@@ -12,7 +12,7 @@ HERO_SPRITE = "w"
 HERO_POSITION = "D4"
 
 START_SPRITES_POSITION = {
-    "D4": "pt", "F6": "pp", "B2": "ap", "F2": "ep", "B6": "ip", "A1": "p", "G1": "t", "C3": "o", "F3": "g", "C5": "s",
+    "D4": "pt", "F6": "pp", "B2": "ap", "F2": "ep", "B6": "ip", "C3": "o", "F3": "g", "C5": "s",
     "D2": "hy", "D6": "hg", "F4": "v"
 }
 
