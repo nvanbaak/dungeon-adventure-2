@@ -1,7 +1,6 @@
 import tkinter as tk
-from tkinter import Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, PhotoImage, messagebox
+from tkinter import Menu, Button, Label, Frame, Canvas, messagebox
 from PIL import Image, ImageTk, ImageOps
-from controller import Controller
 from configurations import *
 import exceptions
 from tkinter import messagebox
@@ -10,8 +9,9 @@ import time
 import preferenceswindow
 import save_load_game
 import sprite
-from sprite import Sprite
+from controller import Controller
 from musicplayer import MusicPlayer
+from sprite import Sprite
 
 
 class View():
@@ -33,16 +33,25 @@ class View():
         self.root = root
         self.canvas_width = 0
         self.canvas_height = 0
-        self.create_board_base()
-        self.canvas.bind("<Button-1>", self.on_square_clicked)
+
+        self.start_menu()
+
+    def start_menu(self):
+        """
+        creates and diplays the start menu
+        """
+        self.create_top_menu()
+
+
         self.start_new_game()
 
-    def create_board_base(self):
-        self.create_top_menu()
+    def create_HUD(self):
         self.create_canvas()
         self.draw_room()
         self.create_bottom_frame()
         self.create_vision_button()
+
+        self.canvas.bind("<Button-1>", self.on_square_clicked)
 
     def create_top_menu(self):
         self.menu_bar = Menu(self.root)
@@ -72,12 +81,9 @@ class View():
     def on_preference_menu_clicked(self):
         preferenceswindow.PreferencesWindow(self)
 
-    # def show_preferences_window(self):
-        
-
     def on_new_game_menu_clicked(self):
         self.root.destroy()
-        # init_new_game()
+        self.start_menu()
 
     def on_save_game_menu_clicked(self):
         rm = self.controller.get_room_data()
@@ -156,13 +162,11 @@ class View():
         self.controller.load_hit_points()
 
     def start_new_game(self):
-        # print("V | start_new_game | calls controller.reset_default_characters()()")
+        self.create_HUD()
         self.controller.reset_default_characters()
         self.send_view_reference_to_controller()
-        # print("V | start_new_game | calls draw_all_sprites()")
         self.draw_all_sprites()
         self.update_score_label()
-        # self.info_label.config(text="")
 
     def send_view_reference_to_controller(self):
         self.controller.accept_view_reference(self)
@@ -531,7 +535,7 @@ class View():
         if res == True:
             self.root.destroy()
             time.sleep(5)
-            # init_new_game()
+            self.start_menu()
         else:
             self.root.destroy()
             sys.exit()
