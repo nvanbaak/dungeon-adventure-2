@@ -26,7 +26,7 @@ class Model():
             self.player = Priestess("TestPriestess", self)
         else:
             self.player = Thief("TestThief", self)
-        # print(self.dungeon.dungeon.winning_path)
+        print(self.dungeon.dungeon.winning_path)
         # self.subscriber_m = Subscriber(self)
         self.pillars = {"A": "", "E": "", "P": "", "I": ""}
         self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}

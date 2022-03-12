@@ -75,17 +75,21 @@ class Controller:
         if curr_pos.pit == True:
             pass
         if curr_pos.pillar == "a":
-            self.model.pillars["A"] = True
-            self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "A "
+            if self.model.pillars["A"] == "":
+                self.model.pillars["A"] = True
+                self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "A "
         if curr_pos.pillar == "e":
-            self.model.pillars["E"] = True
-            self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "E "
+            if self.model.pillars["E"] == "":
+                self.model.pillars["E"] = True
+                self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "E "
         if curr_pos.pillar == "p":
-            self.model.pillars["P"] = True
-            self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "P "
+            if self.model.pillars["P"] == "":
+                self.model.pillars["P"] = True
+                self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "P "
         if curr_pos.pillar == "i":
-            self.model.pillars["I"] = True
-            self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "I "
+            if self.model.pillars["I"] == "":
+                self.model.pillars["I"] = True
+                self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "I "
         self.model.game_stats["Hit Points"] = self.model.player.hp
 
     def gather_sounds(self):

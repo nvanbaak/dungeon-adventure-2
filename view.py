@@ -17,6 +17,7 @@ import save_load_game
 import sprite
 from sprite import Sprite
 # from game_observer import Publisher, Subscriber
+from musicplayer import MusicPlayer
 
 class View():
 
@@ -29,6 +30,7 @@ class View():
     vision = False
     music_on = True
     play_obj = ""
+    music_player = MusicPlayer()
 
     def __init__(self, parent, controller):
         self.controller = controller
@@ -38,6 +40,7 @@ class View():
         self.create_board_base()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
         # self.subscriber_v = Subscriber(self)
+        self.vision_window = ""
         self.start_new_game()
 
     def create_board_base(self):
@@ -70,7 +73,7 @@ class View():
         self.edit_menu.add_command(
             label="Background Color", command=self.on_preference_menu_clicked)
         self.edit_menu.add_command(
-            label="Sound", command=self.toggle_bkg_music)
+            label="Sound", command=self.music_player.toggle_music)
         self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
         self.parent.config(menu=self.menu_bar)
 
@@ -335,6 +338,12 @@ class View():
             self.controller.gather_sounds()
         if clicked == True:
             self.doorway_refresh(hero_dict, clicked)
+        m = self.controller.get_model()
+        if m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and m.pillars["I"] == True:
+            print("Player has won the game!")
+            self.controller.play("you_win")
+            self.ask_new_game()
+
 
     def on_square_clicked(self, event):
         clicked = True
@@ -394,22 +403,26 @@ class View():
         self.info_label["text"] = lbl_txt
 
     def use_vision(self):
-        self.create_vision_window()
-        vision_grid = self.controller.use_vision_potion(self.controller.get_room_data())
-        row_min = 100
-        row_max = 0
-        col_min = 100
-        col_max = 0
-        for r in range(0, len(vision_grid[0])):
-            for c in range(0, len(vision_grid[1])):
-                if vision_grid[r][c]:
-                    row_min = min(row_min, vision_grid[r][c].location[0])
-                    row_max = max(row_max, vision_grid[r][c].location[0])
-                    col_min = min(col_min, vision_grid[r][c].location[1])
-                    col_max = max(col_max, vision_grid[r][c].location[1])
-                    self.draw_vision_room(vision_grid[r][c], c, r)
-                else:
-                    pass
+        if self.vision_window != "":
+            self.vision_window.destroy()
+            self.vision_window = ""
+        else:
+            self.create_vision_window()
+            vision_grid = self.controller.use_vision_potion(self.controller.get_room_data())
+            row_min = 100
+            row_max = 0
+            col_min = 100
+            col_max = 0
+            for r in range(0, len(vision_grid[0])):
+                for c in range(0, len(vision_grid[1])):
+                    if vision_grid[r][c]:
+                        row_min = min(row_min, vision_grid[r][c].location[0])
+                        row_max = max(row_max, vision_grid[r][c].location[0])
+                        col_min = min(col_min, vision_grid[r][c].location[1])
+                        col_max = max(col_max, vision_grid[r][c].location[1])
+                        self.draw_vision_room(vision_grid[r][c], c, r)
+                    else:
+                        pass
 
     def draw_vision_room(self, rm, i, j):
         WALL_WIDTH = 10
@@ -501,6 +514,10 @@ class View():
         self.parent.quit()
         res = messagebox.askyesno("Yes|No", "Would you like to play again?")
         if res == True:
+            m = self.controller.get_model()
+            m.pillars = {"A": "", "E": "", "P": "", "I": ""}
+            self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
+            self.update_score_label()
             self.parent.destroy()
             time.sleep(5)
             init_new_game()
@@ -527,27 +544,28 @@ def init_new_game():
     # print("V _ View now has enough initial game data to draw game screen")
     # print("V _ though View object has still not been initialized. need tk root created first")
     # start_music(initial_game_data, True)
-    start_music_2(True)
+    # start_music_2(True)
     main(initial_game_data)
 
-def start_music(ctrl, tf):
-    pass
+# def start_music(ctrl, tf):
+#     pass
     # sound = AudioSegment.from_wav('audio/cyberpunk.wav')
     # quieter_song = sound - 4
     # ctrl.thread = threading.Thread(target=play, args=(quieter_song,))
     # ctrl.thread.daemon = tf
     # ctrl.thread.start()
 
-def start_music_2(tf):
+# def start_music_2(tf):
     # song = AudioSegment.from_wav('audio/cyberpunk.wav')
     # playback = _play_with_simpleaudio(song)
     # if tf == False:
     #     playback.stop()
-    wav_obj = simpleaudio.WaveObject.from_wave_file('audio/cyberpunk.wav')
-    play_obj = wav_obj.play()
 
-    if tf == False:
-        play_obj.stop()
+    # wav_obj = simpleaudio.WaveObject.from_wave_file('audio/cyberpunk.wav')
+    # play_obj = wav_obj.play()
+
+    # if tf == False:
+    #     play_obj.stop()
 
 if __name__ == "__main__":
     init_new_game()
