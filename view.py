@@ -222,14 +222,14 @@ class View():
         sprite = hero_dict[self.sprite_position]
         doors = ["C1", "D1", "E1", "C7", "D7", "E7", "G3", "G4", "G5", "A3", "A4", "A5"]
         if sprite.name == "warrior" and self.sprite_position in doors:
-            for al_nu in doors:
-                if self.sprite_position == al_nu:
+            for doorway in doors:
+                if self.sprite_position == doorway:
                     self.on_square_clicked_manual(False)
 
     def draw_all_sprites(self):
         for position, sprite in self.controller.get_all_peices_on_board():
             self.draw_single_sprite(position, sprite)
-        for position, sprite in self.controller.get_hero_dict():
+        for position, sprite in self.controller.get_hero_dict_items():
             self.draw_single_sprite(position, sprite)
 
     def draw_single_sprite(self, position, sprite):
@@ -276,16 +276,17 @@ class View():
         return (x0, y0)
 
     def on_square_clicked_manual(self, clicked):
+        """
+        This is to prevent an infinite loop when the user clicks near a door. The room only changes if the user
+        clicked a doorway, not if the user appears in the next room in a doorway. It also redraws the room after
+        every user click.
+        """
         rm = self.controller.get_room_data()
         door_dict = rm.door_value
-        str = ""
-        # self.update_label("")
-        rm_contents = rm.room_contents
-        items = rm_contents.items()
         self.hide_all_sprites()
 
-        model_dict = self.controller.get_dict()
-        hero_dict = self.controller.get_hero()
+        model_dict = self.controller.get_model_dict()
+        hero_dict = self.controller.get_hero_dict()
 
         sprite_obj = hero_dict[self.sprite_position]
 
@@ -332,7 +333,6 @@ class View():
         self.sound_effect_play_count = self.sound_effect_play_count + 1
         if self.sound_effect_play_count == 1:
             self.controller.gather_sounds()
-        # self.controller.dispatch()
         if clicked == True:
             self.doorway_refresh(hero_dict, clicked)
 
@@ -344,6 +344,7 @@ class View():
             (clicked_row, clicked_column))
         self.shift(self.sprite_position, position_of_click)
         self.sprite_position = position_of_click
+
         if self.sprite_xy[0] < xy[0]:
             self.sprite_mirror = False
         else:
@@ -353,7 +354,7 @@ class View():
 
     def hide_all_sprites(self):
 
-        model_dict = self.controller.get_dict()
+        model_dict = self.controller.get_model_dict()
 
         for position, value in model_dict.items():
             if value.name == "warrior":

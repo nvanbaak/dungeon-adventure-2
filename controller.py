@@ -1,24 +1,13 @@
 import model
 import sprite
-from playsound import playsound
 import pygame
-# from game_observer import Publisher, Subscriber
-from dungeonchar import DungeonCharacter
-from healable import Healable
-from hero import Hero
-from monster import Monster
 
 class Controller:
 
     def __init__(self):
         # print("C | __init__ | Controller init calls init of Model")
         self.model = model.Model()
-        # self.pub = Publisher()
-        # self.view = ""
         pygame.init()
-
-    # def setup_observer(self):
-    #     self.pub.register(self.view.subscriber_v)
 
     def accept_view_reference(self, view_ref):
         self.view = view_ref
@@ -49,7 +38,7 @@ class Controller:
     def get_all_peices_on_board(self):
         return self.model.dict.items()
 
-    def get_hero_dict(self):
+    def get_hero_dict_items(self):
         return self.model.hero_dict.items()
 
     def get_alphanumeric_position(self, rowcolumntuple):
@@ -63,14 +52,11 @@ class Controller:
     def pre_move_validation(self, start_pos, end_pos):
         return self.model.pre_move_validation(start_pos, end_pos)
 
-    def get_dict(self):
+    def get_model_dict(self):
         return self.model.get_dict()
 
-    def get_hero(self):
+    def get_hero_dict(self):
         return self.model.get_hero_dict()
-
-    # def dispatch(self):
-    #     self.pub.dispatch("Check hp")
 
     def gather(self):
         curr_pos = self.model.get_curr_pos()
@@ -128,20 +114,11 @@ class Controller:
             self.view.ask_new_game()
 
     def combat(self):
-        # curr_pos = self.model.get_curr_pos()
-        # if curr_pos.monster == "Gremlin" or curr_pos.monster == "Ogre" or curr_pos.monster == "Skeleton":
-        #     print(f"Pre-battle hit points: {self.model.player.hp}")
-        #     monster = Monster(curr_pos.monster, self.model)
-        #     monster.attack_target(self.model.player)
-        #     self.model.player.combat(monster)
-        #     print(f"Post-battle hit points: Player: {self.model.player.hp} | Monster: {monster.hp}")
-
         curr_pos = self.model.get_curr_pos()
         if curr_pos.monster == "Gremlin" or curr_pos.monster == "Skeleton" or curr_pos.monster == "Ogre":
             print(f"Pre-battle hit points: Player: {self.model.player.hp} | {curr_pos.monster} | {curr_pos.monster_obj.hp}")
             self.model.player.combat(curr_pos.monster_obj)
             print(f"Post-battle hit points: Player: {self.model.player.hp} | {curr_pos.monster} | {curr_pos.monster_obj.hp}")
-
 
     def play(self, file):
         filename = "audio/{}.wav".format(
