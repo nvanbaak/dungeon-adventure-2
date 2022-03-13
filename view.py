@@ -304,7 +304,7 @@ class View():
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("G", "A")
                     hero_dict[self.sprite_position] = sprite_obj
-                    self.controller.gather()
+                    # self.controller.gather()
                     self.sound_effect_play_count = 0
             elif self.sprite_position == "C1" or self.sprite_position == "D1" or self.sprite_position =="E1":
                 if door_dict["Down"] == True:
@@ -312,7 +312,7 @@ class View():
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("1", "7")
                     hero_dict[self.sprite_position] = sprite_obj
-                    self.controller.gather()
+                    # self.controller.gather()
                     self.sound_effect_play_count = 0
             elif self.sprite_position == "A5" or self.sprite_position == "A4" or self.sprite_position == "A3":
                 if door_dict["Left"] == True:
@@ -320,7 +320,7 @@ class View():
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("A", "G")
                     hero_dict[self.sprite_position] = sprite_obj
-                    self.controller.gather()
+                    # self.controller.gather()
                     self.sound_effect_play_count = 0
             elif self.sprite_position == "C7" or self.sprite_position == "D7" or self.sprite_position == "E7":
                 if door_dict["Up"] == True:
@@ -328,7 +328,7 @@ class View():
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("7", "1")
                     hero_dict[self.sprite_position] = sprite_obj
-                    self.controller.gather()
+                    # self.controller.gather()
                     self.sound_effect_play_count = 0
             else:
                 pass
@@ -344,20 +344,20 @@ class View():
             self.doorway_refresh(hero_dict, clicked)
         m = self.controller.get_model()
         if m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and m.pillars["I"] == True:
-            self.controller.gather()
+            # self.controller.gather()
             print("Player has won the game!")
             self.controller.play("you_win")
             self.ask_new_game()
 
-    def check_sq_for_gatherable_sprites(self, position_of_click):
+    def check_sq_for_gatherable_objects(self, position_of_click):
         model_dict = self.controller.get_model_dict()
         for position, value in model_dict.items():
             if position == position_of_click:
                 s_obj = model_dict[position]
                 return s_obj
 
-    def process_gatherable_object(self, obj):
-        print(f"Do something with this {obj.name} object!")
+    def process_gatherable_object(self, obj, pos):
+        self.controller.gather(obj, pos)
 
     def on_square_clicked(self, event):
         clicked = True
@@ -366,9 +366,9 @@ class View():
         position_of_click = self.controller.get_alphanumeric_position(
             (clicked_row, clicked_column))
 
-        gatherable_obj = self.check_sq_for_gatherable_sprites(position_of_click)
+        gatherable_obj = self.check_sq_for_gatherable_objects(position_of_click)
         if gatherable_obj:
-            self.process_gatherable_object(gatherable_obj)
+            self.process_gatherable_object(gatherable_obj, position_of_click)
 
         self.shift(self.sprite_position, position_of_click)
         self.sprite_position = position_of_click
