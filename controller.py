@@ -60,10 +60,9 @@ class Controller:
 
     def gather(self, obj, pos):
         curr_pos = self.model.get_curr_pos()
-        model_dict = self.get_model_dict()
         # if curr_pos.heal == "y":
         if obj.name == "healing_potion_y":
-            del model_dict[pos]
+            curr_pos.heal = ""
             obj.visible = False
             self.model.player.health_potions += 1
             self.model.game_stats["Healing Potions"] = self.model.player.health_potions
@@ -72,7 +71,7 @@ class Controller:
         # if curr_pos.heal == "g":
         if obj.name == "healing_potion_g":
             obj.visible = False
-            del model_dict[pos]
+            curr_pos.heal = ""
             self.model.player.health_potions += 1
             self.model.game_stats["Healing Potions"] = self.model.player.health_potions
             self.view.show_health_button = True
@@ -80,7 +79,7 @@ class Controller:
         # if curr_pos.vision == True:
         if obj.name == "vision_potion":
             obj.visible = False
-            del model_dict[pos]
+            curr_pos.vision = False
             self.model.player.vision_potions += 1
             self.model.game_stats["Vision Potions"] = self.model.player.vision_potions
             self.view.vision = True
@@ -91,38 +90,38 @@ class Controller:
         if obj.name == "gremlin":
             monster_after_combat = self.combat()
             if monster_after_combat < 0:
-                del model_dict[pos]
+                curr_pos.monster = ""
         if obj.name == "skeleton":
             monster_after_combat = self.combat()
             if monster_after_combat < 0:
-                del model_dict[pos]
+                curr_pos.monster = ""
         if obj.name == "ogre":
             monster_after_combat = self.combat()
             if monster_after_combat < 0:
-                del model_dict[pos]
+                curr_pos.monster = ""
         # if curr_pos.pillar == "a":
         if obj.name == "abstraction_pillar":
             if self.model.pillars["A"] == "":
                 obj.visible = False
-                del model_dict[pos]
+                curr_pos.pillar = ""
                 self.model.pillars["A"] = True
                 self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "A "
         if obj.name == "encapsulation_pillar":
             if self.model.pillars["E"] == "":
                 obj.visible = False
-                del model_dict[pos]
+                curr_pos.pillar = ""
                 self.model.pillars["E"] = True
                 self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "E "
         if obj.name == "polymorphism_pillar":
             if self.model.pillars["P"] == "":
                 obj.visible = False
-                del model_dict[pos]
+                curr_pos.pillar = ""
                 self.model.pillars["P"] = True
                 self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "P "
         if obj.name == "inheritance_pillar":
             if self.model.pillars["I"] == "":
                 obj.visible = False
-                del model_dict[pos]
+                curr_pos.pillar = ""
                 self.model.pillars["I"] = True
                 self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "I "
         self.model.game_stats["Hit Points"] = self.model.player.hp
