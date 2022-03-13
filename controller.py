@@ -61,15 +61,15 @@ class Controller:
     def gather(self, obj, pos):
         curr_pos = self.model.get_curr_pos()
         if obj.name == "healing_potion_y":
-            curr_pos.heal = ""
             obj.visible = False
+            curr_pos.heal = None
             self.model.player.health_potions += 1
             self.model.game_stats["Healing Potions"] = self.model.player.health_potions
             self.view.show_health_button = True
             self.view.health_button.pack()
         if obj.name == "healing_potion_g":
             obj.visible = False
-            curr_pos.heal = ""
+            curr_pos.heal = None
             self.model.player.health_potions += 1
             self.model.game_stats["Healing Potions"] = self.model.player.health_potions
             self.view.show_health_button = True
