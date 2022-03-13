@@ -87,6 +87,19 @@ class Controller:
             self.view.vision_button.pack()
         if curr_pos.pit == True:
             self.model.player.fall_into_pit()
+        # if curr_pos.monster == "Gremlin" or curr_pos.monster == "Ogre" or curr_pos.monster == "Skeleton":
+        if obj.name == "gremlin":
+            monster_after_combat = self.combat()
+            if monster_after_combat < 0:
+                del model_dict[pos]
+        if obj.name == "skeleton":
+            monster_after_combat = self.combat()
+            if monster_after_combat < 0:
+                del model_dict[pos]
+        if obj.name == "ogre":
+            monster_after_combat = self.combat()
+            if monster_after_combat < 0:
+                del model_dict[pos]
         # if curr_pos.pillar == "a":
         if obj.name == "abstraction_pillar":
             if self.model.pillars["A"] == "":
@@ -133,7 +146,6 @@ class Controller:
             self.play("pillar")
         if curr_pos.monster == "Gremlin" or curr_pos.monster == "Ogre" or curr_pos.monster == "Skeleton":
             self.play("monster")
-            self.combat()
         if curr_pos.pit == True:
             self.play("welcome_pit")
         if self.model.player.hp <= 0:
@@ -146,6 +158,7 @@ class Controller:
             print(f"Pre-battle hit points: Player: {self.model.player.hp} | {curr_pos.monster} | {curr_pos.monster_obj.hp}")
             self.model.player.combat(curr_pos.monster_obj)
             print(f"Post-battle hit points: Player: {self.model.player.hp} | {curr_pos.monster} | {curr_pos.monster_obj.hp}")
+            return curr_pos.monster_obj.hp
 
     def play(self, file):
         filename = "audio/{}.wav".format(
