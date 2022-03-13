@@ -60,7 +60,6 @@ class Controller:
 
     def gather(self, obj, pos):
         curr_pos = self.model.get_curr_pos()
-        # if curr_pos.heal == "y":
         if obj.name == "healing_potion_y":
             curr_pos.heal = ""
             obj.visible = False
@@ -68,7 +67,6 @@ class Controller:
             self.model.game_stats["Healing Potions"] = self.model.player.health_potions
             self.view.show_health_button = True
             self.view.health_button.pack()
-        # if curr_pos.heal == "g":
         if obj.name == "healing_potion_g":
             obj.visible = False
             curr_pos.heal = ""
@@ -76,7 +74,6 @@ class Controller:
             self.model.game_stats["Healing Potions"] = self.model.player.health_potions
             self.view.show_health_button = True
             self.view.health_button.pack()
-        # if curr_pos.vision == True:
         if obj.name == "vision_potion":
             obj.visible = False
             curr_pos.vision = False
@@ -84,22 +81,21 @@ class Controller:
             self.model.game_stats["Vision Potions"] = self.model.player.vision_potions
             self.view.vision = True
             self.view.vision_button.pack()
-        if curr_pos.pit == True:
-            self.model.player.fall_into_pit()
-        # if curr_pos.monster == "Gremlin" or curr_pos.monster == "Ogre" or curr_pos.monster == "Skeleton":
         if obj.name == "gremlin":
             monster_after_combat = self.combat()
             if monster_after_combat < 0:
                 curr_pos.monster = ""
+            self.i_fought_a_monster = True
         if obj.name == "skeleton":
             monster_after_combat = self.combat()
             if monster_after_combat < 0:
                 curr_pos.monster = ""
+            self.i_fought_a_monster = True
         if obj.name == "ogre":
             monster_after_combat = self.combat()
             if monster_after_combat < 0:
                 curr_pos.monster = ""
-        # if curr_pos.pillar == "a":
+            self.i_fought_a_monster = True
         if obj.name == "abstraction_pillar":
             if self.model.pillars["A"] == "":
                 obj.visible = False
@@ -157,7 +153,13 @@ class Controller:
             print(f"Pre-battle hit points: Player: {self.model.player.hp} | {curr_pos.monster} | {curr_pos.monster_obj.hp}")
             self.model.player.combat(curr_pos.monster_obj)
             print(f"Post-battle hit points: Player: {self.model.player.hp} | {curr_pos.monster} | {curr_pos.monster_obj.hp}")
+            if self.model.player.hp <= 0:
+                self.play("game_over")
+                self.view.ask_new_game()
             return curr_pos.monster_obj.hp
+
+    def pit_fall(self):
+        self.model.player.fall_into_pit()
 
     def play(self, file):
         filename = "audio/{}.wav".format(

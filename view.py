@@ -32,6 +32,7 @@ class View():
     music_on = True
     play_obj = ""
     music_player = MusicPlayer()
+    pit_falls = 0
 
     def __init__(self, parent, controller):
         self.controller = controller
@@ -292,12 +293,27 @@ class View():
         door_dict = rm.door_value
         self.hide_all_sprites()
 
-        model_dict = self.controller.get_model_dict()
         hero_dict = self.controller.get_hero_dict()
+        model_dict = self.controller.get_model_dict()
 
         sprite_obj = hero_dict[self.sprite_position]
 
-        if clicked == True:
+        self.ok_to_leave = False
+
+        if rm.monster:
+            if self.controller.i_fought_a_monster:
+                self.ok_to_leave = True
+            else:
+                self.ok_to_leave = False
+        else:
+            self.ok_to_leave = True
+
+        if rm.pit:
+            if self.pit_falls == 0:
+                self.controller.pit_fall()
+                self.pit_falls = 1
+
+        if clicked == True and self.ok_to_leave == True:
             if self.sprite_position == "G5" or self.sprite_position == "G4" or self.sprite_position == "G3":
                 if door_dict["Right"] == True:
                     self.controller.move_right()
@@ -306,6 +322,8 @@ class View():
                     hero_dict[self.sprite_position] = sprite_obj
                     # self.controller.gather()
                     self.sound_effect_play_count = 0
+                    self.controller.i_fought_a_monster = False
+                    self.pit_falls = 0
             elif self.sprite_position == "C1" or self.sprite_position == "D1" or self.sprite_position =="E1":
                 if door_dict["Down"] == True:
                     self.controller.move_down()
@@ -314,6 +332,8 @@ class View():
                     hero_dict[self.sprite_position] = sprite_obj
                     # self.controller.gather()
                     self.sound_effect_play_count = 0
+                    self.controller.i_fought_a_monster = False
+                    self.pit_falls = 0
             elif self.sprite_position == "A5" or self.sprite_position == "A4" or self.sprite_position == "A3":
                 if door_dict["Left"] == True:
                     self.controller.move_left()
@@ -322,6 +342,8 @@ class View():
                     hero_dict[self.sprite_position] = sprite_obj
                     # self.controller.gather()
                     self.sound_effect_play_count = 0
+                    self.controller.i_fought_a_monster = False
+                    self.pit_falls = 0
             elif self.sprite_position == "C7" or self.sprite_position == "D7" or self.sprite_position == "E7":
                 if door_dict["Up"] == True:
                     self.controller.move_upper()
@@ -330,6 +352,8 @@ class View():
                     hero_dict[self.sprite_position] = sprite_obj
                     # self.controller.gather()
                     self.sound_effect_play_count = 0
+                    self.controller.i_fought_a_monster = False
+                    self.pit_falls = 0
             else:
                 pass
 
