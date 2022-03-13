@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, PhotoImage, messagebox
+from tkinter import Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, TOP, PhotoImage, messagebox
 import simpleaudio
 from PIL import Image, ImageTk, ImageOps
 import controller
@@ -28,6 +28,7 @@ class View():
     sprite_mirror = False
     sound_effect_play_count = 0
     vision = False
+    show_health_button = False
     music_on = True
     play_obj = ""
     music_player = MusicPlayer()
@@ -39,7 +40,6 @@ class View():
         self.canvas_height = 0
         self.create_board_base()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
-        # self.subscriber_v = Subscriber(self)
         self.vision_window = ""
         self.start_new_game()
 
@@ -49,6 +49,7 @@ class View():
         self.draw_room()
         self.create_bottom_frame()
         self.create_vision_button()
+        self.create_health_button()
 
     def create_top_menu(self):
         self.menu_bar = Menu(self.parent)
@@ -76,14 +77,6 @@ class View():
             label="Sound", command=self.music_player.toggle_music)
         self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
         self.parent.config(menu=self.menu_bar)
-
-    def toggle_bkg_music(self):
-        if self.music_on == False:
-            self.music_on = True
-            start_music_2(True)
-        else:
-            self.music_on = False
-            start_music_2(False)
 
     def on_preference_menu_clicked(self):
         self.show_preferences_window()
@@ -175,9 +168,20 @@ class View():
     def create_vision_button(self):
         self.vision_button = Button(self.bottom_frame, text="Use Vision", command=self.use_vision)
         self.vision_button.configure(activebackground="#33B5E5")
-        self.vision_button.pack()
+        self.vision_button.pack(side=TOP)
         if self.vision == False:
             self.vision_button.pack_forget()
+
+    def create_health_button(self):
+        self.health_button = Button(self.bottom_frame, text="Use Health", command=self.use_health)
+        self.health_button.configure(activebackground="#33B5E5")
+        self.health_button.pack(side=TOP)
+        if self.show_health_button == False:
+            self.health_button.pack_forget()
+
+    def use_health(self):
+        self.controller.use_health_potion()
+        self.update_score_label()
 
     def draw_room(self):
         WALL_WIDTH = 25
@@ -340,6 +344,7 @@ class View():
             self.doorway_refresh(hero_dict, clicked)
         m = self.controller.get_model()
         if m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and m.pillars["I"] == True:
+            self.controller.gather()
             print("Player has won the game!")
             self.controller.play("you_win")
             self.ask_new_game()
@@ -404,8 +409,10 @@ class View():
 
     def use_vision(self):
         if self.vision_window != "":
-            self.vision_window.destroy()
-            self.vision_window = ""
+            try:
+                self.vision_window.destroy()
+            except:
+                self.vision_window = ""
         else:
             self.create_vision_window()
             vision_grid = self.controller.use_vision_potion(self.controller.get_room_data())
