@@ -349,6 +349,15 @@ class View():
             self.controller.play("you_win")
             self.ask_new_game()
 
+    def check_sq_for_gatherable_sprites(self, position_of_click):
+        model_dict = self.controller.get_model_dict()
+        for position, value in model_dict.items():
+            if position == position_of_click:
+                s_obj = model_dict[position]
+                return s_obj
+
+    def process_gatherable_object(self, obj):
+        print(f"Do something with this {obj.name} object!")
 
     def on_square_clicked(self, event):
         clicked = True
@@ -356,6 +365,11 @@ class View():
         xy = self.get_clicked_xy(event)
         position_of_click = self.controller.get_alphanumeric_position(
             (clicked_row, clicked_column))
+
+        gatherable_obj = self.check_sq_for_gatherable_sprites(position_of_click)
+        if gatherable_obj:
+            self.process_gatherable_object(gatherable_obj)
+
         self.shift(self.sprite_position, position_of_click)
         self.sprite_position = position_of_click
 
