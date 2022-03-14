@@ -1,24 +1,13 @@
 import model
 import sprite
-from playsound import playsound
 import pygame
-# from game_observer import Publisher, Subscriber
-from dungeonchar import DungeonCharacter
-from healable import Healable
-from hero import Hero
-from monster import Monster
 
 class Controller:
 
     def __init__(self):
         # print("C | __init__ | Controller init calls init of Model")
         self.model = model.Model()
-        # self.pub = Publisher()
-        # self.view = ""
         pygame.init()
-
-    # def setup_observer(self):
-    #     self.pub.register(self.view.subscriber_v)
 
     def accept_view_reference(self, view_ref):
         self.view = view_ref
@@ -49,7 +38,7 @@ class Controller:
     def get_all_peices_on_board(self):
         return self.model.dict.items()
 
-    def get_hero_dict(self):
+    def get_hero_dict_items(self):
         return self.model.hero_dict.items()
 
     def get_alphanumeric_position(self, rowcolumntuple):
@@ -63,44 +52,76 @@ class Controller:
     def pre_move_validation(self, start_pos, end_pos):
         return self.model.pre_move_validation(start_pos, end_pos)
 
-    def get_dict(self):
+    def get_model_dict(self):
         return self.model.get_dict()
 
-    def get_hero(self):
+    def get_hero_dict(self):
         return self.model.get_hero_dict()
 
-    # def dispatch(self):
-    #     self.pub.dispatch("Check hp")
-
-    def gather(self):
+    def gather(self, obj, pos):
         curr_pos = self.model.get_curr_pos()
-        # self.dispatch()
-        if curr_pos.heal == "y":
+        if obj.name == "healing_potion_y":
+            obj.visible = False
+            curr_pos.heal = None
             self.model.player.health_potions += 1
             self.model.game_stats["Healing Potions"] = self.model.player.health_potions
-        if curr_pos.heal == "g":
+            self.view.show_health_button = True
+            self.view.health_button.pack()
+        if obj.name == "healing_potion_g":
+            obj.visible = False
+            curr_pos.heal = None
             self.model.player.health_potions += 1
             self.model.game_stats["Healing Potions"] = self.model.player.health_potions
-        if curr_pos.vision == True:
+            self.view.show_health_button = True
+            self.view.health_button.pack()
+        if obj.name == "vision_potion":
+            obj.visible = False
+            curr_pos.vision = False
             self.model.player.vision_potions += 1
             self.model.game_stats["Vision Potions"] = self.model.player.vision_potions
             self.view.vision = True
             self.view.vision_button.pack()
-        if curr_pos.pit == True:
-            pass
-        if curr_pos.pillar == "a":
-            self.model.pillars["A"] = True
-            self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "A "
-        if curr_pos.pillar == "e":
-            self.model.pillars["E"] = True
-            self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "E "
-        if curr_pos.pillar == "p":
-            self.model.pillars["P"] = True
-            self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "P "
-        if curr_pos.pillar == "i":
-            self.model.pillars["I"] = True
-            self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "I "
+        if obj.name == "gremlin":
+            monster_after_combat = self.combat()
+            if monster_after_combat < 0:
+                curr_pos.monster = ""
+            self.i_fought_a_monster = True
+        if obj.name == "skeleton":
+            monster_after_combat = self.combat()
+            if monster_after_combat < 0:
+                curr_pos.monster = ""
+            self.i_fought_a_monster = True
+        if obj.name == "ogre":
+            monster_after_combat = self.combat()
+            if monster_after_combat < 0:
+                curr_pos.monster = ""
+            self.i_fought_a_monster = True
+        if obj.name == "abstraction_pillar":
+            if self.model.pillars["A"] == "":
+                obj.visible = False
+                curr_pos.pillar = ""
+                self.model.pillars["A"] = True
+                self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "A "
+        if obj.name == "encapsulation_pillar":
+            if self.model.pillars["E"] == "":
+                obj.visible = False
+                curr_pos.pillar = ""
+                self.model.pillars["E"] = True
+                self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "E "
+        if obj.name == "polymorphism_pillar":
+            if self.model.pillars["P"] == "":
+                obj.visible = False
+                curr_pos.pillar = ""
+                self.model.pillars["P"] = True
+                self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "P "
+        if obj.name == "inheritance_pillar":
+            if self.model.pillars["I"] == "":
+                obj.visible = False
+                curr_pos.pillar = ""
+                self.model.pillars["I"] = True
+                self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "I "
         self.model.game_stats["Hit Points"] = self.model.player.hp
+        self.view.update_score_label()
 
     def gather_sounds(self):
         curr_pos = self.model.get_curr_pos()
@@ -120,7 +141,6 @@ class Controller:
             self.play("pillar")
         if curr_pos.monster == "Gremlin" or curr_pos.monster == "Ogre" or curr_pos.monster == "Skeleton":
             self.play("monster")
-            self.combat()
         if curr_pos.pit == True:
             self.play("welcome_pit")
         if self.model.player.hp <= 0:
@@ -128,20 +148,25 @@ class Controller:
             self.view.ask_new_game()
 
     def combat(self):
-        # curr_pos = self.model.get_curr_pos()
-        # if curr_pos.monster == "Gremlin" or curr_pos.monster == "Ogre" or curr_pos.monster == "Skeleton":
-        #     print(f"Pre-battle hit points: {self.model.player.hp}")
-        #     monster = Monster(curr_pos.monster, self.model)
-        #     monster.attack_target(self.model.player)
-        #     self.model.player.combat(monster)
-        #     print(f"Post-battle hit points: Player: {self.model.player.hp} | Monster: {monster.hp}")
-
         curr_pos = self.model.get_curr_pos()
         if curr_pos.monster == "Gremlin" or curr_pos.monster == "Skeleton" or curr_pos.monster == "Ogre":
             print(f"Pre-battle hit points: Player: {self.model.player.hp} | {curr_pos.monster} | {curr_pos.monster_obj.hp}")
             self.model.player.combat(curr_pos.monster_obj)
             print(f"Post-battle hit points: Player: {self.model.player.hp} | {curr_pos.monster} | {curr_pos.monster_obj.hp}")
+            if self.model.player.hp <= 0:
+                self.model.game_stats["Hit Points"] = self.model.player.hp
+                self.view.update_score_label()
+                self.play("game_over")
+                self.view.ask_new_game()
+            return curr_pos.monster_obj.hp
 
+    def pit_fall(self):
+        self.model.player.fall_into_pit()
+        if self.model.player.hp <= 0:
+            self.model.game_stats["Hit Points"] = self.model.player.hp
+            self.view.update_score_label()
+            self.play("game_over")
+            self.view.ask_new_game()
 
     def play(self, file):
         filename = "audio/{}.wav".format(
@@ -175,9 +200,14 @@ class Controller:
 
     def use_vision_potion(self, room):
         self.model.player.use_vision_potion()
-        str_vision = self.model.dungeon.use_vision_potion(room)
-        print(str_vision)
+        # str_vision = self.model.dungeon.use_vision_potion(room)
         return self.model.dungeon.vision_potion_rooms(room)
+
+    def use_health_potion(self):
+        self.model.player.use_health_potion()
 
     def get_model(self):
         return self.model
+
+    def set_model(self, saved_model):
+        self.model = saved_model
