@@ -82,8 +82,7 @@ class View():
 
     def on_new_game_menu_clicked(self):
         self.root.destroy()
-        self.music_player.stop_music()
-        init_new_game()
+        # init_new_game()
 
     def on_save_game_menu_clicked(self):
         saveload_window = tk.Tk()
@@ -149,7 +148,6 @@ class View():
 
     def create_vision_window(self):
         self.vision_window = tk.Tk()
-        # self.vision_window.overrideredirect(True)
         self.vision_canvas_width = 900
         self.vision_canvas_height = 900
         self.vision_canvas = Canvas(
@@ -364,7 +362,8 @@ class View():
         if clicked == True:
             self.doorway_refresh(hero_dict, clicked)
         m = self.controller.get_model()
-        if rm.is_exit == True and m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and m.pillars["I"] == True:
+        if m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and m.pillars["I"] == True:
+            # self.controller.gather()
             print("Player has won the game!")
             self.controller.play("you_win")
             self.ask_new_game()
@@ -444,32 +443,28 @@ class View():
         self.info_label["text"] = lbl_txt
 
     def use_vision(self):
-        # if self.vision_window != "":
-        #     try:
-        #         self.vision_window.destroy()
-        #     except:
-        #         self.vision_window = ""
-        # else:
-        self.create_vision_window()
-        vision_grid = self.controller.use_vision_potion(self.controller.get_room_data())
-        row_min = 100
-        row_max = 0
-        col_min = 100
-        col_max = 0
-        for r in range(0, len(vision_grid[0])):
-            for c in range(0, len(vision_grid[1])):
-                if vision_grid[r][c]:
-                    row_min = min(row_min, vision_grid[r][c].location[0])
-                    row_max = max(row_max, vision_grid[r][c].location[0])
-                    col_min = min(col_min, vision_grid[r][c].location[1])
-                    col_max = max(col_max, vision_grid[r][c].location[1])
-                    self.draw_vision_room(vision_grid[r][c], c, r)
-                else:
-                    pass
-        self.controller.model.game_stats["Vision Potions"] = self.controller.model.player.vision_potions
-        self.vision = False
-        self.vision_button.pack_forget()
-        self.update_score_label()
+        if self.vision_window != "":
+            try:
+                self.vision_window.destroy()
+            except:
+                self.vision_window = ""
+        else:
+            self.create_vision_window()
+            vision_grid = self.controller.use_vision_potion(self.controller.get_room_data())
+            row_min = 100
+            row_max = 0
+            col_min = 100
+            col_max = 0
+            for r in range(0, len(vision_grid[0])):
+                for c in range(0, len(vision_grid[1])):
+                    if vision_grid[r][c]:
+                        row_min = min(row_min, vision_grid[r][c].location[0])
+                        row_max = max(row_max, vision_grid[r][c].location[0])
+                        col_min = min(col_min, vision_grid[r][c].location[1])
+                        col_max = max(col_max, vision_grid[r][c].location[1])
+                        self.draw_vision_room(vision_grid[r][c], c, r)
+                    else:
+                        pass
 
     def draw_vision_room(self, rm, i, j):
         WALL_WIDTH = 10
@@ -503,10 +498,6 @@ class View():
             vrs.append([sprite.create_sprite("skeleton"), 2 * VISION_SQUARE, 0])
         if rm.pit == True:
             vrs.append([sprite.create_sprite("pit"), 2 * VISION_SQUARE, 2 * VISION_SQUARE])
-        if rm.is_entrance:
-            vrs.append([sprite.create_sprite("entrance"), 0 * VISION_SQUARE, 1 * VISION_SQUARE])
-        if rm.is_exit:
-            vrs.append([sprite.create_sprite("exit"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
         orig_rm = self.controller.get_room_data()
         if rm == orig_rm:
             vrs.append([sprite.create_sprite(HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
@@ -571,17 +562,11 @@ class View():
             self.update_score_label()
             self.root.destroy()
             time.sleep(5)
-            self.music_player.stop_music()
             init_new_game()
         else:
             self.root.destroy()
             sys.exit()
 
-def init_new_game():
-    root = tk.Tk()
-    root.title("Dungeon Adventure II: Dungeon Harder")
-    View(root, Controller())
-    root.mainloop()
 
 # def main(ctl):
 #     # print("V | main(ctl) | passed Controller object")

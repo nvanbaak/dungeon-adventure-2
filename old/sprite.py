@@ -72,9 +72,3 @@ class Gremlin(Sprite):
 
 class Skeleton(Sprite):
     pass
-
-class Entrance(Sprite):
-    pass
-
-class Exit(Sprite):
-    pass
