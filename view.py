@@ -362,8 +362,7 @@ class View():
         if clicked == True:
             self.doorway_refresh(hero_dict, clicked)
         m = self.controller.get_model()
-        if m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and m.pillars["I"] == True:
-            # self.controller.gather()
+        if rm.is_exit == True and m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and m.pillars["I"] == True:
             print("Player has won the game!")
             self.controller.play("you_win")
             self.ask_new_game()
