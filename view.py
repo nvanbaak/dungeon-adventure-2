@@ -82,7 +82,8 @@ class View():
 
     def on_new_game_menu_clicked(self):
         self.root.destroy()
-        # init_new_game()
+        self.music_player.stop_music()
+        init_new_game()
 
     def on_save_game_menu_clicked(self):
         saveload_window = tk.Tk()
@@ -561,11 +562,17 @@ class View():
             self.update_score_label()
             self.root.destroy()
             time.sleep(5)
+            self.music_player.stop_music()
             init_new_game()
         else:
             self.root.destroy()
             sys.exit()
 
+def init_new_game():
+    root = tk.Tk()
+    root.title("Dungeon Adventure II: Dungeon Harder")
+    View(root, Controller())
+    root.mainloop()
 
 # def main(ctl):
 #     # print("V | main(ctl) | passed Controller object")
