@@ -443,6 +443,8 @@ class View():
         lbl_txt = ""
         for key, value in stat_dict.items():
             lbl_txt = lbl_txt + str(key) + ": " + str(value) + " | "
+        if self.controller.model.player.hp <= 0:
+            lbl_txt = "Y O U  D I E D !!!!!"
         self.info_label["text"] = lbl_txt
 
     def use_vision(self):
@@ -557,7 +559,7 @@ class View():
 
     def ask_new_game(self):
         self.parent.quit()
-        res = messagebox.askyesno("Yes|No", "Would you like to play again?")
+        res = messagebox.askyesno("Game Over!", "Would you like to play again?")
         if res == True:
             m = self.controller.get_model()
             m.pillars = {"A": "", "E": "", "P": "", "I": ""}
