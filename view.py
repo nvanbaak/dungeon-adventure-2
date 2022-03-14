@@ -498,6 +498,10 @@ class View():
             vrs.append([sprite.create_sprite("skeleton"), 2 * VISION_SQUARE, 0])
         if rm.pit == True:
             vrs.append([sprite.create_sprite("pit"), 2 * VISION_SQUARE, 2 * VISION_SQUARE])
+        if rm.is_entrance:
+            vrs.append([sprite.create_sprite("entrance"), 0 * VISION_SQUARE, 1 * VISION_SQUARE])
+        if rm.is_exit:
+            vrs.append([sprite.create_sprite("exit"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
         orig_rm = self.controller.get_room_data()
         if rm == orig_rm:
             vrs.append([sprite.create_sprite(HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
