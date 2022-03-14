@@ -571,26 +571,26 @@ class View():
             sys.exit()
 
 
-def main(ctl):
-    # print("V | main(ctl) | passed Controller object")
-    # print("V | main(ctl) | create new Tk object as root")
-    root = Tk()
-    root.title("Dungeon Adventure II")
-    # print("V | main(ctl) | create new View object with root & ctl as parameters")
-    View(root, ctl)
-    # print("V | main(ctl) | last step of View init is start_game() | last step of main is root.mainloop()")
-    # ctl.setup_observer()
-    root.mainloop()
-
-def init_new_game():
-    # print("V | init_new_game() | call init of controller object from View, save as initial_game_data")
-    initial_game_data = controller.Controller()
-    # print("V | init new_game() | pass initial_game_data to main()")
-    # print("V _ View now has enough initial game data to draw game screen")
-    # print("V _ though View object has still not been initialized. need tk root created first")
-    # start_music(initial_game_data, True)
-    # start_music_2(True)
-    main(initial_game_data)
+# def main(ctl):
+#     # print("V | main(ctl) | passed Controller object")
+#     # print("V | main(ctl) | create new Tk object as root")
+#     root = Tk()
+#     root.title("Dungeon Adventure II")
+#     # print("V | main(ctl) | create new View object with root & ctl as parameters")
+#     View(root, ctl)
+#     # print("V | main(ctl) | last step of View init is start_game() | last step of main is root.mainloop()")
+#     # ctl.setup_observer()
+#     root.mainloop()
+#
+# def init_new_game():
+#     # print("V | init_new_game() | call init of controller object from View, save as initial_game_data")
+#     initial_game_data = controller.Controller()
+#     # print("V | init new_game() | pass initial_game_data to main()")
+#     # print("V _ View now has enough initial game data to draw game screen")
+#     # print("V _ though View object has still not been initialized. need tk root created first")
+#     # start_music(initial_game_data, True)
+#     # start_music_2(True)
+#     main(initial_game_data)
 
 # def start_music(ctrl, tf):
 #     pass
@@ -612,5 +612,5 @@ def init_new_game():
     # if tf == False:
     #     play_obj.stop()
 
-if __name__ == "__main__":
-    init_new_game()
+# if __name__ == "__main__":
+#     init_new_game()
