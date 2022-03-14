@@ -154,12 +154,19 @@ class Controller:
             self.model.player.combat(curr_pos.monster_obj)
             print(f"Post-battle hit points: Player: {self.model.player.hp} | {curr_pos.monster} | {curr_pos.monster_obj.hp}")
             if self.model.player.hp <= 0:
+                self.model.game_stats["Hit Points"] = self.model.player.hp
+                self.view.update_score_label()
                 self.play("game_over")
                 self.view.ask_new_game()
             return curr_pos.monster_obj.hp
 
     def pit_fall(self):
         self.model.player.fall_into_pit()
+        if self.model.player.hp <= 0:
+            self.model.game_stats["Hit Points"] = self.model.player.hp
+            self.view.update_score_label()
+            self.play("game_over")
+            self.view.ask_new_game()
 
     def play(self, file):
         filename = "audio/{}.wav".format(
