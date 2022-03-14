@@ -121,7 +121,6 @@ class Controller:
                 self.model.pillars["I"] = True
                 self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "I "
         self.model.game_stats["Hit Points"] = self.model.player.hp
-        self.view.update_score_label()
 
     def gather_sounds(self):
         curr_pos = self.model.get_curr_pos()
