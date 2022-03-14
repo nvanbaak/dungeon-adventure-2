@@ -83,6 +83,7 @@ class View():
     def on_new_game_menu_clicked(self):
         self.root.destroy()
         self.music_player.stop_music()
+        self.root.quit()
         init_new_game()
 
     def on_save_game_menu_clicked(self):
