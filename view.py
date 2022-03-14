@@ -26,6 +26,7 @@ class View():
         self.sound_effect_play_count = 0
         self.vision = False
         self.music_on = True
+        self.show_health_button = False
 
         self.play_obj = ""
         self.controller : Controller = controller 
