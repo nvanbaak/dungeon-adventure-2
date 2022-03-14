@@ -156,6 +156,14 @@ class View():
             self.vision_window, width=self.vision_canvas_width, height=self.vision_canvas_height, bg=self.board_color_1)
         self.vision_canvas.pack(padx=8, pady=8)
 
+    def create_map_window(self):
+        self.map_window = tk.Tk()
+        self.map_canvas_width = 900
+        self.map_canvas_height = 900
+        self.map_canvas = Canvas(
+            self.map_window, width=self.map_canvas_width, height=self.map_canvas_height, bg=self.board_color_1)
+        self.map_canvas.pack(padx=8, pady=8)
+
     def create_bottom_frame(self):
         self.bottom_frame = Frame(self.root, height=64)
         self.info_label = Label(
@@ -219,6 +227,7 @@ class View():
         self.draw_all_sprites()
         self.update_score_label()
         # self.info_label.config(text="")
+        # self.show_entire_map()
 
     def send_view_reference_to_controller(self):
         self.controller.accept_view_reference(self)
@@ -463,7 +472,7 @@ class View():
                     row_max = max(row_max, vision_grid[r][c].location[0])
                     col_min = min(col_min, vision_grid[r][c].location[1])
                     col_max = max(col_max, vision_grid[r][c].location[1])
-                    self.draw_vision_room(vision_grid[r][c], c, r)
+                    self.draw_vision_room(vision_grid[r][c], c, r, "vision")
                 else:
                     pass
         self.controller.model.game_stats["Vision Potions"] = self.controller.model.player.vision_potions
@@ -471,11 +480,15 @@ class View():
         self.vision_button.pack_forget()
         self.update_score_label()
 
-    def draw_vision_room(self, rm, i, j):
+    def draw_vision_room(self, rm, i, j, type):
         WALL_WIDTH = 10
         door_dict = rm.door_value
         vision_square_width = self.vision_canvas_width / 3
         vision_square_height = self.vision_canvas_height / 3
+        if type == "map":
+            pass
+            # vision_square_width = self.vision_canvas_width / 3
+            # vision_square_height = self.vision_canvas_height / 3
         vi = i * vision_square_width
         vj = j * vision_square_height
 
@@ -570,12 +583,32 @@ class View():
             self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
             self.update_score_label()
             self.root.destroy()
-            time.sleep(5)
+            time.sleep(3)
             self.music_player.stop_music()
+            self.root.quit()
             init_new_game()
         else:
             self.root.destroy()
             sys.exit()
+
+    def show_entire_map(self):
+        self.create_map_window()
+        entire_grid = self.controller.model.dungeon.dungeon.maze
+        row_min = 100
+        row_max = 0
+        col_min = 100
+        col_max = 0
+        for r in range(0, len(entire_grid[0])):
+            for c in range(0, len(entire_grid[1])):
+                if entire_grid[r][c]:
+                    row_min = min(row_min, entire_grid[r][c].location[0])
+                    row_max = max(row_max, entire_grid[r][c].location[0])
+                    col_min = min(col_min, entire_grid[r][c].location[1])
+                    col_max = max(col_max, entire_grid[r][c].location[1])
+                    self.draw_vision_room(entire_grid[r][c], c, r, "map")
+                else:
+                    pass
+
 
 def init_new_game():
     root = tk.Tk()
