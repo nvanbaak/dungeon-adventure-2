@@ -1,14 +1,9 @@
 import tkinter as tk
 from tkinter import Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, TOP, PhotoImage, messagebox
-import simpleaudio
 from PIL import Image, ImageTk, ImageOps
-import controller
+from controller import Controller
 from configurations import *
 import exceptions
-from pydub import AudioSegment
-from pydub.playback import play
-from pydub.playback import _play_with_simpleaudio
-import threading
 from tkinter import messagebox
 import sys
 import time
@@ -16,27 +11,27 @@ import preferenceswindow
 import save_load_game
 import sprite
 from sprite import Sprite
-# from game_observer import Publisher, Subscriber
 from musicplayer import MusicPlayer
 
+
 class View():
+    def __init__(self, root, controller):
+        self.sprite_position = None
+        self.images = {}
+        self.board_color_1 = BOARD_COLOR_1
+        self.sprite_xy = (0, 0)
+        self.sprite_mirror = False
 
-    sprite_position = None
-    images = {}
-    board_color_1 = BOARD_COLOR_1
-    sprite_xy = (0, 0)
-    sprite_mirror = False
-    sound_effect_play_count = 0
-    vision = False
-    show_health_button = False
-    music_on = True
-    play_obj = ""
-    music_player = MusicPlayer()
-    pit_falls = 0
+        self.music_player = MusicPlayer()
+        self.sound_effect_play_count = 0
+        self.vision = False
+        self.music_on = True
+        self.show_health_button = False
 
-    def __init__(self, parent, controller):
-        self.controller = controller
-        self.parent = parent
+        self.play_obj = ""
+        self.controller : Controller = controller 
+
+        self.root = root
         self.canvas_width = 0
         self.canvas_height = 0
         self.create_board_base()
@@ -53,7 +48,7 @@ class View():
         self.create_health_button()
 
     def create_top_menu(self):
-        self.menu_bar = Menu(self.parent)
+        self.menu_bar = Menu(self.root)
         self.create_file_menu()
         self.create_edit_menu()
 
@@ -68,7 +63,7 @@ class View():
         self.file_menu.add_command(
             label="Delete All Saved Games", command=self.on_delete_games_menu_clicked)
         self.menu_bar.add_cascade(label="File", menu=self.file_menu)
-        self.parent.config(menu=self.menu_bar)
+        self.root.config(menu=self.menu_bar)
 
     def create_edit_menu(self):
         self.edit_menu = Menu(self.menu_bar, tearoff=0)
@@ -77,7 +72,7 @@ class View():
         self.edit_menu.add_command(
             label="Sound", command=self.music_player.toggle_music)
         self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
-        self.parent.config(menu=self.menu_bar)
+        self.root.config(menu=self.menu_bar)
 
     def on_preference_menu_clicked(self):
         self.show_preferences_window()
@@ -86,8 +81,8 @@ class View():
         preferenceswindow.PreferencesWindow(self)
 
     def on_new_game_menu_clicked(self):
-        self.parent.destroy()
-        init_new_game()
+        self.root.destroy()
+        # init_new_game()
 
     def on_save_game_menu_clicked(self):
         saveload_window = tk.Tk()
@@ -148,7 +143,7 @@ class View():
         self.canvas_width = NUMBER_OF_COLUMNS * DIMENSION_OF_EACH_SQUARE
         self.canvas_height = NUMBER_OF_ROWS * DIMENSION_OF_EACH_SQUARE
         self.canvas = Canvas(
-            self.parent, width=self.canvas_width, height=self.canvas_height, bg=self.board_color_1)
+            self.root, width=self.canvas_width, height=self.canvas_height, bg=self.board_color_1)
         self.canvas.pack(padx=8, pady=8)
 
     def create_vision_window(self):
@@ -160,7 +155,7 @@ class View():
         self.vision_canvas.pack(padx=8, pady=8)
 
     def create_bottom_frame(self):
-        self.bottom_frame = Frame(self.parent, height=64)
+        self.bottom_frame = Frame(self.root, height=64)
         self.info_label = Label(
             self.bottom_frame, text="")
         self.info_label.pack(side="left", padx=8, pady=5)
@@ -558,18 +553,18 @@ class View():
             label.place(x=x_pos, y=y_pos)
 
     def ask_new_game(self):
-        self.parent.quit()
+        self.root.quit()
         res = messagebox.askyesno("Game Over!", "Would you like to play again?")
         if res == True:
             m = self.controller.get_model()
             m.pillars = {"A": "", "E": "", "P": "", "I": ""}
             self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
             self.update_score_label()
-            self.parent.destroy()
+            self.root.destroy()
             time.sleep(5)
             init_new_game()
         else:
-            self.parent.destroy()
+            self.root.destroy()
             sys.exit()
 
 
