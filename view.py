@@ -12,7 +12,7 @@ import save_load_game
 import sprite
 from sprite import Sprite
 from musicplayer import MusicPlayer
-
+from tkinter import TclError
 
 class View():
     def __init__(self, root, controller):
@@ -221,6 +221,7 @@ class View():
         self.controller.load_hit_points()
 
     def start_new_game(self):
+        self.root.protocol("WM_DELETE_WINDOW", lambda: self.on_close_window(self.root))
         # print("V | start_new_game | calls controller.reset_default_characters()()")
         self.controller.reset_default_characters()
         self.send_view_reference_to_controller()
@@ -229,6 +230,9 @@ class View():
         self.update_score_label()
         # self.info_label.config(text="")
         # self.show_entire_map()
+
+    def on_close_window(self, root):
+        root.destroy()
 
     def send_view_reference_to_controller(self):
         self.controller.accept_view_reference(self)
@@ -390,25 +394,29 @@ class View():
         self.controller.gather(obj, pos)
 
     def on_square_clicked(self, event):
-        clicked = True
-        clicked_row, clicked_column = self.get_clicked_row_column(event)
-        xy = self.get_clicked_xy(event)
-        position_of_click = self.controller.get_alphanumeric_position(
-            (clicked_row, clicked_column))
+        try:
+            clicked = True
+            clicked_row, clicked_column = self.get_clicked_row_column(event)
+            xy = self.get_clicked_xy(event)
+            position_of_click = self.controller.get_alphanumeric_position(
+                (clicked_row, clicked_column))
 
-        gatherable_obj = self.check_sq_for_gatherable_objects(position_of_click)
-        if gatherable_obj:
-            self.process_gatherable_object(gatherable_obj, position_of_click)
+            gatherable_obj = self.check_sq_for_gatherable_objects(position_of_click)
+            if gatherable_obj:
+                self.process_gatherable_object(gatherable_obj, position_of_click)
 
-        self.shift(self.sprite_position, position_of_click)
-        self.sprite_position = position_of_click
+            self.shift(self.sprite_position, position_of_click)
+            self.sprite_position = position_of_click
 
-        if self.sprite_xy[0] < xy[0]:
-            self.sprite_mirror = False
-        else:
-            self.sprite_mirror = True
+            if self.sprite_xy[0] < xy[0]:
+                self.sprite_mirror = False
+            else:
+                self.sprite_mirror = True
 
-        self.on_square_clicked_manual(clicked)
+            self.on_square_clicked_manual(clicked)
+
+        except TclError:
+            pass
 
     def hide_all_sprites(self):
 
@@ -583,11 +591,12 @@ class View():
             m.pillars = {"A": "", "E": "", "P": "", "I": ""}
             self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
             self.update_score_label()
-            self.root.destroy()
-            time.sleep(3)
-            self.music_player.stop_music()
-            self.root.quit()
-            init_new_game()
+            self.on_new_game_menu_clicked()
+            # self.root.destroy()
+            # time.sleep(3)
+            # self.music_player.stop_music()
+            # self.root.quit()
+            # init_new_game()
         else:
             self.root.destroy()
             sys.exit()
