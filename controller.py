@@ -217,7 +217,7 @@ class Controller:
             self.model.announce(f"{self.model.player.name} is attacking")
             self.model.player.attack_target(self.model.curr_pos.monster_obj)
             sleep(attack_speed_factor)
-            if self.model.curr_pos.monster_obj.hp <= 0:
+            if self.model.curr_pos.monster_obj is not None and self.model.curr_pos.monster_obj.hp <= 0:
                 self.model.player.hp = self.model.player.hp_total
 
     def thread_to_attack_player(self):
@@ -240,10 +240,7 @@ class Controller:
                 self.model.curr_pos.monster_obj.attack_target(self.model.player)
                 sleep(attack_speed_factor)
                 if self.model.player.hp <= 0:
-                    # self.view.ask_new_game()
                     break
-                # if self.model.curr_pos.monster_obj.hp <= 0 or self.model.player.hp <= 0:
-                #     break
             else:
                 break
 
