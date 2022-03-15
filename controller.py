@@ -242,8 +242,8 @@ class Controller:
                 if self.model.player.hp <= 0:
                     # self.view.ask_new_game()
                     break
-                if self.model.curr_pos.monster_obj.hp <= 0 or self.model.player.hp <= 0:
-                    break
+                # if self.model.curr_pos.monster_obj.hp <= 0 or self.model.player.hp <= 0:
+                #     break
             else:
                 break
 
