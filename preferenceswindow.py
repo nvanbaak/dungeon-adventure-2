@@ -19,15 +19,9 @@ class PreferencesWindow():
 
     def fill_preference_colors(self):
         self.board_color_1 = configurations.BOARD_COLOR_1
-        # self.highlight_color = configurations.HIGHLIGHT_COLOR
 
     def set_color_1(self):
-        # tmp = askcolor(initialcolor=self.board_color_1)[-1]
         self.board_color_1 = askcolor(initialcolor=self.board_color_1)[-1]
-
-    def set_highlight_color(self):
-        # self.highlight_color = askcolor(initialcolor=self.highlight_color)[-1]
-        pass
 
     def create_preferences_window(self):
         self.pref_window = Toplevel(self.root)
@@ -38,16 +32,10 @@ class PreferencesWindow():
     def create_preferences_list(self):
         Label(self.pref_window, text="Board Color 1").grid(
             row=1, sticky=W, padx=5, pady=5)
-        # Label(self.pref_window, text="Highlight Color").grid(
-        #     row=3, sticky=W, padx=5, pady=5)
         self.board_color_1_button = Button(
             self.pref_window, text='Select Board Color 1', command=self.set_color_1)
         self.board_color_1_button.grid(
             row=1, column=1, columnspan=2, sticky=E, padx=5, pady=5)
-        # self.highlight_color_button = Button(
-        #     self.pref_window, text='Select Highlight Color', command=self.set_highlight_color)
-        # self.highlight_color_button.grid(
-        #     row=3, column=1, columnspan=2, sticky=E, padx=5, pady=5)
         Button(self.pref_window, text="Save", command=self.on_save_button_clicked).grid(
             row=4, column=2, sticky=E, padx=5, pady=5)
         Button(self.pref_window, text="Cancel", command=self.on_cancel_button_clicked).grid(
