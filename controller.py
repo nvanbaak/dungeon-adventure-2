@@ -90,6 +90,7 @@ class Controller:
             p1.start()
             self.thread_to_attack_player() # the thread to make the monster attacking the player
             if curr_pos.monster_obj.hp <= 0:
+                p1.stop = True
                 curr_pos.monster = ""
                 self.i_fought_a_monster = True # allows the player to exit the room
 
@@ -226,6 +227,9 @@ class Controller:
         # monster has killed the player
         if self.model.player.hp <= 0:
              p2.stop = True
+             self.model.game_stats["Hit Points"] = self.model.player.hp
+             self.view.update_score_label()
+             self.play("game_over")
              self.view.ask_new_game()
 
     def attack_player(self):
@@ -236,9 +240,6 @@ class Controller:
                 self.model.curr_pos.monster_obj.attack_target(self.model.player)
                 sleep(attack_speed_factor)
                 if self.model.player.hp <= 0:
-                    self.model.game_stats["Hit Points"] = self.model.player.hp
-                    self.view.update_score_label()
-                    self.play("game_over")
                     # self.view.ask_new_game()
                     break
                 if self.model.curr_pos.monster_obj.hp <= 0 or self.model.player.hp <= 0:
