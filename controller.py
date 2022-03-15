@@ -212,11 +212,12 @@ class Controller:
 
     def attack_monster(self):
         attack_speed_factor = self.attack_speed_factor("player")
-        self.model.announce(f"{self.model.player.name} is attacking")
-        self.model.player.attack_target(self.model.curr_pos.monster_obj)
-        sleep(attack_speed_factor)
-        if self.model.curr_pos.monster_obj.hp <= 0:
-            self.model.player.hp = self.model.player.hp_total
+        if self.model.player.hp > 0:
+            self.model.announce(f"{self.model.player.name} is attacking")
+            self.model.player.attack_target(self.model.curr_pos.monster_obj)
+            sleep(attack_speed_factor)
+            if self.model.curr_pos.monster_obj.hp <= 0:
+                self.model.player.hp = self.model.player.hp_total
 
     def thread_to_attack_player(self):
         # self.attack_player()
@@ -230,16 +231,19 @@ class Controller:
     def attack_player(self):
         while True:
             attack_speed_factor = self.attack_speed_factor("monster")
-            self.model.announce(f"{self.model.curr_pos.monster} is attacking")
-            self.model.curr_pos.monster_obj.attack_target(self.model.player)
-            sleep(attack_speed_factor)
-            if self.model.player.hp <= 0:
-                self.model.game_stats["Hit Points"] = self.model.player.hp
-                self.view.update_score_label()
-                self.play("game_over")
-                # self.view.ask_new_game()
-                break
-            if self.model.curr_pos.monster_obj.hp <= 0 or self.model.player.hp <= 0:
+            if self.model.curr_pos.monster_obj.hp > 0:
+                self.model.announce(f"{self.model.curr_pos.monster} is attacking")
+                self.model.curr_pos.monster_obj.attack_target(self.model.player)
+                sleep(attack_speed_factor)
+                if self.model.player.hp <= 0:
+                    self.model.game_stats["Hit Points"] = self.model.player.hp
+                    self.view.update_score_label()
+                    self.play("game_over")
+                    # self.view.ask_new_game()
+                    break
+                if self.model.curr_pos.monster_obj.hp <= 0 or self.model.player.hp <= 0:
+                    break
+            else:
                 break
 
     def attack_speed_factor(self, who_str):
