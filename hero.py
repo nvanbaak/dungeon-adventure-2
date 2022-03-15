@@ -93,6 +93,8 @@ class Hero(DungeonCharacter, ABC):
         else:
             if self.chance_to_block < random.random():
                 self.__take_damage(dmg, source)
+            else:
+                self.model.announce(f" {self.name} has blocked the attack " )
 
     def fall_into_pit(self):
         """generates a random value range 10 to 20 and reduce it from the hero's hp"""
