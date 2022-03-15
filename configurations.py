@@ -13,13 +13,13 @@ HERO_POSITION = "D4"
 
 START_SPRITES_POSITION = {
     "D4": "pt", "F6": "pp", "B2": "ap", "F2": "ep", "B6": "ip", "C3": "o", "F3": "g", "C5": "s",
-    "D2": "hy", "D6": "hg", "F4": "v"
+    "D2": "hy", "D6": "hg", "F4": "v", "A1": "e", "A6": "ex"
 }
 
 SHORT_NAME = {'W': 'Warrior',  'P': 'Priestess',  'T': 'Thief',  'O': 'Ogre', 'G': 'Gremlin',  'S': 'Skeleton',
               'AP': 'Abstraction_pillar', 'EP': 'Encapsulation_pillar', 'IP': 'Inheritance_pillar',
               'PP': 'Polymorphism_pillar', 'PT': 'Pit', 'HY': 'Healing_potion_y', 'HG': 'Healing_potion_g',
-              'V': 'Vision_potion'}
+              'V': 'Vision_potion', 'E': 'Entrance', 'EX': 'Exit'}
 
 '''
 User Modifiable Options

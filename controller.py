@@ -1,18 +1,14 @@
 import model
 import sprite
 import pygame
-import threading
 from time import *
-import time
-import os
+import threading
+
 class Controller:
 
     def __init__(self):
         # print("C | __init__ | Controller init calls init of Model")
         self.model = model.Model()
-        self.__combat = False
-        self.p1 = None
-        self.p2 = None
         pygame.init()
 
     def accept_view_reference(self, view_ref):
@@ -67,8 +63,8 @@ class Controller:
     def gather(self, obj, pos):
         curr_pos = self.model.get_curr_pos()
         if obj.name == "healing_potion_y":
-            curr_pos.heal = None
             obj.visible = False
+            curr_pos.heal = None
             self.model.player.health_potions += 1
             self.model.game_stats["Healing Potions"] = self.model.player.health_potions
             self.view.show_health_button = True
@@ -87,21 +83,16 @@ class Controller:
             self.model.game_stats["Vision Potions"] = self.model.player.vision_potions
             self.view.vision = True
             self.view.vision_button.pack()
-        # if obj.name == "gremlin":
-        #     monster_after_combat = self.combat()
-        #     if monster_after_combat < 0:
-        #         curr_pos.monster = ""
-        #     self.i_fought_a_monster = True
-        # if obj.name == "skeleton":
-        #     monster_after_combat = self.combat()
-        #     if monster_after_combat < 0:
-        #         curr_pos.monster = ""
-        #     self.i_fought_a_monster = True
-        # if obj.name == "ogre":
-        #     monster_after_combat = self.combat()
-        #     if monster_after_combat < 0:
-        #         curr_pos.monster = ""
-        #     self.i_fought_a_monster = True
+
+        if obj.name == "gremlin" or obj.name == "skeleton" or obj.name == "ogre":
+            p1 = threading.Thread(target=self.attack_monster, args=())
+            # the player starts attacking the monster
+            p1.start()
+            self.thread_to_attack_player() # the thread to make the monster attacking the player
+            if curr_pos.monster_obj.hp <= 0:
+                curr_pos.monster = ""
+                self.i_fought_a_monster = True # allows the player to exit the room
+
         if obj.name == "abstraction_pillar":
             if self.model.pillars["A"] == "":
                 obj.visible = False
@@ -126,6 +117,7 @@ class Controller:
                 curr_pos.pillar = ""
                 self.model.pillars["I"] = True
                 self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "I "
+
         self.model.game_stats["Hit Points"] = self.model.player.hp
         self.view.update_score_label()
 
@@ -153,72 +145,26 @@ class Controller:
             self.play("game_over")
             self.view.ask_new_game()
 
-    def attack_now(self):
-        # if self.model.curr_pos.monster and self.__combat:
-        self.model.player.set_attack_now(True)
-
-    def combat_with_time(self):
-        ##
-
-        while self.model.player._is_alive and self.model.curr_pos.monster_obj._is_alive:
-            # print("i am here")
-            combat_time = max(self.model.player.attack_speed, self.model.curr_pos.monster_obj.attack_speed)
-            t_hero_now = time.time()
-            t_mons_now = time.time()
-            t_end = time.time() + (1.5 * combat_time)
-            # adding 2sec so that the character with high attach speed gets to complete all attacks for the round even with sleep
-            while time.time() < t_end:
-                monster_attack_time = combat_time / self.model.curr_pos.monster_obj.attack_speed
-                hero_attack_time = combat_time / self.model.player.attack_speed
-                if time.time() >= t_mons_now + monster_attack_time:
-                    print("monster is attacking")
-                    self.model.curr_pos.monster_obj.attack_target(self.model.player)
-                    if not self.model.player._is_alive:
-                        break
-                    print(f"hero hp:{self.model.player.hp}")
-                    sleep(1)  # to multi thread
-                    t_mons_now = time.time()
-
-                if time.time() >= t_hero_now + hero_attack_time and self.model.player.attack_now:
-                    print("hero is attacking")
-                    self.model.player.attack_target(self.model.curr_pos.monster_obj)
-                    if not self.model.curr_pos.monster_obj._is_alive:
-                        break
-                    # print(f"monster hp:{monster.hp}")
-                    self.model.player.attack_now = False
-                    t_hero_now = time.time()
-
-        if not self.model.curr_pos.monster_obj._is_alive:
-            self.model.curr_pos.monster = ""
-            self.view.draw_room()
-            self.view.draw_all_sprites()
-            self.view.on_square_clicked_manual(False)
-            self.view.update_score_label()
-            if self.view.vision == False:
-                self.view.vision_button.pack_forget()
-        if self.model.player.hp <= 0:
-            self.play("game_over")
-
-        self.view.update_score_label()
-
     def combat(self):
-        self.__combat = True
         curr_pos = self.model.get_curr_pos()
         if curr_pos.monster == "Gremlin" or curr_pos.monster == "Skeleton" or curr_pos.monster == "Ogre":
             print(f"Pre-battle hit points: Player: {self.model.player.hp} | {curr_pos.monster} | {curr_pos.monster_obj.hp}")
-            self.p2 = threading.Thread(target=self.combat_with_time, args=())
-            # self.p1.start()
-            self.p2.start()
-            self.__combat = False
+            self.model.player.combat(curr_pos.monster_obj)
             print(f"Post-battle hit points: Player: {self.model.player.hp} | {curr_pos.monster} | {curr_pos.monster_obj.hp}")
-
             if self.model.player.hp <= 0:
+                self.model.game_stats["Hit Points"] = self.model.player.hp
+                self.view.update_score_label()
                 self.play("game_over")
                 self.view.ask_new_game()
             return curr_pos.monster_obj.hp
 
     def pit_fall(self):
         self.model.player.fall_into_pit()
+        if self.model.player.hp <= 0:
+            self.model.game_stats["Hit Points"] = self.model.player.hp
+            self.view.update_score_label()
+            self.play("game_over")
+            self.view.ask_new_game()
 
     def play(self, file):
         filename = "audio/{}.wav".format(
@@ -263,3 +209,50 @@ class Controller:
 
     def set_model(self, saved_model):
         self.model = saved_model
+
+    def attack_monster(self):
+        attack_speed_factor = self.attack_speed_factor("player")
+        self.model.announce(f"{self.model.player.name} is attacking")
+        self.model.player.attack_target(self.model.curr_pos.monster_obj)
+        sleep(attack_speed_factor)
+        if self.model.curr_pos.monster_obj.hp <= 0:
+            self.model.player.hp = self.model.player.hp_total
+
+    def thread_to_attack_player(self):
+        # self.attack_player()
+        p2 = threading.Thread(target=self.attack_player, args=())
+        p2.start()
+        # monster has killed the player
+        if self.model.player.hp <= 0:
+             p2.stop = True
+             self.view.ask_new_game()
+
+    def attack_player(self):
+        while True:
+            attack_speed_factor = self.attack_speed_factor("monster")
+            self.model.announce(f"{self.model.curr_pos.monster} is attacking")
+            self.model.curr_pos.monster_obj.attack_target(self.model.player)
+            sleep(attack_speed_factor)
+            if self.model.player.hp <= 0:
+                self.model.game_stats["Hit Points"] = self.model.player.hp
+                self.view.update_score_label()
+                self.play("game_over")
+                # self.view.ask_new_game()
+                break
+            if self.model.curr_pos.monster_obj.hp <= 0 or self.model.player.hp <= 0:
+                break
+
+    def attack_speed_factor(self, who_str):
+        total_speed = self.model.player.attack_speed + self.model.curr_pos.monster_obj.attack_speed
+
+        if who_str  == "player":
+            attack_speed_factor = total_speed / self.model.player.attack_speed
+            return attack_speed_factor
+
+        if who_str == "monster":
+            attack_speed_factor = total_speed / self.model.curr_pos.monster_obj.attack_speed
+            return attack_speed_factor
+
+
+
+

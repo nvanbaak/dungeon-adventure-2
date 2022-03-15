@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from dungeonchar import DungeonCharacter
 import random
-from time import *
 
 class Hero(DungeonCharacter, ABC):
     """
@@ -9,27 +8,10 @@ class Hero(DungeonCharacter, ABC):
     """
     def __init__(self, name, model) -> None:
         super().__init__(name, model)
-        self.__attack_now = False
         self.__chance_to_block = 0.0
         self.__health_potions = 0
         self.__vision_potions = 0
         self.__vision = 3
-
-    def set_attack_now(self, t_f = False):
-            if self.hp > 0:
-                # print(f" setting hero to attack :{t_f}")
-                    # print("i am setting hero to attack")
-                self.attack_now = t_f
-
-    def __set_attack_now(self, t_f):
-        if isinstance(t_f, bool):
-            self.__attack_now = t_f
-        else:
-            raise TypeError(f"{t_f} not a boolean")
-
-    def __get_attack_now(self):
-        return self.__attack_now
-    attack_now = property(__get_attack_now, __set_attack_now)
 
     def use_health_potion(self):
         """
@@ -98,9 +80,9 @@ class Hero(DungeonCharacter, ABC):
         """ Reduces the hp by the dmg value"""
 
         self.hp -= dmg
-        self._DungeonCharacter__model.announce(f"{self.name} took {dmg} dmg from {source}!")
+        self.model.announce(f"{self.name} took {dmg} dmg from {source}!")
         if not self._is_alive:
-            self._DungeonCharacter__model.announce(f"{self.name} has died!")
+            self.model.announce(f"{self.name} has died!")
 
 
     def take_damage(self, dmg, source):
@@ -111,6 +93,8 @@ class Hero(DungeonCharacter, ABC):
         else:
             if self.chance_to_block < random.random():
                 self.__take_damage(dmg, source)
+            else:
+                self.model.announce(f" {self.name} has blocked the attack " )
 
     def fall_into_pit(self):
         """generates a random value range 10 to 20 and reduce it from the hero's hp"""

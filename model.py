@@ -8,8 +8,6 @@ from gremlin import Gremlin
 from skeleton import Skeleton
 import sprite
 from configurations import *
-from time import *
-import time
 # from game_observer import Publisher, Subscriber
 
 class Model:
@@ -29,7 +27,6 @@ class Model:
         else:
             self.player = Thief("TestThief", self)
         print(self.dungeon.dungeon.winning_path)
-        print(self.dungeon)
         # self.subscriber_m = Subscriber(self)
         self.pillars = {"A": "", "E": "", "P": "", "I": ""}
         self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
@@ -111,36 +108,3 @@ class Model:
 
     def get_hero_dict(self):
         return self.hero_dict
-
-
-    # def combat_with_time(self):
-    #     ##
-    #
-    #     while self.player._is_alive and self.curr_pos.monster_obj._is_alive:
-    #         # print("i am here")
-    #         combat_time = max(self.player.attack_speed, self.curr_pos.monster_obj.attack_speed)
-    #         t_hero_now = time.time()
-    #         t_mons_now = time.time()
-    #         t_end = time.time() + (1.5 * combat_time)
-    #         # adding 2sec so that the character with high attach speed gets to complete all attacks for the round even with sleep
-    #         while time.time() < t_end:
-    #             monster_attack_time = combat_time / self.curr_pos.monster_obj.attack_speed
-    #             hero_attack_time = combat_time / self.player.attack_speed
-    #             if time.time() >= t_mons_now + monster_attack_time:
-    #                 print("monster is attacking")
-    #                 self.curr_pos.monster_obj.attack_target(self.player)
-    #                 if not self.player._is_alive:
-    #                     break
-    #                 print(f"hero hp:{self.player.hp}")
-    #                 sleep(1)  # to multi thread
-    #                 t_mons_now = time.time()
-    #
-    #             if time.time() >= t_hero_now + hero_attack_time and self.player.attack_now:
-    #                 print("hero is attacking")
-    #                 self.player.attack_target(self.curr_pos.monster_obj)
-    #                 if not self.curr_pos.monster_obj._is_alive:
-    #                     self.curr_pos.monster = ""
-    #                     break
-    #                 # print(f"monster hp:{monster.hp}")
-    #                 self.player.attack_now = False
-    #                 t_hero_now = time.time()

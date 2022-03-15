@@ -1,8 +1,6 @@
 # nvb / 7 Feb 2022
 from abc import ABC, abstractmethod
 import random
-from time import *
-import time
 
 
 class DungeonCharacter(ABC):
@@ -19,23 +17,14 @@ class DungeonCharacter(ABC):
         self.__damage_min = 20
         self.__damage_max = 30
         self.__model = model
-        self.__healable = False
-
-
-    def __set_healable(self, t_f):
-
-        if isinstance(t_f, bool):
-            self.__healable = t_f
-
-    def __get_healable(self):
-        
-        return self.__healable
-
-    healable = property(__get_healable, __set_healable)
 
     @property
     def name(self):
         return self.__name
+
+    @property
+    def model(self):
+        return self.__model
 
     @property
     def hp(self):
@@ -133,37 +122,6 @@ class DungeonCharacter(ABC):
             damage = random.randint(self.damage_min, self.damage_max)
             target.take_damage(damage, self.name)
 
-    # @staticmethod
-    # def combat_with_time(hero, monster):
-    #     ##
-    #     if issubclass(type(hero), DungeonCharacter) and issubclass(type(monster), DungeonCharacter):
-    #         while hero._is_alive and monster._is_alive:
-    #             # print("i am here")
-    #             combat_time = max(hero.attack_speed, monster.attack_speed)
-    #             t_hero_now = time.time()
-    #             t_mons_now = time.time()
-    #             t_end = time.time() + (1.5 * combat_time)
-    #             # adding 2sec so that the character with high attach speed gets to complete all attacks for the round even with sleep
-    #             while time.time() < t_end:
-    #                 monster_attack_time = combat_time / monster.attack_speed
-    #                 hero_attack_time = combat_time / hero.attack_speed
-    #                 if time.time() >= t_mons_now + monster_attack_time:
-    #                     print("monster is attacking")
-    #                     monster.attack_target(hero)
-    #                     if not hero._is_alive:
-    #                         break
-    #                     print(f"hero hp:{hero.hp}")
-    #                     sleep(1)  # to multi thread
-    #                     t_mons_now = time.time()
-    #
-    #                 if time.time() >= t_hero_now + hero_attack_time and hero.attack_now:
-    #                     print("hero is attacking")
-    #                     hero.attack_target(monster)
-    #                     if not monster._is_alive:
-    #                         break
-    #                     # print(f"monster hp:{monster.hp}")
-    #                     hero.attack_now = False
-    #                     t_hero_now = time.time()
 
     def combat(self, target):
         """
@@ -178,17 +136,17 @@ class DungeonCharacter(ABC):
             if my_turn:
                 if my_attacks < self.attack_speed:
                     self.attack_target(target)
+                    my_turn = False
                     my_attacks += 1
                     if not target._is_alive:
                         break
-                my_turn = False
             else:
                 if target_attacks < target.attack_speed:
                     target.attack_target(self)
+                    my_turn = True
                     target_attacks += 1
                     if not self._is_alive:
                         break
-                my_turn = True
 
     def take_damage(self, dmg, source):
         self.hp -= dmg
