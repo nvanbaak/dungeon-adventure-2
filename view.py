@@ -35,12 +35,8 @@ class View():
         self.root = root
         self.canvas_width = 0
         self.canvas_height = 0
-        self.create_board_base()
-        self.canvas.bind("<Button-1>", self.on_square_clicked)
         self.vision_window = ""
         self.start_new_game()
-
-        self.start_menu()
 
     def start_menu(self):
         """
@@ -60,7 +56,6 @@ class View():
 
         title_text = self.canvas.create_image(title_x, title_y, image=title, anchor=CENTER)
 
-        # self.start_new_game()
 
     def create_HUD(self):
         self.create_canvas()
@@ -69,6 +64,7 @@ class View():
         self.create_vision_button()
         self.create_health_button()
 
+        # self.start_new_game()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
 
     def create_top_menu(self):
@@ -171,7 +167,6 @@ class View():
 
     def create_vision_window(self):
         self.vision_window = tk.Tk()
-        # self.vision_window.overrideredirect(True)
         self.vision_canvas_width = 900
         self.vision_canvas_height = 900
         self.vision_canvas = Canvas(
@@ -292,7 +287,6 @@ class View():
                 self.canvas.itemconfig(ci, state="hidden")
             else:
                 self.canvas.itemconfig(ci, state="normal")
-            # print(f"ADD OTHER HERO TYPES")
             if sprite.name == "warrior":
                 self.sprite_position = position
                 self.sprite_xy = (x0, y0)
@@ -303,7 +297,6 @@ class View():
             int(DIMENSION_OF_EACH_SQUARE / 2)
         y0 = ((6 - row) * DIMENSION_OF_EACH_SQUARE) + \
             int(DIMENSION_OF_EACH_SQUARE / 2)
-        # print(f"V | calculate_sprite_coordinates | return {x0}, {y0}")
         return (x0, y0)
 
     def on_square_clicked_manual(self, clicked):
@@ -343,7 +336,6 @@ class View():
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("G", "A")
                     hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
                     self.sound_effect_play_count = 0
                     self.controller.i_fought_a_monster = False
                     self.pit_falls = 0
@@ -353,7 +345,6 @@ class View():
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("1", "7")
                     hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
                     self.sound_effect_play_count = 0
                     self.controller.i_fought_a_monster = False
                     self.pit_falls = 0
@@ -363,7 +354,6 @@ class View():
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("A", "G")
                     hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
                     self.sound_effect_play_count = 0
                     self.controller.i_fought_a_monster = False
                     self.pit_falls = 0
@@ -373,7 +363,6 @@ class View():
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("7", "1")
                     hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
                     self.sound_effect_play_count = 0
                     self.controller.i_fought_a_monster = False
                     self.pit_falls = 0
@@ -470,12 +459,6 @@ class View():
         self.info_label["text"] = lbl_txt
 
     def use_vision(self):
-        # if self.vision_window != "":
-        #     try:
-        #         self.vision_window.destroy()
-        #     except:
-        #         self.vision_window = ""
-        # else:
         self.create_vision_window()
         vision_grid = self.controller.use_vision_potion(self.controller.get_room_data())
         row_min = 100
@@ -502,10 +485,6 @@ class View():
         door_dict = rm.door_value
         vision_square_width = self.vision_canvas_width / 3
         vision_square_height = self.vision_canvas_height / 3
-        if type == "map":
-            pass
-            # vision_square_width = self.vision_canvas_width / 3
-            # vision_square_height = self.vision_canvas_height / 3
         vi = i * vision_square_width
         vj = j * vision_square_height
 
