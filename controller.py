@@ -1,8 +1,6 @@
 import model
 import sprite
 import pygame
-from time import *
-import threading
 
 class Controller:
 
@@ -83,16 +81,21 @@ class Controller:
             self.model.game_stats["Vision Potions"] = self.model.player.vision_potions
             self.view.vision = True
             self.view.vision_button.pack()
-        if obj.name == "gremlin" or obj.name == "skeleton" or obj.name == "ogre":
-            p1 = threading.Thread(target=self.attack_monster, args=())
-            # the player starts attacking the monster
-            p1.start()
-            self.thread_to_attack_player() # the thread to make the monster attacking the player
-            if curr_pos.monster_obj.hp <= 0:
-                p1.stop = True
+        if obj.name == "gremlin":
+            monster_after_combat = self.combat()
+            if monster_after_combat < 0:
                 curr_pos.monster = ""
-                self.i_fought_a_monster = True # allows the player to exit the room
-
+            self.i_fought_a_monster = True
+        if obj.name == "skeleton":
+            monster_after_combat = self.combat()
+            if monster_after_combat < 0:
+                curr_pos.monster = ""
+            self.i_fought_a_monster = True
+        if obj.name == "ogre":
+            monster_after_combat = self.combat()
+            if monster_after_combat < 0:
+                curr_pos.monster = ""
+            self.i_fought_a_monster = True
         if obj.name == "abstraction_pillar":
             if self.model.pillars["A"] == "":
                 obj.visible = False
@@ -207,48 +210,3 @@ class Controller:
 
     def set_model(self, saved_model):
         self.model = saved_model
-
-    def attack_monster(self):
-        attack_speed_factor = self.attack_speed_factor("player")
-        if self.model.player.hp > 0:
-            self.model.announce(f"{self.model.player.name} is attacking")
-            self.model.player.attack_target(self.model.curr_pos.monster_obj)
-            sleep(attack_speed_factor)
-            if self.model.curr_pos.monster_obj is not None and self.model.curr_pos.monster_obj.hp <= 0:
-                self.model.player.hp = self.model.player.hp_total
-
-    def thread_to_attack_player(self):
-        # self.attack_player()
-        p2 = threading.Thread(target=self.attack_player, args=())
-        p2.start()
-        # monster has killed the player
-        if self.model.player.hp <= 0:
-             p2.stop = True
-             self.model.game_stats["Hit Points"] = self.model.player.hp
-             self.view.update_score_label()
-             self.play("game_over")
-             self.view.ask_new_game()
-
-    def attack_player(self):
-        while True:
-            attack_speed_factor = self.attack_speed_factor("monster")
-            if self.model.curr_pos.monster_obj.hp > 0:
-                self.model.announce(f"{self.model.curr_pos.monster} is attacking")
-                self.model.curr_pos.monster_obj.attack_target(self.model.player)
-                sleep(attack_speed_factor)
-                if self.model.player.hp <= 0:
-                    break
-            else:
-                break
-
-    def attack_speed_factor(self, who_str):
-        total_speed = self.model.player.attack_speed + self.model.curr_pos.monster_obj.attack_speed
-
-        if who_str  == "player":
-            attack_speed_factor = total_speed / self.model.player.attack_speed
-            return attack_speed_factor
-
-        if who_str == "monster":
-            attack_speed_factor = total_speed / self.model.curr_pos.monster_obj.attack_speed
-            return attack_speed_factor
-
