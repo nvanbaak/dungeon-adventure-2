@@ -15,7 +15,9 @@ from musicplayer import MusicPlayer
 
 
 class View:
-    def __init__(self, root, controller):
+    def __init__(self, parent, root, controller):
+        self.parent = parent
+        
         self.sprite_position = None
         self.images = {}
         self.board_color_1 = BOARD_COLOR_1
@@ -621,11 +623,7 @@ class View:
                     pass
 
 
-def init_new_game():
-    root = tk.Tk()
-    root.title("Dungeon Adventure II: Dungeon Harder")
-    View(root, Controller())
-    root.mainloop()
+
 
 # def main(ctl):
 #     # print("V | main(ctl) | passed Controller object")
