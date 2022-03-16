@@ -4,9 +4,9 @@ import pygame
 
 class Controller:
 
-    def __init__(self):
+    def __init__(self, hero="warrior"):
         # print("C | __init__ | Controller init calls init of Model")
-        self.model = model.Model()
+        self.model = model.Model(hero)
         pygame.init()
 
     def accept_view_reference(self, view_ref):
