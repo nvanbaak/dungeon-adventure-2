@@ -14,7 +14,7 @@ from sprite import Sprite
 from musicplayer import MusicPlayer
 
 
-class View():
+class View:
     def __init__(self, root, controller):
         self.sprite_position = None
         self.images = {}
@@ -311,6 +311,8 @@ class View():
             if self.controller.i_fought_a_monster:
                 self.ok_to_leave = True
             else:
+                self.controller.model.announce(
+                    "You cannot leave until you kill the monster.Click on the monster to start battle")
                 self.ok_to_leave = False
         else:
             self.ok_to_leave = True
@@ -375,7 +377,7 @@ class View():
             self.doorway_refresh(hero_dict, clicked)
         m = self.controller.get_model()
         if rm.is_exit == True and m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and m.pillars["I"] == True:
-            print("Player has won the game!")
+            self.controller.model.announce(f"{self.controller.model.player} has won the game!")
             self.controller.play("you_win")
             self.ask_new_game()
 
@@ -445,12 +447,18 @@ class View():
             self.info_label["text"] = error.__class__.__name__
 
     def update_score_label(self):
+        rm = self.controller.get_room_data()
+        m = self.controller.get_model()
         stat_dict = self.controller.get_game_stats()
+
         lbl_txt = ""
         for key, value in stat_dict.items():
             lbl_txt = lbl_txt + str(key) + ": " + str(value) + " | "
         if self.controller.model.player.hp <= 0:
             lbl_txt = "Y O U  D I E D !!!!!"
+        if rm.is_exit == True and m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and \
+                m.pillars["I"] == True:
+            lbl_txt = "Y O U  W I N !!!!!"
         self.info_label["text"] = lbl_txt
 
     def use_vision(self):
@@ -584,10 +592,12 @@ class View():
             self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
             self.update_score_label()
             self.root.destroy()
-            time.sleep(3)
+            time.sleep(1)
             self.music_player.stop_music()
             self.root.quit()
             init_new_game()
+            sys.exit()
+
         else:
             self.root.destroy()
             sys.exit()
