@@ -14,7 +14,7 @@ from sprite import Sprite
 from musicplayer import MusicPlayer
 from tkinter import TclError
 
-class View:
+class View():
     def __init__(self, root, controller):
         self.sprite_position = None
         self.images = {}
@@ -599,28 +599,12 @@ class View:
             m.pillars = {"A": "", "E": "", "P": "", "I": ""}
             self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
             self.update_score_label()
-<<<<<<< HEAD
             self.on_new_game_menu_clicked()
             # self.root.destroy()
             # time.sleep(3)
             # self.music_player.stop_music()
             # self.root.quit()
             # init_new_game()
-||||||| 93e3bb5
-            self.root.destroy()
-            time.sleep(3)
-            self.music_player.stop_music()
-            self.root.quit()
-            init_new_game()
-=======
-            self.root.destroy()
-            time.sleep(1)
-            self.music_player.stop_music()
-            self.root.quit()
-            init_new_game()
-            sys.exit()
-
->>>>>>> 092f4843de668531be6e85df53e4b480ac46cf6a
         else:
             self.root.destroy()
             sys.exit()
