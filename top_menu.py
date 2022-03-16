@@ -4,8 +4,6 @@ import save_load_game
 from configurations import BOARD_COLOR
 from preferenceswindow import PreferencesWindow
 
-
-
 class TopMenu:
     """
     class that handles the top menu functionality for the GUI

@@ -41,8 +41,8 @@ class View:
 
         self.top_menu = TopMenu(self, self.root)
 
-        # self.start_menu()
-        self.start_new_game(False)
+        self.start_menu()
+        # self.start_new_game(False)
 
     def set_new_controller(self):
         """

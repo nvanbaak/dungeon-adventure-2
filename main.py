@@ -1,4 +1,3 @@
-import imp
 import tkinter as tk
 from view import View
 
