@@ -29,3 +29,10 @@ class MusicPlayer:
         resumes background music playback
         """
         self.background_music = self.bg_track.play()
+
+    def restart(self):
+        """
+        stops playback and then starts again
+        """
+        self.stop_music()
+        self.start_music()

@@ -18,7 +18,7 @@ class PreferencesWindow():
         self.create_preferences_window()
 
     def fill_preference_colors(self):
-        self.board_color_1 = configurations.BOARD_COLOR_1
+        self.board_color_1 = configurations.BOARD_COLOR
 
     def set_color_1(self):
         self.board_color_1 = askcolor(initialcolor=self.board_color_1)[-1]

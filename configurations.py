@@ -26,4 +26,4 @@ User Modifiable Options
 '''
 config = ConfigParser()
 config.read('options.ini')
-BOARD_COLOR_1 = config.get('colors', 'board_color_1', fallback="#e6a803")
+BOARD_COLOR = config.get('colors', 'board_color', fallback="#e6a803")

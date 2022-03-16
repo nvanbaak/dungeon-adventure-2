@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import CENTER, Menu, Button, Label, Frame, Canvas, messagebox, TOP
+from tkinter import CENTER, Button, Label, Frame, Canvas, Toplevel, messagebox, TOP
 from PIL import Image, ImageTk, ImageOps
 from math import floor
 from configurations import *
@@ -7,19 +7,18 @@ import exceptions
 from tkinter import messagebox
 import sys
 import time
-import preferenceswindow
-import save_load_game
 import sprite
 from controller import Controller
 from musicplayer import MusicPlayer
 from sprite import Sprite
+from top_menu import TopMenu
 
 
 class View:
-    def __init__(self, root, controller):
+    def __init__(self, root):
         self.sprite_position = None
         self.images = {}
-        self.board_color_1 = BOARD_COLOR_1
+        self.board_color = BOARD_COLOR
         self.sprite_xy = (0, 0)
         self.sprite_mirror = False
 
@@ -30,32 +29,39 @@ class View:
         self.show_health_button = False
 
         self.play_obj = ""
-        self.controller : Controller = controller 
+        self.controller = None
+        self.set_new_controller()
 
         self.root = root
-        self.canvas_width = 0
-        self.canvas_height = 0
+        self.canvas = None
+        self.title_image = None
+        self.canvas_width = 800
+        self.canvas_height = 600
         self.vision_window = ""
-        self.start_new_game()
 
-    def start_menu(self):
+        self.top_menu = TopMenu(self, self.root)
+
+        # self.start_menu()
+        self.start_new_game(False)
+
+    def set_new_controller(self):
         """
-        creates and diplays the start menu
+        Creates a new controller object and passes it a reference to this object
         """
-        self.create_top_menu()
+        self.controller = Controller()
+        self.controller.set_view(self)
 
-        self.canvas = Canvas(self.root, width=self.canvas_width, height=self.canvas_height, bg="#476E22")
-
-        self.canvas.pack(expand=True)
-
-        title_image = Image.open("title_text.png")
-
-        title = ImageTk.PhotoImage(title_image)
-        title_x = self.canvas_width // 2
-        title_y = self.canvas_height // 0.25
-
-        title_text = self.canvas.create_image(title_x, title_y, image=title, anchor=CENTER)
-
+    def start_new_game(self, reset_controller=True):
+        """
+        Starts a new game by refreshing the canvas and resetting the Controller class (if it's not the first call)
+        """
+        if self.canvas:
+            self.canvas.destroy()
+        if reset_controller:
+            self.set_new_controller()
+        self.create_HUD()
+        self.draw_all_sprites()
+        self.update_score_label()
 
     def create_HUD(self):
         self.create_canvas()
@@ -64,92 +70,20 @@ class View:
         self.create_vision_button()
         self.create_health_button()
 
-        # self.start_new_game()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
 
-    def create_top_menu(self):
-        self.menu_bar = Menu(self.root)
-        self.create_file_menu()
-        self.create_edit_menu()
-
-    def create_file_menu(self):
-        self.file_menu = Menu(self.menu_bar, tearoff=0)
-        self.file_menu.add_command(
-            label="New Game", command=self.on_new_game_menu_clicked)
-        self.file_menu.add_command(
-            label="Save Game", command=self.on_save_game_menu_clicked)
-        self.file_menu.add_command(
-            label="Load Game", command=self.on_load_game_menu_clicked)
-        self.file_menu.add_command(
-            label="Delete All Saved Games", command=self.on_delete_games_menu_clicked)
-        self.menu_bar.add_cascade(label="File", menu=self.file_menu)
-        self.root.config(menu=self.menu_bar)
-
-    def create_edit_menu(self):
-        self.edit_menu = Menu(self.menu_bar, tearoff=0)
-        self.edit_menu.add_command(
-            label="Preferences", command=self.on_preference_menu_clicked)
-        self.edit_menu.add_command(
-            label="Sound", command=self.music_player.toggle_music)
-        self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
-        self.root.config(menu=self.menu_bar)
-
-    def on_preference_menu_clicked(self):
-        preferenceswindow.PreferencesWindow(self)
-
-    def on_new_game_menu_clicked(self):
-        self.root.destroy()
-        self.music_player.stop_music()
-        self.root.quit()
-        init_new_game()
-
-    def on_save_game_menu_clicked(self):
-        saveload_window = tk.Tk()
-        saveload_canvas_width = 100
-        saveload_canvas_height = 40
-        saveload_canvas = Canvas(
-            saveload_window, width=saveload_canvas_width, height=saveload_canvas_height, bg=self.board_color_1)
-        saveload_label = Label(saveload_canvas)
-        sg = save_load_game.SaveGame()
-        game_name = sg.game_name_generator()
-        sg.save_game(game_name, self.controller.get_model())
-        lbltxt = f"{game_name} successfully saved!"
-        saveload_label.config(text = lbltxt)
-        saveload_label.pack()
-        saveload_canvas.pack(padx=8, pady=8)
-
-    def on_delete_games_menu_clicked(self):
-        sg = save_load_game.SaveGame()
-        sg.delete_all_saved_games()
-
-    def open_saved(self, selected_game):
-        sg = save_load_game.SaveGame
-        if self.clicked != "Select":
-            m = sg.load_game(sg, selected_game)
-            self.controller.set_model(m)
-            self.draw_room()
-            self.controller.reset_default_characters()
-            self.draw_all_sprites()
-            self.on_square_clicked_manual(True)
-            self.update_score_label()
-            if self.vision == False:
-                self.vision_button.pack_forget()
-
-    def on_load_game_menu_clicked(self):
-        saveload_window = tk.Tk()
-        saveload_canvas_width = 50
-        saveload_canvas_height = 50
-        saveload_canvas = Canvas(
-            saveload_window, width=saveload_canvas_width, height=saveload_canvas_height, bg=self.board_color_1)
-        saveload_label = Label(saveload_canvas, text = "Select saved game")
-        saveload_label.pack()
-        saveload_canvas.pack(padx=8, pady=8)
-        sg = save_load_game.SaveGame
-        saved_list = sg.saved_games_list()
-        self.clicked = tk.StringVar()
-        self.clicked.set("Select")
-        drop = tk.OptionMenu(saveload_canvas, self.clicked, *saved_list, command=self.open_saved)
-        drop.pack()
+    def load_from_saved_game(self, game_data):
+        """
+        Variant game start using data from a save
+        """
+        self.controller.set_model(game_data)
+        self.draw_room()
+        self.controller.reset_default_characters()
+        self.draw_all_sprites()
+        self.on_square_clicked_manual(True)
+        self.update_score_label()
+        if self.vision == False:
+            self.vision_button.pack_forget()
 
     def reload_colors(self, color_1):
         self.board_color_1 = color_1
@@ -162,7 +96,7 @@ class View:
         self.canvas_width = NUMBER_OF_COLUMNS * DIMENSION_OF_EACH_SQUARE
         self.canvas_height = NUMBER_OF_ROWS * DIMENSION_OF_EACH_SQUARE
         self.canvas = Canvas(
-            self.root, width=self.canvas_width, height=self.canvas_height, bg=self.board_color_1)
+            self.root, width=self.canvas_width, height=self.canvas_height, bg=BOARD_COLOR)
         self.canvas.pack(padx=8, pady=8)
 
     def create_vision_window(self):
@@ -235,16 +169,6 @@ class View:
                 pass
             self.canvas.pack()
         self.controller.load_hit_points()
-
-    def start_new_game(self):
-        self.create_HUD()
-        self.controller.reset_default_characters()
-        self.send_view_reference_to_controller()
-        self.draw_all_sprites()
-        self.update_score_label()
-
-    def send_view_reference_to_controller(self):
-        self.controller.accept_view_reference(self)
 
     def doorway_refresh(self, hero_dict, clicked):
         sprite = hero_dict[self.sprite_position]
@@ -383,7 +307,7 @@ class View:
         m = self.controller.get_model()
         if rm.is_exit == True and m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and m.pillars["I"] == True:
             self.controller.model.announce(f"{self.controller.model.player} has won the game!")
-            self.controller.play("you_win")
+            self.controller.play("yay")
             self.ask_new_game()
 
     def check_sq_for_gatherable_objects(self, position_of_click):
@@ -615,9 +539,16 @@ class View:
                 else:
                     pass
 
+    def start_menu(self):
+        """
+        creates and diplays the start menu
+        """
+        self.canvas = tk.Canvas(self.root, width=self.canvas_width, height=self.canvas_height, bg="#476E22")
+        self.canvas.pack(expand=True)
 
-def init_new_game():
-    root = tk.Tk()
-    root.title("Dungeon Adventure II: Dungeon Harder")
-    View(root, Controller())
-    root.mainloop()
+        self.title_image = tk.PhotoImage(file="title_text.png")
+
+        title_x = self.canvas_width // 2
+        title_y = self.canvas_height // 0.25
+
+        title_text = self.canvas.create_image(title_x, title_y, anchor=CENTER, image=self.title_image)

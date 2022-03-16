@@ -1,3 +1,8 @@
-import view
+import imp
+import tkinter as tk
+from view import View
 
-view.init_new_game()
+root = tk.Tk()
+root.title("Dungeon Adventure II: Dungeon Harder")
+View(root)
+root.mainloop()

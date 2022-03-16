@@ -11,9 +11,8 @@ class Controller:
         self.model = model.Model()
         pygame.init()
 
-    def accept_view_reference(self, view_ref):
+    def set_view(self, view_ref):
         self.view = view_ref
-        print(" ")
 
     def get_room_data(self):
         return self.model.get_curr_pos()
@@ -34,7 +33,6 @@ class Controller:
         return self.model.refresh_room()
 
     def reset_default_characters(self):
-        # print("C | calls model.reset_default_characters() via Controller")
         self.model.reset_default_characters()
 
     def get_all_peices_on_board(self):
