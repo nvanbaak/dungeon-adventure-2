@@ -1,4 +1,3 @@
-import imp
 import tkinter as tk
 from view import View
 from controller import Controller
@@ -27,8 +26,8 @@ class MainMenu:
         """
         self.root = tk.Tk()
         self.root.title("Dungeon Adventure II: Dungeon Harder")
-        self.start_menu()
         self.root.mainloop()
+        self.start_menu()
 
     def start_menu(self):
         """
@@ -37,7 +36,7 @@ class MainMenu:
         self.canvas = tk.Canvas(self.root, width=self.canvas_width, height=self.canvas_height, bg="#476E22")
         self.canvas.pack(expand=True)
 
-        self.title_image = tk.PhotoImage(file="./sprites_images/title_text.png")
+        self.title_image = tk.PhotoImage(file="title_text.png")
 
         title_x = self.canvas_width // 2
         title_y = self.canvas_height // 4
