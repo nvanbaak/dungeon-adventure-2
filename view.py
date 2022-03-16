@@ -315,6 +315,8 @@ class View():
             if self.controller.i_fought_a_monster:
                 self.ok_to_leave = True
             else:
+                self.controller.model.announce(
+                    "You cannot leave until you kill the monster.Click on the monster to start battle")
                 self.ok_to_leave = False
         else:
             self.ok_to_leave = True
@@ -379,7 +381,7 @@ class View():
             self.doorway_refresh(hero_dict, clicked)
         m = self.controller.get_model()
         if rm.is_exit == True and m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and m.pillars["I"] == True:
-            print("Player has won the game!")
+            self.controller.model.announce(f"{self.controller.model.player} has won the game!")
             self.controller.play("you_win")
             self.ask_new_game()
 
@@ -453,12 +455,18 @@ class View():
             self.info_label["text"] = error.__class__.__name__
 
     def update_score_label(self):
+        rm = self.controller.get_room_data()
+        m = self.controller.get_model()
         stat_dict = self.controller.get_game_stats()
+
         lbl_txt = ""
         for key, value in stat_dict.items():
             lbl_txt = lbl_txt + str(key) + ": " + str(value) + " | "
         if self.controller.model.player.hp <= 0:
             lbl_txt = "Y O U  D I E D !!!!!"
+        if rm.is_exit == True and m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and \
+                m.pillars["I"] == True:
+            lbl_txt = "Y O U  W I N !!!!!"
         self.info_label["text"] = lbl_txt
 
     def use_vision(self):
@@ -601,24 +609,24 @@ class View():
             self.root.destroy()
             sys.exit()
 
-    def show_entire_map(self):
-        self.create_map_window()
-        entire_grid = self.controller.model.dungeon.dungeon.maze
-        row_min = 100
-        row_max = 0
-        col_min = 100
-        col_max = 0
-        for r in range(0, len(entire_grid[0])):
-            for c in range(0, len(entire_grid[1])):
-                if entire_grid[r][c]:
-                    row_min = min(row_min, entire_grid[r][c].location[0])
-                    row_max = max(row_max, entire_grid[r][c].location[0])
-                    col_min = min(col_min, entire_grid[r][c].location[1])
-                    col_max = max(col_max, entire_grid[r][c].location[1])
-                    self.draw_vision_room(entire_grid[r][c], c, r, "map")
-                else:
-                    pass
-
+    # def show_entire_map(self):
+        # self.create_map_window()
+        # entire_grid = self.controller.model.dungeon.dungeon.maze
+        # row_min = 100
+        # row_max = 0
+        # col_min = 100
+        # col_max = 0
+        # for r in range(0, len(entire_grid[0])):
+        #     for c in range(0, len(entire_grid[1])):
+        #         if entire_grid[r][c]:
+        #             row_min = min(row_min, entire_grid[r][c].location[0])
+        #             row_max = max(row_max, entire_grid[r][c].location[0])
+        #             col_min = min(col_min, entire_grid[r][c].location[1])
+        #             col_max = max(col_max, entire_grid[r][c].location[1])
+        #             self.draw_vision_room(entire_grid[r][c], c, r, "map")
+        #         else:
+        #             pass
+        # pass
 
 def init_new_game():
     root = tk.Tk()
