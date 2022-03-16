@@ -10,7 +10,7 @@ import sprite
 from configurations import *
 # from game_observer import Publisher, Subscriber
 
-class Model():
+class Model:
 
     # print("M | class variables initialized before __init__")
     dict = {}
