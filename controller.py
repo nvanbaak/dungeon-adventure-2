@@ -4,8 +4,17 @@ import pygame
 
 class Controller:
 
+    """
+    Controller class allows the View class to access the underlying game structure within Model such that it knows what
+    to display.
+    """
+
     def __init__(self):
-        # print("C | __init__ | Controller init calls init of Model")
+        """
+        Controller's __init__() instantiates a Model that can then be accessed by View. Also initializes a pygame object
+        that will be used to play the game's soundtrack.
+        """
+
         self.model = model.Model()
         pygame.init()
 

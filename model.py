@@ -12,11 +12,22 @@ from configurations import *
 
 class Model:
 
-    # print("M | class variables initialized before __init__")
-    dict = {}
-    hero_dict = {}
+    """
+    Model class instantiates a Dungeon object, which holds most of the game's underlying logic. It contains game
+    navigation methods that Controller can access and pass along the results to View for display.
+    """
 
     def __init__(self, hero = "warrior"):
+        """
+        Model's __init__() instantiates a Dungeon via DungeonBuilder.
+        Dungeon size and difficulty level can also be specified here via DungeonBuilder.
+        The dungeon's first room is entered and the location is saved such that it can be displayed.
+        The hero type is specified as a parameter, which is to be chosen by the user.
+        Two dictionaries to document the grid location of the hero and sprites respectively are also instantiated.
+        Finally, Monster objects are created and placed in the rooms where they were identified at dungeon creation.
+
+        :param hero:
+        """
         self.game = DungeonBuilder.build_single_dungeon()
         self.dungeon = self.game[0]
         self.curr_pos = self.dungeon.enter_dungeon()
@@ -27,7 +38,8 @@ class Model:
         else:
             self.player = Thief("TestThief", self)
         print(self.dungeon.dungeon.winning_path)
-        # self.subscriber_m = Subscriber(self)
+        self.dict = {}
+        self.hero_dict = {}
         self.pillars = {"A": "", "E": "", "P": "", "I": ""}
         self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
         self.dungeon.update_monsters_to_room(self)
@@ -51,14 +63,24 @@ class Model:
         self.curr_pos = self.curr_pos.down_room
 
     def reset_default_characters(self):
+        """
+        Clears dictionaries storing alphanumeric position of hero sprites and other game sprites.
+        Instantiates sprite objects of the type and location specified in configurations.py.
+        Refreshes room by checking underlying data and setting relevant sprite objects to "visible".
+        """
+
+        # clear dictionaries storing alphanumeric (center = D4) position of hero sprite and other game sprites
         self.dict.clear()
         self.hero_dict.clear()
+        # for each sprite at alphanumeric home position specified in configurations.py, instantiate a Sprite object
+        #   of the specified subtype and store it in the dictionary, then pass a Model reference to that Sprite object
         for position, value in START_SPRITES_POSITION.items():
             self.dict[position] = sprite.create_sprite(value)
             self.dict[position].keep_reference(self)
+        # creates hero Sprite and stores it in a separate dictionary (so that the player can click on the same
+        #  alphanumeric space on the board grid without displacing a sprite that is already there)
         self.hero_dict[HERO_POSITION] = sprite.create_sprite(HERO_SPRITE)
-        # print(f"M | {self.dict}")
-        # print(f"M | {self.hero_dict}")
+        # check underlying model to verify that all sprites are visible that are supposed to be visible
         self.refresh_room()
 
     def refresh_room(self):
