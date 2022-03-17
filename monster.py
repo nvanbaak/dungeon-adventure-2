@@ -8,15 +8,17 @@ import random
 
 class Monster(DungeonCharacter, Healable, ABC):
     """
-    Abstract base class used for all monster. They attach the hero and heal itself after every time taking damage
+    Abstract base class used for all monster. They attack the hero and heal itself based on chance to heal after taking damage
     """
 
-    def __init__(self, name = "name", model = None):
-        super().__init__(name = name, model = model)
-        super(DungeonCharacter, self).__init__()
+    def __init__(self, name, model, **kwargs):
+        super().__init__(name = name, model = model, **kwargs)
+        super(DungeonCharacter, self).__init__(**kwargs)
 
     def take_damage(self, dmg, source):
-        """ after taking damage, if the monster is not dead, it tries to heal itself"""
+        """ after taking damage, if the monster is not dead, it tries to heal itself
+        :param dmg int
+        :param source dungeon char"""
         hp_before_attack = self.hp
         super().take_damage(dmg, source)
         if self._is_alive and hp_before_attack > self.hp:
