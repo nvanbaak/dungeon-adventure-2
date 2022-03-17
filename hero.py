@@ -6,9 +6,10 @@ class Hero(DungeonCharacter, ABC):
     """
     A class representing a character controlled by the player
     """
-    def __init__(self, name, model) -> None:
-        super().__init__(name, model)
-        self.__chance_to_block = 0.0
+    def __init__(self, name, model, **kwargs) -> None:
+        super().__init__(name, model, **kwargs)
+        for k, v in kwargs.items():
+            setattr(self, k, v)
         self.__health_potions = 0
         self.__vision_potions = 0
         self.__vision = 3
