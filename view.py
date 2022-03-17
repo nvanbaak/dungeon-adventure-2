@@ -554,11 +554,8 @@ class View:
         return (x, y)
 
     def shift(self, start_pos, end_pos):
-        try:
-            self.controller.pre_move_validation(start_pos, end_pos)
-        except exceptions.NameError as error:
-            self.info_label["text"] = error.__class__.__name__
-
+        self.controller.pre_move_validation(start_pos, end_pos)
+ 
     def update_score_label(self):
 
         self.controller.load_hit_points()
