@@ -44,14 +44,12 @@ class Sprite():
         row, col = position
 
         # convert from 1-indexed to 0-indexed
-        col = int(col) - 1
+        col = 7 - int(col)
         col = col * SQUARE_SIZE
         col += SQUARE_SIZE//2
 
         # cheap hack to convert A-G to 0-6
         row = X_AXIS_LABELS.index(row)
-        # then invert to line up with tkinter coordinates
-        row = 6 - row
         row = row * SQUARE_SIZE
         row += SQUARE_SIZE//2
 
@@ -67,7 +65,7 @@ class Sprite():
         new_x, new_y = self.parse_position_code(alphanum)
 
         # check if we need to flip the sprite
-        self.__mirror = self.__x_pos < new_x
+        self.__mirror = self.__x_pos > new_x
 
         # set new position and draw
         self.__x_pos = new_x
@@ -83,13 +81,15 @@ class Sprite():
         # create and process image object
         image_file = Image.open(f"sprites_image/{self.name}.png")
 
+        if self.__mirror:
+            image_file = image_file.transpose(Image.FLIP_LEFT_RIGHT)
+
         dimensions = (64, 64) if self.name != "pit" else (256, 256)
         image_obj = ImageOps.contain(image_file, dimensions)
 
         self.image = ImageTk.PhotoImage(image=image_obj)
 
-        if self.__mirror:
-            self.image = self.image.transpose(Image.FLIP_LEFT_RIGHT)
+
 
         # draw sprite
         self.image_id = self.canvas.create_image(self.__x_pos, self.__y_pos, image=self.image, anchor=tk.CENTER, tags=f"sprites")

@@ -46,6 +46,12 @@ class Controller:
     #          GAME MECHANICS        #
     ##################################
 
+    def activate_square(self, alphanum):
+        """
+        Resolves whatever actions are appropriate for the objects located at the designated square.
+        """
+        return True
+
     def gather(self, obj, pos):
         curr_pos = self.model.get_curr_pos()
         if obj.name == "healing_potion_y":

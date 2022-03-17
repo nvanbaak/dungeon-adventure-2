@@ -307,18 +307,11 @@ class View:
         self.draw_doors()
         self.draw_all_sprites()
 
-        self.interactables.clear()
-        self.interactables = {}
-        room_contents = self.model.get_current_room_contents()
-
-        for location, obj in START_SPRITES_POSITION.items():
-            if obj in room_contents:
-                self.interactables[location] = obj
-
     def draw_doors(self, fill_color=BOARD_COLOR_1):
         """
         Draws doors where appropriate given the player's current locations.
         """
+        self.erase_doors()
         door_dict = self.model.get_curr_pos().door_value
 
         door_coords = {
@@ -372,6 +365,7 @@ class View:
         """
         Draws the hero, then gets a list of all game objeects in the current room and displays the corresponding sprites.
         """
+        self.canvas.delete("sprites")
         self.hero_sprite.draw()
 
         objects_to_display = self.model.get_current_room_contents()
@@ -425,10 +419,10 @@ class View:
         if item_resolved:
             self.hero_sprite.redraw_at(click_pos)
 
-        self.on_square_clicked_manual(clicked)
+        # self.on_square_clicked_manual(clicked)
 
 
-    def pixels_to_alphanum(event):
+    def pixels_to_alphanum(self, event):
         """
         Given a click event, returns the alphanumeric position that was clicked
         """
@@ -442,30 +436,6 @@ class View:
             return None
 
         return f"{X_AXIS_LABELS[clicked_column]}{Y_AXIS_LABELS[clicked_row]}"
-
-
-
-
-
-
-
-
-
-
-
-
-    # def get_row_column(self, x, y):
-    #     col_size = row_size = SQUARE_SIZE
-    #     xcol = x // col_size
-    #     xrow = y // row_size
-    #     return (xrow, xcol)
-
-    # def get_clicked_xy(self, event):
-    #     x = event.x
-    #     y = event.y
-    #     return (x, y)
-
-
 
 
 
