@@ -10,7 +10,7 @@ class Model:
     navigation methods that Controller can access and pass along the results to View for display.
     """
 
-    def __init__(self, hero = "warrior", name="Player"):
+    def __init__(self, hero_class = "warrior", name="Player"):
         """
         Model's __init__() instantiates a Dungeon via DungeonBuilder.
         Dungeon size and difficulty level can also be specified here via DungeonBuilder.
@@ -21,13 +21,13 @@ class Model:
 
         :param hero:
         """
-        self.hero = hero
+        self.hero = hero_class
         self.game = DungeonBuilder.build_single_dungeon()
         self.dungeon = self.game[0]
         self.curr_pos = self.dungeon.enter_dungeon()
-        if hero == "warrior":
+        if hero_class == "warrior":
             self.player = HeroFactory.create_warrior(name, self)
-        elif hero == "priestess":
+        elif hero_class == "priestess":
             self.player = HeroFactory.create_priestess(name, self)
         else:
             self.player = HeroFactory.create_thief(name, self)
@@ -35,6 +35,25 @@ class Model:
         self.pillars = {"A": "", "E": "", "P": "", "I": ""}
         self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
         self.dungeon.update_monsters_to_room(self)
+
+    def get_game_stats(self):
+        return self.game_stats
+
+    def player_has_all_pillars(self):
+        """
+        Returns True if the player has picked up all of
+        the pillars; False otherwise
+        """
+        for pillar in self.pillars:
+            if not self.pillars[pillar]:
+                return False
+        return True
+
+    def player_is_dead(self):
+        """
+        returns True if hp is <= 0, False otherwise
+        """
+        return self.player.hp <= 0
 
     def announce(self, message):
         print(message)

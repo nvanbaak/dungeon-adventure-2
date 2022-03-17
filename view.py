@@ -46,7 +46,8 @@ class View:
         self.create_top_menu()
         self.setup_gui()
 
-        # game data
+        current_room_contents = []
+
         self.hero_sprite = Sprite(hero_class, self.canvas, HERO_POSITION)
         self.sprite_dict = {}
         self.load_sprites()
@@ -277,6 +278,29 @@ class View:
         self.draw_all_sprites()
         self.update_score_label()
 
+    def draw_walls(self):
+        """
+        Draws walls on each side of the room.
+        """
+        up_wall = (
+                0, 0,
+                self.canvas_width, WALL_WIDTH)
+        down_wall = (
+                0, self.canvas_height - WALL_WIDTH,
+                self.canvas_width, self.canvas_height)
+        left_wall = (
+                0, 0, 
+                WALL_WIDTH, self.canvas_height)
+        right_wall = (
+                self.canvas_width - WALL_WIDTH, 
+                0, self.canvas_height, self.canvas_height)
+
+        for wall in [up_wall, down_wall, left_wall, right_wall]:
+            self.canvas.create_rectangle(
+                    wall[0], wall[1],
+                    wall[2], wall[3],
+                    fill="black")
+
     def draw_doors(self, fill_color=BOARD_COLOR_1):
         """
         Draws doors where appropriate given the player's current locations.
@@ -307,29 +331,6 @@ class View:
                         door[2], door[3],
                         fill=fill_color,
                         tags="doors")
-
-    def draw_walls(self):
-        """
-        Draws walls on each side of the room.
-        """
-        up_wall = (
-                0, 0,
-                self.canvas_width, WALL_WIDTH)
-        down_wall = (
-                0, self.canvas_height - WALL_WIDTH,
-                self.canvas_width, self.canvas_height)
-        left_wall = (
-                0, 0, 
-                WALL_WIDTH, self.canvas_height)
-        right_wall = (
-                self.canvas_width - WALL_WIDTH, 
-                0, self.canvas_height, self.canvas_height)
-
-        for wall in [up_wall, down_wall, left_wall, right_wall]:
-            self.canvas.create_rectangle(
-                    wall[0], wall[1],
-                    wall[2], wall[3],
-                    fill="black")
 
     def erase_doors(self):
         """
@@ -366,15 +367,30 @@ class View:
             self.sprite_dict[game_object].draw()
             print(f"drew a {game_object}")
 
-        
-
     def clear_all_sprites(self):
         """
         Deletes all sprites from the canvas.  Used when transitioning between rooms.
         """
         self.canvas.delete("sprites")
 
+    def update_score_label(self):
+        """
+        Modifies the text in the bottom frame using information from Model.
+        """
 
+        game_stats = self.model.get_game_stats()
+        exit_flag = self.model.get_curr_pos().is_exit
+
+        info_fields = []
+        for key, value in game_stats.items():
+            info_fields.append(f"{key}: {value}")
+        label_text = " | ".join(info_fields)
+
+        if self.model.player_is_dead():
+            label_text = "Y O U  D I E D !!!!!"
+        elif exit_flag and self.model.player_has_all_pillars():
+            label_text = "Y O U  W I N !!!!!"
+        self.info_label["text"] = label_text
 
 
     ##################################
@@ -473,29 +489,29 @@ class View:
             self.ask_new_game()
 
     def on_square_clicked(self, event):
-        try:
-            clicked = True
-            clicked_row, clicked_column = self.get_clicked_row_column(event)
-            xy = self.get_clicked_xy(event)
-            position_of_click = self.controller.get_alphanumeric_position(
-                (clicked_row, clicked_column))
+        # try:
+        clicked = True
+        clicked_row, clicked_column = self.get_clicked_row_column(event)
+        xy = self.get_clicked_xy(event)
+        position_of_click = self.controller.get_alphanumeric_position(
+            (clicked_row, clicked_column))
 
-            gatherable_obj = self.check_sq_for_gatherable_objects(position_of_click)
-            if gatherable_obj:
-                self.process_gatherable_object(gatherable_obj, position_of_click)
+        gatherable_obj = self.check_sq_for_gatherable_objects(position_of_click)
+        if gatherable_obj:
+            self.process_gatherable_object(gatherable_obj, position_of_click)
 
-            self.shift(self.sprite_position, position_of_click)
-            self.sprite_position = position_of_click
+        self.shift(self.sprite_position, position_of_click)
+        self.sprite_position = position_of_click
 
-            if self.sprite_xy[0] < xy[0]:
-                self.sprite_mirror = False
-            else:
-                self.sprite_mirror = True
+        if self.sprite_xy[0] < xy[0]:
+            self.sprite_mirror = False
+        else:
+            self.sprite_mirror = True
 
-            self.on_square_clicked_manual(clicked)
+        self.on_square_clicked_manual(clicked)
 
-        except TclError:
-            pass
+        # except TclError:
+        #     pass
 
     def check_sq_for_gatherable_objects(self, position_of_click):
         model_dict = self.controller.get_model_dict()
@@ -518,56 +534,11 @@ class View:
                 if self.sprite_position == doorway:
                     self.on_square_clicked_manual(False)
 
-    def draw_single_sprite(self, position, sprite):
-        UNDER_64 = (64, 64)
-        EXTRA_LARGE = (256, 256)
-        x, y = self.controller.get_numeric_notation(position)
-        if sprite:
-            filename = "sprites_image/{}.png".format(
-                sprite.name.lower())
-            image = Image.open(filename)
-            w, h = image.size
-            if sprite.name == "pit":
-                image = ImageOps.contain(image, EXTRA_LARGE)
-            else:
-                image = ImageOps.contain(image, UNDER_64)
 
-            if self.sprite_mirror == True and sprite.name == "warrior":
-                image = image.transpose(Image.FLIP_LEFT_RIGHT)
-            self.images[filename] = ImageTk.PhotoImage(image)
-
-            x0, y0 = self.calculate_sprite_coordinate(x, y)
-            ci = self.canvas.create_image(x0, y0, image=self.images[
-                                     filename], anchor="c")
-            if sprite.name == "warrior":
-                sprite.visible = True
-            if sprite.visible == False:
-                self.canvas.itemconfig(ci, state="hidden")
-            else:
-                self.canvas.itemconfig(ci, state="normal")
-            # print(f"ADD OTHER HERO TYPES")
-            if sprite.name == "warrior":
-                self.sprite_position = position
-                self.sprite_xy = (x0, y0)
         self.update_score_label()
-
-
-
 
     def process_gatherable_object(self, obj, pos):
         self.controller.gather(obj, pos)
-
-
-    def hide_all_sprites(self):
-
-        model_dict = self.controller.get_model_dict()
-
-        for position, value in model_dict.items():
-            if value.name == "warrior":
-                pass
-            else:
-                s_obj = model_dict[position]
-                s_obj.visible = False
 
     def get_clicked_row_column(self, event):
         col_size = row_size = SQUARE_SIZE
@@ -589,25 +560,17 @@ class View:
     def shift(self, start_pos, end_pos):
         self.controller.pre_move_validation(start_pos, end_pos)
  
-    def update_score_label(self):
-
-        self.controller.load_hit_points()
-        
-        rm = self.controller.get_room_data()
-        m = self.controller.get_model()
-        stat_dict = self.controller.get_game_stats()
-
-        lbl_txt = ""
-        for key, value in stat_dict.items():
-            lbl_txt = lbl_txt + str(key) + ": " + str(value) + " | "
-        if self.controller.model.player.hp <= 0:
-            lbl_txt = "Y O U  D I E D !!!!!"
-        if rm.is_exit == True and m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and \
-                m.pillars["I"] == True:
-            lbl_txt = "Y O U  W I N !!!!!"
-        self.info_label["text"] = lbl_txt
 
 
+
+
+
+
+
+
+    ##################################
+    #        NEED REFACTORING
+    ##################################
 
     def draw_vision_room(self, rm, i, j, type):
         WALL_WIDTH = 10
