@@ -676,18 +676,3 @@ class View:
         else:
             self.root.destroy()
             sys.exit()
-
-
-<<<<<<< HEAD
-=======
-def init_new_game():
-    """
-    Starts the game by instantiating a Tk object and a Controller object and passing them to the View constructor, then
-    starting mainloop. Currently resides outside View class so it can be called from there in the case of second game/restart.
-    """
-
-    root = tk.Tk()
-    root.title("Dungeon Adventure II: Dungeon Harder")
-    View(root, Controller())
-    root.mainloop()
->>>>>>> 7bc4ce30062370b1aea4cef2cd4e5e65d2f51003

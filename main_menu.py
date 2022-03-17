@@ -41,8 +41,8 @@ class MainMenu:
         }
 
         # init
-        # self.start_menu()
-        self.init_new_game()
+        self.start_menu()
+        # self.init_new_game()
 
     ##################################
     #      TK WIDGET CONSTRUCTION    #
