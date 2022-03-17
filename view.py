@@ -251,6 +251,10 @@ class View():
                 if self.sprite_position == doorway:
                     self.on_square_clicked_manual(False)
 
+    # def load_sprites(self):
+    #     for position, name in START_SPRITES_POSITION.items():
+    #         self.sprite_dict[name] = Sprite(name, self.canvas, position)
+
     def draw_all_sprites(self):
         for position, sprite in self.controller.get_all_peices_on_board():
             self.draw_single_sprite(position, sprite)
@@ -684,6 +688,30 @@ class View():
                                              vy + vision_room_height, fill="black")
             else:
                 pass
+
+    def drw_vis_spr(self, sprite, spr_start_x, spr_start_y, rm_start_x, rm_start_y, canvas):
+        UNDER_100 = (70, 70)
+
+        if isinstance(sprite, Sprite):
+            WALL_CLEARANCE = 15
+            filename = "sprites_image/{}.png".format(
+                sprite.name.lower())
+            im = Image.open(filename)
+            image = ImageOps.contain(im, UNDER_100)
+            ph = ImageTk.PhotoImage(image, master=canvas)
+            if spr_start_x == 0:
+                # bordering left wall
+                spr_start_x = spr_start_x + WALL_CLEARANCE
+            if spr_start_y == 0:
+                # bordering top wall
+                spr_start_y = spr_start_y + WALL_CLEARANCE
+            spr_start_x = spr_start_x + rm_start_x
+            spr_start_y = spr_start_y + rm_start_y
+            label = tk.Label(canvas, image=ph, bg=self.board_color_1)
+            label.config(width=UNDER_100[0], height=UNDER_100[1])
+            label.image = ph
+            label.place(x=spr_start_x, y=spr_start_y)
+
 
     def draw_vision_sprite(self, sprite, spr_start_x, spr_start_y, rm_start_x, rm_start_y, canvas):
         UNDER_100 = (70, 70)
