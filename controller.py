@@ -1,3 +1,4 @@
+from threading import current_thread
 from tkinter.tix import Tree
 import pygame
 
@@ -81,15 +82,40 @@ class Controller:
         move_succeeds = True
         curr_room = self.model.get_curr_pos()
 
+        # determine which objects if any to interact with
         if alphanum in START_SPRITES_POSITION:
             candidate = START_SPRITES_POSITION[alphanum]
 
+            print(f"candidate: {candidate}")
+
+            # fight monster if applicable
             if curr_room.monster:
                 if candidate == curr_room.monster.lower():
                     monster_hp = self.combat()
                     if monster_hp > 0:
                         move_succeeds = False
 
+            # potions
+            print(f"vision potion: {curr_room.vision}")
+            if curr_room.vision and candidate == "vision_potion":
+                curr_room.vision = False
+                self.model.player.vision_potions += 1
+
+            print(f"health potion: {curr_room.heal}")
+            if curr_room.heal and "health_potion" in candidate:
+                curr_room.heal = False
+                self.model.player.health_potions += 1
+
+            # pillars
+            print(f"pillar: {curr_room.pillar}")
+            if curr_room.pillar and "pillar" in candidate:
+                self.model.pillars[curr_room.pillar] = True
+                curr_room.pillar = None
+
+        
+
+
+        # resolve room transition if appropriate
         if alphanum in self.door_dict:
             if self.__monster_blocking_exit:
                 self.announce("Your debilitating sense of honor won't let you leave without fighting this room's guardian at least once!")
@@ -109,6 +135,7 @@ class Controller:
             self.__monster_blocking_exit = True
         if current_room.pit:
             self.pit_fall()
+        current_room.is_visited = True
 
     def gather(self, obj, pos):
         curr_pos = self.model.get_curr_pos()
@@ -214,9 +241,7 @@ class Controller:
         monster_hp = curr_pos.monster_obj.hp
         if monster_hp <= 0:
             self.announce(f"{monster_name} was defeated!")
-            # curr_pos.monster_obj = None
             curr_pos.monster = None 
-            self.view.load_current_room()
 
         # resolve player death if applicable
         if self.model.player.hp <= 0:

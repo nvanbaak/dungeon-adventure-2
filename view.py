@@ -429,10 +429,9 @@ class View:
                 elif "G" in click_pos:
                     click_pos = click_pos.replace("G", "A")
 
-                # then redraw the room
-                self.load_current_room()
-
-            self.hero_sprite.redraw_at(click_pos)
+        # then redraw the room
+        self.hero_sprite.redraw_at(click_pos)
+        self.load_current_room()
 
     def click_event_to_alphanum(self, event):
         """
