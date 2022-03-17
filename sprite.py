@@ -64,12 +64,12 @@ class Sprite():
         """
 
         # create and process image object
-        image_file = Image.open(file=f"sprites_image/{self.name}.png")
+        image_file = Image.open(f"sprites_image/{self.name}.png")
 
         dimensions = (64, 64) if self.name != "pit" else (256, 256)
-        image_file = ImageOps.contain(image_file, dimensions)
+        image_obj = ImageOps.contain(image_file, dimensions)
 
-        self.image = ImageTk.PhotoImage(file=image_file)
+        self.image = ImageTk.PhotoImage(image=image_obj)
 
         if self.__mirror:
             self.image = self.image.transpose(Image.FLIP_LEFT_RIGHT)

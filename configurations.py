@@ -41,6 +41,6 @@ User Modifiable Options
 '''
 config = ConfigParser()
 config.read('options.ini')
-BOARD_COLOR_1 = config.get('colors', 'board_color_1', fallback="#e6a803")
+BOARD_COLOR_1 = config.get('colors', 'board_color_1', fallback="#476E22")
 
 print(START_SPRITES_POSITION.items())

@@ -30,10 +30,6 @@ class View:
         self.controller = Controller(self, self.model)
         self.music_player = MusicPlayer()
 
-        # game data
-        self.hero_sprite = Sprite(hero_class, self.canvas, HERO_POSITION)
-        self.sprite_dict = {}
-
         # TODO these variables will be deprecated
         self.vision = False
         self.show_health_button = False
@@ -42,12 +38,18 @@ class View:
         self.room_size = ROW_COUNT * SQUARE_SIZE
         self.canvas_width = self.room_size
         self.canvas_height = self.room_size
+        self.canvas = None
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_close_window)
 
         # init
         self.create_top_menu()
         self.setup_gui()
+
+        # game data
+        self.hero_sprite = Sprite(hero_class, self.canvas, HERO_POSITION)
+        self.sprite_dict = {}
+        self.load_sprites()
 
         self.start_new_game()
 
@@ -164,7 +166,6 @@ class View:
         """
         self.create_canvas()
         self.draw_walls()
-        self.load_sprites()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
         self.create_bottom_frame()
 
@@ -276,7 +277,7 @@ class View:
         self.draw_all_sprites()
         self.update_score_label()
 
-    def draw_doors(self):
+    def draw_doors(self, fill_color=BOARD_COLOR_1):
         """
         Draws doors where appropriate given the player's current locations.
         """
@@ -304,7 +305,7 @@ class View:
                 self.canvas.create_rectangle(
                         door[0], door[1],
                         door[2], door[3],
-                        fill=BOARD_COLOR_1,
+                        fill=fill_color,
                         tags="doors")
 
     def draw_walls(self):
@@ -342,10 +343,9 @@ class View:
         """
         Redraws the room wih a new color; unsure if this works
         """
-        self.draw_room()
         self.canvas.config(bg=color)
-        # self.canvas.pack()
-        self.draw_all_sprites()
+        self.erase_doors()
+        self.draw_doors(color)
 
     def load_sprites(self):
         """
@@ -356,12 +356,17 @@ class View:
 
     def draw_all_sprites(self):
         """
-        Gets a list of all game objeects in the current room and displays the corresponding sprites
+        Draws the hero, then gets a list of all game objeects in the current room and displays the corresponding sprites.
         """
+        self.hero_sprite.draw()
+
         objects_to_display = self.model.get_current_room_contents()
 
         for game_object in objects_to_display:
             self.sprite_dict[game_object].draw()
+            print(f"drew a {game_object}")
+
+        
 
     def clear_all_sprites(self):
         """
@@ -512,12 +517,6 @@ class View:
             for doorway in doors:
                 if self.sprite_position == doorway:
                     self.on_square_clicked_manual(False)
-
-    def draw_all_sprites(self):
-        for position, sprite in self.controller.get_all_peices_on_board():
-            self.draw_single_sprite(position, sprite)
-        for position, sprite in self.controller.get_hero_dict_items():
-            self.draw_single_sprite(position, sprite)
 
     def draw_single_sprite(self, position, sprite):
         UNDER_64 = (64, 64)

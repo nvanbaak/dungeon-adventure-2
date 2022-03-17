@@ -36,8 +36,7 @@ class Controller:
         return self.model.refresh_room()
 
     def reset_default_characters(self):
-        # print("C | calls model.reset_default_characters() via Controller")
-        self.model.reset_default_characters()
+        print("TODO: Make this reset the game state")
 
     def get_all_peices_on_board(self):
         return self.model.dict.items()
