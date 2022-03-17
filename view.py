@@ -52,9 +52,14 @@ class View:
 
         self.root = root
 
+        # define event handler for window close
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close_window)
+
+
         # for storing canvas width/height after creation, for later use in draw_room()
         self.canvas_width = 0
         self.canvas_height = 0
+
 
         # draw all elements of board needed to start game (menu, canvas, room, bottom frame & buttons) but no sprites
         self.create_top_menu()
@@ -231,7 +236,7 @@ class View:
 
 
     ##################################
-    #    GUI BUTTOM FUNCTIONALITY    #
+    #    GUI BUTTON FUNCTIONALITY    #
     ##################################
 
     def use_health(self):
@@ -267,6 +272,13 @@ class View:
         self.vision_canvas = Canvas(
             self.vision_window, width=self.vision_canvas_width, height=self.vision_canvas_height, bg=self.board_color_1)
         self.vision_canvas.pack(padx=8, pady=8)
+
+    def on_close_window(self):
+        """
+        Event handler for window closure event.
+        """
+        self.music_player.stop_music()
+        self.root.destroy()
 
 
     ##################################
@@ -345,7 +357,6 @@ class View:
 
         """
         # catch event of manual game window close by user
-        # self.root.protocol("WM_DELETE_WINDOW", lambda: self.on_close_window(self.root))
 
         # clear dictionaries, instantiate sprite objects, refresh room by setting relevant sprite objects to 'visible'
         self.controller.reset_default_characters()
@@ -359,8 +370,7 @@ class View:
 
 
 
-    def on_close_window(self, root):
-        root.destroy()
+
 
     def send_view_reference_to_controller(self):
         self.controller.accept_view_reference(self)
