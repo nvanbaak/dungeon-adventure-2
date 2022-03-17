@@ -1,7 +1,10 @@
+# name  : Shoby Gnanasekaran
+# net id: shoby
 
 from dungeon import Dungeon
 
 class DungeonBuilder:
+    """ It is a dungeon builder factory"""
 
     @staticmethod
     def build_single_dungeon():
@@ -13,14 +16,17 @@ class DungeonBuilder:
 
     @staticmethod
     def build_easy_dungeon():
+        """ adds 2 Dungeons of size 6*6 to result list. Distributes the pillars to the Dungeons. Adds double links
+        between the exit of first dungeon and the entrance of the second dungeon."""
         dun0 = Dungeon(6,6)
         exit_value = dun0.dungeon.winning_path[-1]
         entrance_row,entrance_col = exit_value[0], exit_value[1]
+        #the entrance of dun1 is set as the same location as the exit of dun0
         dun1 = Dungeon(6,6, entrance = True, entrance_row_value = entrance_row, entrance_col_value = entrance_col)
         result = [dun0, dun1]
-        # result = DungeonBuilder.__distribute_entrance_exit(result)
         result = DungeonBuilder.__distribute_pillars(result)
         DungeonBuilder.__build_stairs(result)
+        # every room of each dungeon is updated of the respective dungeon detail
         DungeonBuilder.__update_floor_details(result)
         return result
 
@@ -62,10 +68,5 @@ class DungeonBuilder:
 
 
 
-# game = DungeonBuilder.build_easy_dungeon()
-# print(f"ground_floor path: {game[0].dungeon.winning_path}")
-# print(game[0])
-# print(f"first_floor path: {game[1].dungeon.winning_path}")
-# print(game[1])
 
 

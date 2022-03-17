@@ -1,13 +1,11 @@
 
 # name  : Shoby Gnanasekaran
 # net id: shoby
-import numpy as np
 
+import numpy as np
 from maze_generator import Maze
 from room import Room
-from ogre import Ogre
-from gremlin import Gremlin
-from skeleton import Skeleton
+from monster_factory import MonsterFactory
 
 class Dungeon:
     """
@@ -17,11 +15,6 @@ class Dungeon:
     The __str__ gives the string representation of the whole Dungeon
 
     Each room is connected to 4 adjacent rooms through pointers
-     The down_room of a room on the last row is linked to the room on the first row on the same column
-     The upper_room of a room on the first row is linked to the room on the last row on the same column
-     The left_room of a room on the first column is linked to the room on the last column on the same row
-     The right_room of a room on the last column is linked to the room on the first column on the same row
-
     """
 
     def __init__(self, row_count=-1, col_count=-1, entrance =False, entrance_row_value = -1, entrance_col_value = -1 ):
@@ -37,16 +30,19 @@ class Dungeon:
         self.__dungeon_str = self.__set_dungeon_str()  # creates the string representation of the Dungeon
 
     def print_initial_map(self):
+        """ string representation of the initial dungeon, when the player starts a new game
+        :return string"""
         return str(self.__dungeon_str)
 
     def __str__(self):
         """
-        returns the the string representation of the Dungeon
+        returns the string representation of the Dungeon
         :return: string
         """
         return str(self.__set_dungeon_str())
 
     def __create_maze_specified_entrance(self,entrance_row_value, entrance_col_value):
+        """generates random maze with the specified entrance room"""
         if 0 <= entrance_row_value < self.__rowCount and 0<= entrance_col_value < self.__colCount:
             try:
                 self.__maze.create_maze_specified_entrance(entrance_row_value, entrance_col_value)
@@ -55,11 +51,11 @@ class Dungeon:
                 self.__maze.create_maze_specified_entrance(entrance_row_value, entrance_col_value)
 
     def __create_maze_random_entrance(self):
+        """generates random maze with random entrance room"""
         try:
             self.__maze.create_maze_random_entrance()  # creates a playable maze(array) of Rooms
         except RecursionError:
             self.__maze.create_maze_random_entrance()
-            # raise ValueError("maze is not traversable, try again")
 
     def __set_rowCount(self, row_count):
         """
@@ -141,14 +137,15 @@ class Dungeon:
             return self.__maze.maze[row, col]
 
     def update_monsters_to_room(self, model):
+        """ if the monster string is placed during maze_generation, creates respective monster objects to the room """
         for i in range (self.row_Count):
             for j in range (self.col_Count):
                 if self.dungeon.maze[i, j].monster == "Ogre":
-                    self.dungeon.maze[i, j].monster_obj = Ogre("ogre", model)
+                    self.dungeon.maze[i, j].monster_obj = MonsterFactory.create_ogre("ogre", model)
                 if self.dungeon.maze[i, j].monster == "Gremlin":
-                    self.dungeon.maze[i, j].monster_obj = Gremlin("gremlin", model)
+                    self.dungeon.maze[i, j].monster_obj = MonsterFactory.create_gremlin("gremlin", model)
                 if self.dungeon.maze[i, j].monster == "Skeleton":
-                    self.dungeon.maze[i, j].monster_obj = Skeleton("skeleton", model)
+                    self.dungeon.maze[i, j].monster_obj = MonsterFactory.create_skeleton("skeleton", model)
 
     def __set_dungeon_str(self):
         """creates a string representation of the Dungeon  """
@@ -264,15 +261,3 @@ class Dungeon:
             if room_obj.heal is not None:
                 room_obj.heal = None   # sets the healing_potion to None in the room_content dictionary of the Room
 
-
-if __name__ == '__main__':
-    dun = Dungeon(4, 4)
-    # print(dun.dungeon.winning_path)
-    # print(dun)
-    # for i in range(4):
-    #     for j in range(4):
-    #         dun.clear_healing_pillar_vision(dun.dungeon.maze[i, j])
-    #
-    curr = dun.enter_dungeon()
-    print(dun.print_dungeon_live_location(curr))
-    print(dun.vision_potion_rooms(curr))
