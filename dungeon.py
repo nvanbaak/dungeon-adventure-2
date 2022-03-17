@@ -261,18 +261,3 @@ class Dungeon:
             if room_obj.heal is not None:
                 room_obj.heal = None   # sets the healing_potion to None in the room_content dictionary of the Room
 
-<<<<<<< HEAD
-
-if __name__ == '__main__':
-    dun = Dungeon(4, 4)
-    # print(dun.dungeon.winning_path)
-    # print(dun)
-    # for i in range(4):
-    #     for j in range(4):
-    #         dun.clear_healing_pillar_vision(dun.dungeon.maze[i, j])
-    #
-    curr = dun.enter_dungeon()
-    print(dun.print_dungeon_live_location(curr))
-    print(dun.vision_potion_rooms(curr))
-=======
->>>>>>> sg_dungeon_new
