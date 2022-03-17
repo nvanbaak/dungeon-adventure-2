@@ -1,8 +1,5 @@
-"""
-"""
-
 from configurations import *
-import sys
+import tkinter as tk
 import exceptions
 
 
@@ -23,58 +20,27 @@ def get_numeric_notation(rowcol):
 
 
 class Sprite():
-
-    def __init__(self):
-        self.name = self.__class__.__name__.lower()
+    """
+    Class that handles displaying the art asset for one game object
+    """
+    def __init__(self, name, canvas):
+        self.name = name # should be identical to a filename in the images folder
+        self.canvas : tk.Canvas = canvas
         self.visible = False
+        self.image = None
 
-    def keep_reference(self, model):
-        self.model = model
+    def draw(self, x_pos, y_pos):
+        """
+        Creates a PhotoImage object at the specified location on self.canvas.
+        Retains a reference for later destruction.
+        """
+        self.image = tk.PhotoImage(file=f"sprites_image/{self.name}.png")
+        self.canvas.create_image(x_pos, y_pos, image=self.image, anchor=tk.NW)
 
-class Abstraction_pillar(Sprite):
-    pass
+    def erase(self):
+        """
+        Destroys the image reference, removing it from the screen.
+        """
+        if self.image:
+            self.image.destroy()
 
-class Encapsulation_pillar(Sprite):
-    pass
-
-class Inheritance_pillar(Sprite):
-    pass
-
-class Polymorphism_pillar(Sprite):
-    pass
-
-class Pit(Sprite):
-    pass
-
-class Priestess(Sprite):
-    pass
-
-class Thief(Sprite):
-    pass
-
-class Warrior(Sprite):
-    pass
-
-class Ogre(Sprite):
-    pass
-
-class Healing_potion_g(Sprite):
-    pass
-
-class Healing_potion_y(Sprite):
-    pass
-
-class Vision_potion(Sprite):
-    pass
-
-class Gremlin(Sprite):
-    pass
-
-class Skeleton(Sprite):
-    pass
-
-class Entrance(Sprite):
-    pass
-
-class Exit(Sprite):
-    pass

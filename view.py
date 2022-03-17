@@ -535,12 +535,6 @@ class View:
         self.info_label["text"] = lbl_txt
 
     def use_vision(self):
-        # if self.vision_window != "":
-        #     try:
-        #         self.vision_window.destroy()
-        #     except:
-        #         self.vision_window = ""
-        # else:
         self.create_vision_window()
         vision_grid = self.controller.use_vision_potion(self.controller.get_room_data())
         row_min = 100
