@@ -7,7 +7,7 @@ import exceptions
 from tkinter import messagebox
 import sys
 import time
-import preferenceswindow
+from preferenceswindow import PreferencesWindow
 import save_load_game
 from sprite import Sprite
 from musicplayer import MusicPlayer
@@ -60,24 +60,17 @@ class View:
         self.canvas_height = 0
 
         # draw all elements of board needed to start game (menu, canvas, room, bottom frame & buttons) but no sprites
-        self.create_board_base()
+        self.create_top_menu()
+        self.setup_gui()
 
         # bind the canvas to any mouse click
         self.canvas.bind("<Button-1>", self.on_square_clicked)
 
         self.start_new_game()
 
-    def create_board_base(self):
-        """
-        Draw all elements of board needed to start game (menu, canvas, room, bottom frame & buttons) but no sprites.
-        """
-
-        self.create_top_menu()
-        self.create_canvas()
-        self.draw_room()
-        self.create_bottom_frame()
-        self.create_vision_button()
-        self.create_health_button()
+    ##################################
+    #       MENU BUILD METHODS       #
+    ##################################
 
     def create_top_menu(self):
         """
@@ -115,90 +108,10 @@ class View:
         self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
         self.root.config(menu=self.menu_bar)
 
-    def create_canvas(self):
-        """
-        Create game board canvas of squares based on values in configurations.py (number of ROWS/COLS,
-        DIMENSIONS_OF_EACH_SQUARE)
-        """
-        self.canvas_width = NUMBER_OF_COLUMNS * DIMENSION_OF_EACH_SQUARE
-        self.canvas_height = NUMBER_OF_ROWS * DIMENSION_OF_EACH_SQUARE
-        self.canvas = Canvas(
-            self.root, width=self.canvas_width, height=self.canvas_height, bg=self.board_color_1)
-        self.canvas.pack(padx=8, pady=8)
 
-    def draw_room(self):
-        """
-        Draws game's current room (walls only) based on player's current position in the dungeon.
-        """
-
-        # get pointer to current room object
-        rm = self.controller.get_room_data()
-
-        # get dictionary of this room's doors to neighboring rooms
-        door_dict = rm.door_value
-
-        # draw walls on each side of the room
-        up_wall = (0, 0, self.canvas_width, WALL_WIDTH)
-        down_wall = (0, self.canvas_height - WALL_WIDTH, self.canvas_width, self.canvas_height)
-        left_wall = (0, 0, WALL_WIDTH, self.canvas_height)
-        right_wall = (self.canvas_width - WALL_WIDTH, 0, self.canvas_height, self.canvas_height)
-
-        for wall in [up_wall, down_wall, left_wall, right_wall]:
-            self.canvas.create_rectangle(wall[0], wall[1], wall[2], wall[3], fill="black")
-
-        # next, fill in the doors if they exist
-        door_coords = {
-            "Up" : (
-                    self.canvas_width//3, 0, 
-                    2 * self.canvas_width//3, WALL_WIDTH),
-            "Down" : (
-                    self.canvas_width//3, self.canvas_height - WALL_WIDTH,
-                    2 * self.canvas_width//3, self.canvas_height),
-            "Left" : (
-                    0, self.canvas_height//3,
-                    WALL_WIDTH, 2 * self.canvas_height//3),
-            "Right" : (
-                    self.canvas_width - WALL_WIDTH, self.canvas_height//3,
-                    self.canvas_width, 2 * self.canvas_height//3
-            )
-        }
-
-        for dir in ["Up", "Down", "Left", "Right"]:
-            if door_dict[dir]:
-                door = door_coords[dir]
-                self.canvas.create_rectangle(
-                            door[0], door[1], door[2], door[3],
-                            fill=BOARD_COLOR_1)
-  
-
-        # get the game score from Model so that it will be accurate when scoreboard is refreshed
-        self.controller.load_hit_points()
-
-    def start_new_game(self):
-        """
-        reset_default_characters()
-            Clears dictionaries storing alphanumeric position of hero sprites and other game sprites.
-            Instantiates sprite objects of the type and location specified in configurations.py.
-            Refreshes room by checking underlying data and setting relevant sprite objects to "visible".
-
-        """
-        # catch event of manual game window close by user
-        self.root.protocol("WM_DELETE_WINDOW", lambda: self.on_close_window(self.root))
-
-        # clear dictionaries, instantiate sprite objects, refresh room by setting relevant sprite objects to 'visible'
-        self.controller.reset_default_characters()
-
-        # make sure Controller has a reference to View object (used for gather() and gather_sounds() in Controller)
-        self.send_view_reference_to_controller()
-
-        self.draw_all_sprites()
-        self.update_score_label()
-
-    def on_preference_menu_clicked(self):
-        self.show_preferences_window()
-
-    def show_preferences_window(self):
-        preferenceswindow.PreferencesWindow(self)
+    ##################################
+    #       MENU FUNCTIONALITY       #
+    ##################################
 
     def on_new_game_menu_clicked(self):
         self.root.destroy()
@@ -221,23 +134,6 @@ class View:
         saveload_label.pack()
         saveload_canvas.pack(padx=8, pady=8)
 
-    def on_delete_games_menu_clicked(self):
-        sg = save_load_game.SaveGame()
-        sg.delete_all_saved_games()
-
-    def open_saved(self, selected_game):
-        sg = save_load_game.SaveGame
-        if self.clicked != "Select":
-            m = sg.load_game(sg, selected_game)
-            self.controller.set_model(m)
-            self.draw_room()
-            self.controller.reset_default_characters()
-            self.draw_all_sprites()
-            self.on_square_clicked_manual(True)
-            self.update_score_label()
-            if self.vision == False:
-                self.vision_button.pack_forget()
-
     def on_load_game_menu_clicked(self):
         saveload_window = tk.Tk()
         saveload_canvas_width = 50
@@ -254,6 +150,159 @@ class View:
         drop = tk.OptionMenu(saveload_canvas, self.clicked, *saved_list, command=self.open_saved)
         drop.pack()
 
+    def open_saved(self, selected_game):
+        sg = save_load_game.SaveGame
+        if self.clicked != "Select":
+            m = sg.load_game(sg, selected_game)
+            self.controller.set_model(m)
+            self.draw_room()
+            self.controller.reset_default_characters()
+            self.draw_all_sprites()
+            self.on_square_clicked_manual(True)
+            self.update_score_label()
+            if self.vision == False:
+                self.vision_button.pack_forget()
+
+    def on_delete_games_menu_clicked(self):
+        sg = save_load_game.SaveGame()
+        sg.delete_all_saved_games()
+
+    def on_preference_menu_clicked(self):
+        PreferencesWindow(self)
+
+
+    ##################################
+    #        GUI CONSTRUCTION        #
+    ##################################
+
+    def setup_gui(self):
+        """
+        Draw all elements of board needed to start game (menu, canvas, room, bottom frame & buttons) but no sprites.
+        """
+        self.create_canvas()
+        self.draw_room()
+        self.create_bottom_frame()
+
+    def create_canvas(self):
+        """
+        Creates the base canvas for the game.
+        Parameters can be modified in configurations.py
+        """
+        self.canvas_width = NUMBER_OF_COLUMNS * DIMENSION_OF_EACH_SQUARE
+        self.canvas_height = NUMBER_OF_ROWS * DIMENSION_OF_EACH_SQUARE
+        self.canvas = Canvas(
+            self.root, width=self.canvas_width, height=self.canvas_height, bg=BOARD_COLOR_1)
+        self.canvas.pack(padx=8, pady=8)
+
+    def create_bottom_frame(self):
+        """
+        Constructs a frame at the base of the window
+        and adds the relevant widgets.
+        """
+        def create_frame():
+            self.bottom_frame = Frame(self.root, height=64)
+            self.info_label = Label(
+                self.bottom_frame, text="")
+            self.info_label.pack(side="left", padx=8, pady=5)
+            self.bottom_frame.pack(fill="x", side="bottom")
+
+        def create_vision_button():
+            """
+            Constructs the vision potion button
+            and addis it to the bottom frame.
+            """
+            self.vision_button = Button(self.bottom_frame, text="Use Vision", command=self.use_vision)
+            self.vision_button.configure(activebackground="#33B5E5")
+            self.vision_button.pack(side=TOP)
+            if self.vision == False:
+                self.vision_button.pack_forget()
+
+        def create_health_button():
+            """
+            Constructs the health potion button
+            and adds it to the bottom frame.
+            """
+            self.health_button = Button(self.bottom_frame, text="Use Health", command=self.use_health)
+            self.health_button.configure(activebackground="#33B5E5")
+            self.health_button.pack(side=TOP)
+            if self.show_health_button == False:
+                self.health_button.pack_forget()
+
+        create_frame()
+        create_vision_button()
+        create_health_button()
+
+    def draw_room(self):
+        """
+        Draws game's current room (walls only) based on player's current position in the dungeon.
+        """
+        room_pointer = self.controller.get_room_data()
+        door_dict = room_pointer.door_value
+
+        # draw walls on each side of the room
+        up_wall = (
+                0, 0,
+                self.canvas_width, WALL_WIDTH)
+        down_wall = (
+                0, self.canvas_height - WALL_WIDTH,
+                self.canvas_width, self.canvas_height)
+        left_wall = (
+                0, 0, 
+                WALL_WIDTH, self.canvas_height)
+        right_wall = (
+                self.canvas_width - WALL_WIDTH, 
+                0, self.canvas_height, self.canvas_height)
+
+        for wall in [up_wall, down_wall, left_wall, right_wall]:
+            self.canvas.create_rectangle(
+                    wall[0], wall[1],
+                    wall[2], wall[3],
+                    fill="black")
+
+        # next, fill in the doors if they exist
+        door_coords = {
+            "Up" : (
+                    self.canvas_width//3, 0, 
+                    2 * self.canvas_width//3, WALL_WIDTH),
+            "Down" : (
+                    self.canvas_width//3, self.canvas_height - WALL_WIDTH,
+                    2 * self.canvas_width//3, self.canvas_height),
+            "Left" : (
+                    0, self.canvas_height//3,
+                    WALL_WIDTH, 2 * self.canvas_height//3),
+            "Right" : (
+                    self.canvas_width - WALL_WIDTH, self.canvas_height//3,
+                    self.canvas_width, 2 * self.canvas_height//3)
+        }
+
+        for dir in ["Up", "Down", "Left", "Right"]:
+            if door_dict[dir]:
+                door = door_coords[dir]
+                self.canvas.create_rectangle(
+                        door[0], door[1],
+                        door[2], door[3],
+                        fill=BOARD_COLOR_1)
+       
+    def start_new_game(self):
+        """
+        reset_default_characters()
+            Clears dictionaries storing alphanumeric position of hero sprites and other game sprites.
+            Instantiates sprite objects of the type and location specified in configurations.py.
+            Refreshes room by checking underlying data and setting relevant sprite objects to "visible".
+
+        """
+        # catch event of manual game window close by user
+        self.root.protocol("WM_DELETE_WINDOW", lambda: self.on_close_window(self.root))
+
+        # clear dictionaries, instantiate sprite objects, refresh room by setting relevant sprite objects to 'visible'
+        self.controller.reset_default_characters()
+
+        # make sure Controller has a reference to View object (used for gather() and gather_sounds() in Controller)
+        self.send_view_reference_to_controller()
+
+        self.draw_all_sprites()
+        self.update_score_label()
+
     def reload_colors(self, color_1):
         self.board_color_1 = color_1
         self.draw_room()
@@ -263,7 +312,6 @@ class View:
 
     def create_vision_window(self):
         self.vision_window = tk.Tk()
-        # self.vision_window.overrideredirect(True)
         self.vision_canvas_width = 900
         self.vision_canvas_height = 900
         self.vision_canvas = Canvas(
@@ -277,27 +325,6 @@ class View:
         self.map_canvas = Canvas(
             self.map_window, width=self.map_canvas_width, height=self.map_canvas_height, bg=self.board_color_1)
         self.map_canvas.pack(padx=8, pady=8)
-
-    def create_bottom_frame(self):
-        self.bottom_frame = Frame(self.root, height=64)
-        self.info_label = Label(
-            self.bottom_frame, text="")
-        self.info_label.pack(side="left", padx=8, pady=5)
-        self.bottom_frame.pack(fill="x", side="bottom")
-
-    def create_vision_button(self):
-        self.vision_button = Button(self.bottom_frame, text="Use Vision", command=self.use_vision)
-        self.vision_button.configure(activebackground="#33B5E5")
-        self.vision_button.pack(side=TOP)
-        if self.vision == False:
-            self.vision_button.pack_forget()
-
-    def create_health_button(self):
-        self.health_button = Button(self.bottom_frame, text="Use Health", command=self.use_health)
-        self.health_button.configure(activebackground="#33B5E5")
-        self.health_button.pack(side=TOP)
-        if self.show_health_button == False:
-            self.health_button.pack_forget()
 
     def use_health(self):
         self.controller.use_health_potion()
@@ -525,6 +552,9 @@ class View:
             self.info_label["text"] = error.__class__.__name__
 
     def update_score_label(self):
+
+        self.controller.load_hit_points()
+        
         rm = self.controller.get_room_data()
         m = self.controller.get_model()
         stat_dict = self.controller.get_game_stats()

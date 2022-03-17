@@ -1,6 +1,6 @@
 from dungeon_builder import DungeonBuilder
 from hero_factory import HeroFactory
-import sprite
+from sprite import Sprite
 from configurations import *
 # from game_observer import Publisher, Subscriber
 
