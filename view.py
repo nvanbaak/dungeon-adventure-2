@@ -9,7 +9,6 @@ import sys
 import time
 import preferenceswindow
 import save_load_game
-import sprite
 from sprite import Sprite
 from musicplayer import MusicPlayer
 from tkinter import TclError

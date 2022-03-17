@@ -1,6 +1,4 @@
-from cgitb import text
 import tkinter as tk
-from sprite import Priestess
 from view import View
 from controller import Controller
 
@@ -40,7 +38,7 @@ class MainMenu:
                 "thief": "Mysterious as he is greedy, the Thief attacks multiple times in a flash of knives."
         }
 
-        # init
+        # init # switch which line is commented to skip the menu
         self.start_menu()
         # self.init_new_game()
 
@@ -265,11 +263,11 @@ class MainMenu:
         gets the selected class and user-supplied character name, then starts a new use using that information.
         If no name has been entered, the game does not start.
         """
-        # player_name = self.name_entry.get()
-        # if player_name == "":
-        #     return
+        player_name = self.name_entry.get()
+        if player_name == "":
+            return
 
         game_root = tk.Tk()
         game_root.title("Dungeon Adventure II: Dungeon Harder")
-        View(self, game_root, Controller(self.current_hero))
+        game = View(self, game_root, Controller(self.current_hero, player_name))
         game_root.mainloop()

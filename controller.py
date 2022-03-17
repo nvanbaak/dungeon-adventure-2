@@ -4,16 +4,12 @@ import pygame
 
 class Controller:
 
-    def __init__(self, hero="warrior"):
+    def __init__(self, hero="warrior", name="player"):
         """
         Controller class allows the View class to access the underlying game structure within Model such that it knows what
         to display.
         """
-        self.model = model.Model(hero)
-        """
-        Controller's __init__() instantiates a Model that can then be accessed by View. Also initializes a pygame object
-        that will be used to play the game's soundtrack.
-        """
+        self.model = model.Model(hero, name)
         pygame.init()
 
     def accept_view_reference(self, view_ref):
@@ -49,11 +45,9 @@ class Controller:
         return self.model.hero_dict.items()
 
     def get_alphanumeric_position(self, rowcolumntuple):
-        # print(f"C | calls get_alphanumeric_position({rowcolumntuple}) via Model")
         return self.model.get_alphanumeric_position(rowcolumntuple)
 
     def get_numeric_notation(self, rowcol):
-        # print("C | calls get_numeric_notation via Sprite()")
         return sprite.get_numeric_notation(rowcol)
 
     def pre_move_validation(self, start_pos, end_pos):
