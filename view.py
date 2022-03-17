@@ -46,7 +46,7 @@ class View:
         self.create_top_menu()
         self.setup_gui()
 
-        current_room_contents = []
+        self.interactables = {}
 
         self.hero_sprite = Sprite(hero_class, self.canvas, HERO_POSITION)
         self.sprite_dict = {}
@@ -274,8 +274,7 @@ class View:
         """
         self.controller.reset_default_characters()
 
-        self.draw_doors()
-        self.draw_all_sprites()
+        self.load_current_room()
         self.update_score_label()
 
     def draw_walls(self):
@@ -301,12 +300,26 @@ class View:
                     wall[2], wall[3],
                     fill="black")
 
+    def load_current_room(self):
+        """
+        gets all GUI-relevant information about the current room and displays it.
+        """
+        self.draw_doors()
+        self.draw_all_sprites()
+
+        self.interactables.clear()
+        self.interactables = {}
+        room_contents = self.model.get_current_room_contents()
+
+        for location, obj in START_SPRITES_POSITION.items():
+            if obj in room_contents:
+                self.interactables[location] = obj
+
     def draw_doors(self, fill_color=BOARD_COLOR_1):
         """
         Draws doors where appropriate given the player's current locations.
         """
-        room_pointer = self.controller.get_room_data()
-        door_dict = room_pointer.door_value
+        door_dict = self.model.get_curr_pos().door_value
 
         door_coords = {
             "Up" : (
@@ -396,6 +409,65 @@ class View:
     ##################################
     # GAME CONTROLS (TODO move these to controller)
     ##################################
+
+    def on_square_clicked(self, event):
+        """
+        Event handling for click event.  Resolves any object interactions in the clicked square and then moves the player to the square if no object remains there.
+        """
+
+        click_pos = self.pixels_to_alphanum(event)
+        if click_pos is None:
+            return
+
+        # activate_square returns True or False depending on whether the square is empty after resolution
+        item_resolved = self.controller.activate_square(click_pos)
+
+        if item_resolved:
+            self.hero_sprite.redraw_at(click_pos)
+
+        self.on_square_clicked_manual(clicked)
+
+
+    def pixels_to_alphanum(event):
+        """
+        Given a click event, returns the alphanumeric position that was clicked
+        """
+        col_size = row_size = SQUARE_SIZE
+        clicked_column = event.x // col_size
+        clicked_row = 6 - (event.y // row_size)
+
+        if clicked_row not in range(7):
+            return None
+        if clicked_column not in range(7):
+            return None
+
+        return f"{X_AXIS_LABELS[clicked_column]}{Y_AXIS_LABELS[clicked_row]}"
+
+
+
+
+
+
+
+
+
+
+
+
+    # def get_row_column(self, x, y):
+    #     col_size = row_size = SQUARE_SIZE
+    #     xcol = x // col_size
+    #     xrow = y // row_size
+    #     return (xrow, xcol)
+
+    # def get_clicked_xy(self, event):
+    #     x = event.x
+    #     y = event.y
+    #     return (x, y)
+
+
+
+
 
     def on_square_clicked_manual(self, clicked):
         """
@@ -488,30 +560,7 @@ class View:
             self.controller.play("you_win")
             self.ask_new_game()
 
-    def on_square_clicked(self, event):
-        # try:
-        clicked = True
-        clicked_row, clicked_column = self.get_clicked_row_column(event)
-        xy = self.get_clicked_xy(event)
-        position_of_click = self.controller.get_alphanumeric_position(
-            (clicked_row, clicked_column))
 
-        gatherable_obj = self.check_sq_for_gatherable_objects(position_of_click)
-        if gatherable_obj:
-            self.process_gatherable_object(gatherable_obj, position_of_click)
-
-        self.shift(self.sprite_position, position_of_click)
-        self.sprite_position = position_of_click
-
-        if self.sprite_xy[0] < xy[0]:
-            self.sprite_mirror = False
-        else:
-            self.sprite_mirror = True
-
-        self.on_square_clicked_manual(clicked)
-
-        # except TclError:
-        #     pass
 
     def check_sq_for_gatherable_objects(self, position_of_click):
         model_dict = self.controller.get_model_dict()
@@ -540,22 +589,9 @@ class View:
     def process_gatherable_object(self, obj, pos):
         self.controller.gather(obj, pos)
 
-    def get_clicked_row_column(self, event):
-        col_size = row_size = SQUARE_SIZE
-        clicked_column = event.x // col_size
-        clicked_row = 6 - (event.y // row_size)
-        return (clicked_row, clicked_column)
 
-    def get_row_column(self, x, y):
-        col_size = row_size = SQUARE_SIZE
-        xcol = x // col_size
-        xrow = y // row_size
-        return (xrow, xcol)
 
-    def get_clicked_xy(self, event):
-        x = event.x
-        y = event.y
-        return (x, y)
+
 
     def shift(self, start_pos, end_pos):
         self.controller.pre_move_validation(start_pos, end_pos)

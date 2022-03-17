@@ -87,14 +87,9 @@ class Model:
 
         return output_list
 
-    def get_alphanumeric_position(self, rowcol):
-        if self.is_on_board(rowcol):
-            row, col = rowcol
-            return "{}{}".format(X_AXIS_LABELS[col], Y_AXIS_LABELS[row])
 
-    def is_on_board(self, rowcol):
-        row, col = rowcol
-        return 0 <= row <= 6 and 0 <= col <= 6
+
+
 
     def pre_move_validation(self, initial_pos, final_pos):
         self.move(initial_pos, final_pos)

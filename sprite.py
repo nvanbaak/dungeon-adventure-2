@@ -57,6 +57,23 @@ class Sprite():
 
         return row, col
 
+    def redraw_at(self, alphanum):
+        """
+        Given an alphanumeric position code, deletes this image and redraws at the specified location
+        """
+        self.erase()
+
+        # get new position
+        new_x, new_y = self.parse_position_code(alphanum)
+
+        # check if we need to flip the sprite
+        self.__mirror = self.__x_pos < new_x
+
+        # set new position and draw
+        self.__x_pos = new_x
+        self.__y_pos = new_y
+        self.draw()
+
     def draw(self):
         """
         Creates a PhotoImage object at the specified location on self.canvas.

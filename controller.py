@@ -1,3 +1,4 @@
+from numpy import block
 import model
 import sprite
 import pygame
@@ -13,12 +14,15 @@ class Controller:
         self.view = view
         pygame.init()
 
-    def accept_view_reference(self, view_ref):
-        self.view = view_ref
-        print(" ")
+    def get_model(self):
+        return self.model
 
-    def get_room_data(self):
-        return self.model.get_curr_pos()
+    def set_model(self, saved_model):
+        self.model = saved_model
+
+    ##################################
+    #        MOVEMENT FUNCTIONS      #
+    ##################################
 
     def move_left(self):
         return self.model.move_left()
@@ -32,32 +36,15 @@ class Controller:
     def move_down(self):
         return self.model.move_down()
 
-    def refresh_room(self):
-        return self.model.refresh_room()
-
     def reset_default_characters(self):
         print("TODO: Make this reset the game state")
-
-    def get_all_peices_on_board(self):
-        return self.model.dict.items()
-
-    def get_hero_dict_items(self):
-        return self.model.hero_dict.items()
-
-    def get_alphanumeric_position(self, rowcolumntuple):
-        return self.model.get_alphanumeric_position(rowcolumntuple)
 
     def get_numeric_notation(self, rowcol):
         return sprite.get_numeric_notation(rowcol)
 
-    def pre_move_validation(self, start_pos, end_pos):
-        return self.model.pre_move_validation(start_pos, end_pos)
-
-    def get_model_dict(self):
-        return self.model.get_dict()
-
-    def get_hero_dict(self):
-        return self.model.get_hero_dict()
+    ##################################
+    #          GAME MECHANICS        #
+    ##################################
 
     def gather(self, obj, pos):
         curr_pos = self.model.get_curr_pos()
@@ -168,6 +155,14 @@ class Controller:
             self.play("game_over")
             self.view.ask_new_game()
 
+    def use_vision_potion(self, room):
+        self.model.player.use_vision_potion()
+        # str_vision = self.model.dungeon.use_vision_potion(room)
+        return self.model.dungeon.vision_potion_rooms(room)
+
+    def use_health_potion(self):
+        self.model.player.use_health_potion()
+
     def play(self, file):
         filename = "audio/{}.wav".format(
             file)
@@ -195,19 +190,3 @@ class Controller:
         if curr_pos.pillar == "i":
             curr_pos.pillar = None
 
-    def get_game_stats (self):
-        return self.model.game_stats
-
-    def use_vision_potion(self, room):
-        self.model.player.use_vision_potion()
-        # str_vision = self.model.dungeon.use_vision_potion(room)
-        return self.model.dungeon.vision_potion_rooms(room)
-
-    def use_health_potion(self):
-        self.model.player.use_health_potion()
-
-    def get_model(self):
-        return self.model
-
-    def set_model(self, saved_model):
-        self.model = saved_model
