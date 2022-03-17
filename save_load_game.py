@@ -1,7 +1,6 @@
 # name  : Shoby Gnanasekaran
 # net id: shoby
 
-from model import Model
 import pickle
 from dungeonchar_db_access import DungeonCharDb
 import os
@@ -9,6 +8,12 @@ import os
 class SaveGame:
 
     def save_game(self,name, model):
+        """ validates if another game is saved with the same name,
+        if not makes a temp pickle file of the model, converts it to binary and saves the name and game_file to
+        save_game table of dungeondb.db. Deletes the temp pickle file
+        :param name string
+        :param model Model"""
+
         db = DungeonCharDb()
         validate = db.load_game(name)
         if validate is None:
@@ -36,6 +41,9 @@ class SaveGame:
             file.write(blob_data[0])
 
     def load_game(self, name):
+        """ Loads the binary file saved in name. Converts to temp pickle file, loads the model object,
+        deletes the pickle file, returns the model object"""
+
         db = DungeonCharDb()
         binary_pickle_file = db.load_game(name)
         if binary_pickle_file is not None:
@@ -60,6 +68,7 @@ class SaveGame:
 
     @staticmethod
     def game_name_generator():
+        """generates a name for saving a game"""
         db = DungeonCharDb()
         existing_saved_games = db.select_column_from_table("saved_games", "name")
         count = 1
@@ -75,6 +84,7 @@ class SaveGame:
     @staticmethod
 
     def saved_games_list():
+        """ returns the list of saved games list"""
         db = DungeonCharDb()
         saved_games =[]
         existing_saved_games = db.select_column_from_table("saved_games", "name")
@@ -83,23 +93,6 @@ class SaveGame:
 
         return saved_games
 
-
-
-if __name__ == '__main__':
-
-    m = Model()
-    m.player.hp =10
-    sg = SaveGame()
-    sg.delete_all_saved_games()
-    sg.save_game("Game1",m)
-    m1= sg.load_game("Game1")
-    print(m1.player.hp)
-    m2 = Model()
-    sg = SaveGame()
-    sg.save_game("Game2", m2)
-    print(sg.game_name_generator())
-    print(sg.saved_games_list())
-    sg.delete_all_saved_games()
 
 
 
