@@ -2,23 +2,6 @@ from configurations import *
 import tkinter as tk
 from PIL import Image, ImageTk
 
-
-def create_sprite(sprite):
-    # print(f"P | create_sprite | {sprite}")
-    if isinstance(sprite, str):
-        if sprite.upper() in SHORT_NAME.keys():
-            sprite = SHORT_NAME[sprite.upper()]
-        sprite = sprite.capitalize()
-        if sprite in SHORT_NAME.values():
-            # returns an object of type specified in variable 'sprite'
-            return eval("{classname}()".format(classname=sprite))
-    raise ValueError("invalid sprite name: '{}'".format(sprite))
-
-def get_numeric_notation(rowcol):
-    row, col = rowcol
-    return int(col) - 1, X_AXIS_LABELS.index(row)
-
-
 class Sprite():
     """
     Class that handles displaying the art asset for one game object
