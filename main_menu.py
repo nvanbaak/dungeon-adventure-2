@@ -19,6 +19,7 @@ class MainMenu:
         self.hero_desc = None
         self.name_entry_label = None
         self.name_entry = None
+        self.start_button_label = None
 
         # tk parameters
         self.canvas_width = 900
@@ -38,15 +39,14 @@ class MainMenu:
                 "thief": "Mysterious as he is greedy, the Thief attacks multiple times in a flash of knives."
         }
 
-        # init # switch which line is commented to skip the menu
-        self.start_menu()
-        # self.init_new_game()
+        # init
+        self.build_menu()
 
     ##################################
     #      TK WIDGET CONSTRUCTION    #
     ##################################
 
-    def start_menu(self):
+    def build_menu(self):
         """
         creates and diplays the start menu
         """
@@ -102,7 +102,7 @@ class MainMenu:
             self.canvas.create_window(start_x, start_y, window=start_button)
 
             # label for start button
-            start_button_label = tk.Label(
+            self.start_button_label = tk.Label(
                     master=self.canvas,
                     text="Are you prepared?",
                     font="Optima 15",
@@ -113,7 +113,7 @@ class MainMenu:
 
             start_label_y = (self.canvas_height // 9) * 5
 
-            self.canvas.create_window(start_x, start_label_y, window=start_button_label)
+            self.canvas.create_window(start_x, start_label_y, window=self.start_button_label)
 
         def create_hero_selection_buttons():
             # hero selection
@@ -252,22 +252,19 @@ class MainMenu:
 
         self.update_hero_image()
 
-    def click_button(self):
-        """
-        dummy method
-        """
-        print("YOU DID IT!  YOU CLICKED THE BUTTON!")
-
     def init_new_game(self):
         """
-        gets the selected class and user-supplied character name, then starts a new use using that information.
+        gets the selected class and user-supplied character name, then starts a new game using that information.
         If no name has been entered, the game does not start.
         """
         player_name = self.name_entry.get()
         if player_name == "":
             return
 
+        # close the menu before opening the game window
+        self.root.destroy()
+
         game_root = tk.Tk()
         game_root.title("Dungeon Adventure II: Dungeon Harder")
-        game = View(self, game_root, self.current_hero, player_name)
+        View(self, game_root, self.current_hero, player_name)
         game_root.mainloop()

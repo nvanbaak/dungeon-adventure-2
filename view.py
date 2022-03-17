@@ -21,32 +21,19 @@ class View:
     """
     def __init__(self, parent, root, hero_class, player_name):
 
-        # references
+        # misc object references
         self.parent = parent
-        self.controller = Controller(self, hero_class, player_name)
         self.root = root
+
+        # utility classes
+        self.controller = Controller(self, hero_class, player_name)
+        self.music_player = MusicPlayer()
 
         # define event handler for window close
         self.root.protocol("WM_DELETE_WINDOW", self.on_close_window)
 
-
-        self.sprite_position = None
-
-        # dictionary to store sprite images.
-        # key is filename (e.g, "sprites_image/warrior.png", value is ImageTK PhotoImage object)
-        self.images = {}
-
-        # records x,y position of hero sprite. used for moving sprite (and mirroring image left/right as necessary)
-        self.sprite_xy = (0, 0)
-
-        # for tracking whether hero sprite has moved in opposite direction (such that image should be mirrored)
-        self.sprite_mirror = False
-
-        # instantiates a MusicPlayer object which will be used to play game's soundtrack
-        self.music_player = MusicPlayer()
-
-        # count that ensures sprite sound effects are only played once per room
-        self.sound_effect_play_count = 0
+        # game data
+        self.hero_sprite = None
 
         # boolean to check if player has any vision potions, so that button can be shown/hidden accordingly
         self.vision = False
@@ -54,17 +41,15 @@ class View:
         # boolean to check if player has any health potions, so that button can be shown/hidden accordingly
         self.show_health_button = False
 
-        # for storing canvas width/height after creation, for later use in draw_room()
-        self.canvas_width = 0
-        self.canvas_height = 0
+        # parameters for canvas
+        self.room_size = ROW_COUNT * SQUARE_SIZE
+        self.canvas_width = self.room_size
+        self.canvas_height = self.room_size
 
 
         # draw all elements of board needed to start game (menu, canvas, room, bottom frame & buttons) but no sprites
         self.create_top_menu()
         self.setup_gui()
-
-        # bind the canvas to any mouse click
-        self.canvas.bind("<Button-1>", self.on_square_clicked)
 
         self.start_new_game()
 
@@ -180,19 +165,19 @@ class View:
         Draw all elements of board needed to start game (menu, canvas, room, bottom frame & buttons) but no sprites.
         """
         self.create_canvas()
-        self.draw_room()
         self.create_bottom_frame()
+        self.draw_room()
+        self.canvas.bind("<Button-1>", self.on_square_clicked)
 
     def create_canvas(self):
         """
         Creates the base canvas for the game.
         Parameters can be modified in configurations.py
         """
-        self.canvas_width = NUMBER_OF_COLUMNS * DIMENSION_OF_EACH_SQUARE
-        self.canvas_height = NUMBER_OF_ROWS * DIMENSION_OF_EACH_SQUARE
         self.canvas = Canvas(
             self.root, width=self.canvas_width, height=self.canvas_height, bg=BOARD_COLOR_1)
         self.canvas.pack(padx=8, pady=8)
+        
 
     def create_bottom_frame(self):
         """
@@ -361,6 +346,13 @@ class View:
         self.update_score_label()
 
 
+
+
+
+    ##################################
+    #           UNSORTED             #
+    ##################################
+
     def doorway_refresh(self, hero_dict, clicked):
         sprite = hero_dict[self.sprite_position]
         doors = ["C1", "D1", "E1", "C7", "D7", "E7", "G3", "G4", "G5", "A3", "A4", "A5"]
@@ -409,11 +401,10 @@ class View:
         self.update_score_label()
 
     def calculate_sprite_coordinate(self, row, col):
-        x0 = (col * DIMENSION_OF_EACH_SQUARE) + \
-            int(DIMENSION_OF_EACH_SQUARE / 2)
-        y0 = ((6 - row) * DIMENSION_OF_EACH_SQUARE) + \
-            int(DIMENSION_OF_EACH_SQUARE / 2)
-        # print(f"V | calculate_sprite_coordinates | return {x0}, {y0}")
+        x0 = (col * SQUARE_SIZE) + \
+            int(SQUARE_SIZE / 2)
+        y0 = ((6 - row) * SQUARE_SIZE) + \
+            int(SQUARE_SIZE / 2)
         return (x0, y0)
 
     def on_square_clicked_manual(self, clicked):
@@ -554,13 +545,13 @@ class View:
                 s_obj.visible = False
 
     def get_clicked_row_column(self, event):
-        col_size = row_size = DIMENSION_OF_EACH_SQUARE
+        col_size = row_size = SQUARE_SIZE
         clicked_column = event.x // col_size
         clicked_row = 6 - (event.y // row_size)
         return (clicked_row, clicked_column)
 
     def get_row_column(self, x, y):
-        col_size = row_size = DIMENSION_OF_EACH_SQUARE
+        col_size = row_size = SQUARE_SIZE
         xcol = x // col_size
         xrow = y // row_size
         return (xrow, xcol)

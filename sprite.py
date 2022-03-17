@@ -1,6 +1,6 @@
 from configurations import *
 import tkinter as tk
-import exceptions
+from PIL import Image, ImageTk
 
 
 def create_sprite(sprite):
@@ -12,7 +12,7 @@ def create_sprite(sprite):
         if sprite in SHORT_NAME.values():
             # returns an object of type specified in variable 'sprite'
             return eval("{classname}()".format(classname=sprite))
-    raise exceptions.NameError("invalid sprite name: '{}'".format(sprite))
+    raise ValueError("invalid sprite name: '{}'".format(sprite))
 
 def get_numeric_notation(rowcol):
     row, col = rowcol
@@ -23,19 +23,43 @@ class Sprite():
     """
     Class that handles displaying the art asset for one game object
     """
-    def __init__(self, name, canvas):
+    def __init__(self, name, canvas, position):
         self.name = name # should be identical to a filename in the images folder
         self.canvas : tk.Canvas = canvas
         self.visible = False
-        self.image = None
+        self.image : tk.Image = None
+        self.__mirror = False
+        self.__x_pos, self.__y_pos = position
 
-    def draw(self, x_pos, y_pos):
+    @property
+    def position(self):
+        return (self.__x_pos, self.__y_pos)
+    @position.setter
+    def position(self, xy):
+        self.__x_pos, self.__y_pos = xy
+
+    @property
+    def mirror(self):
+        return self.__mirror
+    @mirror.setter
+    def mirror(self, value):
+        if isinstance(value, bool):
+            self.__mirror = value
+
+
+    def draw(self):
         """
         Creates a PhotoImage object at the specified location on self.canvas.
         Retains a reference for later destruction.
         """
-        self.image = tk.PhotoImage(file=f"sprites_image/{self.name}.png")
-        self.canvas.create_image(x_pos, y_pos, image=self.image, anchor=tk.NW)
+        image_file = Image.open(file=f"sprites_image/{self.name}.png")
+
+        self.image = ImageTk.PhotoImage(file=image_file)
+
+        if self.__mirror:
+            self.image = self.image.transpose(Image.FLIP_LEFT_RIGHT)
+
+        self.canvas.create_image(self.__x_pos, self.__y_pos, image=self.image, anchor=tk.NW)
 
     def erase(self):
         """

@@ -2,9 +2,9 @@
 """
 from configparser import ConfigParser
 
-NUMBER_OF_ROWS = 7
-NUMBER_OF_COLUMNS = 7
-DIMENSION_OF_EACH_SQUARE = 64
+ROW_COUNT = 7
+COL_COUNT = 7
+SQUARE_SIZE = 64
 X_AXIS_LABELS = ('A', 'B', 'C', 'D', 'E', 'F', 'G')
 Y_AXIS_LABELS = (1, 2, 3, 4, 5, 6, 7)
 
