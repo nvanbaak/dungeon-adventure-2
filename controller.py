@@ -5,8 +5,15 @@ import pygame
 class Controller:
 
     def __init__(self, hero="warrior"):
-        # print("C | __init__ | Controller init calls init of Model")
+        """
+        Controller class allows the View class to access the underlying game structure within Model such that it knows what
+        to display.
+        """
         self.model = model.Model(hero)
+        """
+        Controller's __init__() instantiates a Model that can then be accessed by View. Also initializes a pygame object
+        that will be used to play the game's soundtrack.
+        """
         pygame.init()
 
     def accept_view_reference(self, view_ref):
