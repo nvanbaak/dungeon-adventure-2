@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, TOP, PhotoImage, messagebox
+from unicodedata import name
 from PIL import Image, ImageTk, ImageOps
 from controller import Controller
 from configurations import *
@@ -18,9 +19,17 @@ class View:
     """
     View class holds the entirety of the game's GUI elements.
     """
-    def __init__(self, parent, root, controller):
+    def __init__(self, parent, root, hero_class, player_name):
+
+        # references
         self.parent = parent
-        
+        self.controller = Controller(self, hero_class, player_name)
+        self.root = root
+
+        # define event handler for window close
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close_window)
+
+
         self.sprite_position = None
 
         # dictionary to store sprite images.
@@ -44,17 +53,6 @@ class View:
 
         # boolean to check if player has any health potions, so that button can be shown/hidden accordingly
         self.show_health_button = False
-
-        # boolean to track whether background music is on
-        self.music_on = True
-
-        self.controller : Controller = controller
-
-        self.root = root
-
-        # define event handler for window close
-        self.root.protocol("WM_DELETE_WINDOW", self.on_close_window)
-
 
         # for storing canvas width/height after creation, for later use in draw_room()
         self.canvas_width = 0
@@ -275,7 +273,7 @@ class View:
 
     def on_close_window(self):
         """
-        Event handler for window closure event.
+        Event handler for window closure..
         """
         self.music_player.stop_music()
         self.root.destroy()
@@ -356,24 +354,12 @@ class View:
             Refreshes room by checking underlying data and setting relevant sprite objects to "visible".
 
         """
-        # catch event of manual game window close by user
-
         # clear dictionaries, instantiate sprite objects, refresh room by setting relevant sprite objects to 'visible'
         self.controller.reset_default_characters()
-
-        # make sure Controller has a reference to View object (used for gather() and gather_sounds() in Controller)
-        self.send_view_reference_to_controller()
 
         self.draw_all_sprites()
         self.update_score_label()
 
-
-
-
-
-
-    def send_view_reference_to_controller(self):
-        self.controller.accept_view_reference(self)
 
     def doorway_refresh(self, hero_dict, clicked):
         sprite = hero_dict[self.sprite_position]

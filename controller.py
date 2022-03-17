@@ -4,12 +4,13 @@ import pygame
 
 class Controller:
 
-    def __init__(self, hero="warrior", name="player"):
+    def __init__(self, view, hero="warrior", name="player"):
         """
         Controller class allows the View class to access the underlying game structure within Model such that it knows what
         to display.
         """
         self.model = model.Model(hero, name)
+        self.view = view
         pygame.init()
 
     def accept_view_reference(self, view_ref):

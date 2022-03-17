@@ -269,5 +269,5 @@ class MainMenu:
 
         game_root = tk.Tk()
         game_root.title("Dungeon Adventure II: Dungeon Harder")
-        game = View(self, game_root, Controller(self.current_hero, player_name))
+        game = View(self, game_root, self.current_hero, player_name)
         game_root.mainloop()
