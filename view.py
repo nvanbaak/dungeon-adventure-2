@@ -39,6 +39,7 @@ class View():
         self.canvas.bind("<Button-1>", self.on_square_clicked)
         self.root.bind("<Key>", self.on_key_pressed)
         self.vision_window = ""
+        self.visited = {}
         self.start_new_game()
 
     def create_board_base(self):
@@ -307,6 +308,7 @@ class View():
         """
         rm = self.controller.get_room_data()
         door_dict = rm.door_value
+        self.visited[tuple(rm.location)] = True
         self.hide_all_sprites()
 
         hero_dict = self.controller.get_hero_dict()
@@ -403,6 +405,7 @@ class View():
 
     def on_key_pressed(self, event):
         if event.char == "x":
+            print(self.visited.items())
             self.show_entire_map()
 
     def on_square_clicked(self, event):
@@ -636,6 +639,10 @@ class View():
             vrs.append([sprite.create_sprite("exit"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
             # print(f"vrs[{len(vrs)-1}]: exit appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         orig_rm = self.controller.get_room_data()
+        # tup_loc = tuple(rm.location)
+        # print(self.visited[tup_loc])
+        # if self.visited[tup_loc]:
+        #     print(f"room {tup_loc} has been visited!")
         if rm == orig_rm:
             vrs.append([sprite.create_sprite(HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
             # print(f"vrs[{len(vrs)-1}]: hero appended at {(VISION_SQUARE, VISION_SQUARE)}")
