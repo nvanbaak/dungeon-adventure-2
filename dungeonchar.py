@@ -8,15 +8,14 @@ class DungeonCharacter(ABC):
     Abstract base class used for all dungeon characters
     """
 
-    def __init__(self, name, model) -> None:
+    def __init__(self, name, model, **kwargs) -> None:
         self.__name = name
-        self.__hp_total = random.choice(range(50, 100))
-        self.__hp = self.hp_total
-        self.__attack_speed = 1
-        self.__hit_chance = .5
-        self.__damage_min = 20
-        self.__damage_max = 30
         self.__model = model
+        self.__hp = 0
+        self.__damage_min = 0
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+        self.__hp = self.__hp_total
 
     @property
     def name(self):

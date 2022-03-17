@@ -8,7 +8,7 @@ class MockDC(DungeonCharacter):
     A concrete version of the normally abstract DungeonCharacter for testing purposes
     """
     def __init__(self, name, model) -> None:
-        super().__init__(name, model)
+        super().__init__(name, model, hp_total = 100, attack_speed = 1, hit_chance = 0.5, damage_max= 30, damage_min= 20)
 
     def attack_target(self, target):
         return super().attack_target(target)

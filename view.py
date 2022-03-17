@@ -320,8 +320,6 @@ class View:
             self.draw_single_sprite(position, sprite)
 
     def draw_single_sprite(self, position, sprite):
-        # print(f"V | draw_single_sprite | position: {position} | sprite {sprite}")
-        # print(f"V | call get_numeric_notation(position) via Controller")
         UNDER_64 = (64, 64)
         EXTRA_LARGE = (256, 256)
         x, y = self.controller.get_numeric_notation(position)

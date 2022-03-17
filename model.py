@@ -1,11 +1,5 @@
 from dungeon_builder import DungeonBuilder
-from hero import Hero
-from warrior import Warrior
-from priestess import Priestess
-from thief import Thief
-from ogre import Ogre
-from gremlin import Gremlin
-from skeleton import Skeleton
+from hero_factory import HeroFactory
 import sprite
 from configurations import *
 # from game_observer import Publisher, Subscriber
@@ -17,7 +11,7 @@ class Model:
     navigation methods that Controller can access and pass along the results to View for display.
     """
 
-    def __init__(self, hero = "warrior"):
+    def __init__(self, hero = "warrior", name="Player"):
         """
         Model's __init__() instantiates a Dungeon via DungeonBuilder.
         Dungeon size and difficulty level can also be specified here via DungeonBuilder.
@@ -32,11 +26,11 @@ class Model:
         self.dungeon = self.game[0]
         self.curr_pos = self.dungeon.enter_dungeon()
         if hero == "warrior":
-            self.player = Warrior("TestWarrior", self)
+            self.player = HeroFactory.create_warrior(name, self)
         elif hero == "priestess":
-            self.player = Priestess("TestPriestess", self)
+            self.player = HeroFactory.create_priestess(name, self)
         else:
-            self.player = Thief("TestThief", self)
+            self.player = HeroFactory.create_thief(name, self)
         print(self.dungeon.dungeon.winning_path)
         self.dict = {}
         self.hero_dict = {}
