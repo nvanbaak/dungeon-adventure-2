@@ -29,25 +29,21 @@ class View:
         self.controller = Controller(self, hero_class, player_name)
         self.music_player = MusicPlayer()
 
-        # define event handler for window close
-        self.root.protocol("WM_DELETE_WINDOW", self.on_close_window)
-
         # game data
         self.hero_sprite = None
 
-        # boolean to check if player has any vision potions, so that button can be shown/hidden accordingly
+        # TODO these variables will be deprecated
         self.vision = False
-
-        # boolean to check if player has any health potions, so that button can be shown/hidden accordingly
         self.show_health_button = False
 
-        # parameters for canvas
+        # tk parameters
         self.room_size = ROW_COUNT * SQUARE_SIZE
         self.canvas_width = self.room_size
         self.canvas_height = self.room_size
 
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close_window)
 
-        # draw all elements of board needed to start game (menu, canvas, room, bottom frame & buttons) but no sprites
+        # init
         self.create_top_menu()
         self.setup_gui()
 
