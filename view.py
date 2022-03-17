@@ -37,6 +37,7 @@ class View():
         self.canvas_height = 0
         self.create_board_base()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
+        self.root.bind("<Key>", self.on_key_pressed)
         self.vision_window = ""
         self.start_new_game()
 
@@ -400,6 +401,10 @@ class View():
     def process_gatherable_object(self, obj, pos):
         self.controller.gather(obj, pos)
 
+    def on_key_pressed(self, event):
+        if event.char == "x":
+            self.show_entire_map()
+
     def on_square_clicked(self, event):
         try:
             clicked = True
@@ -510,8 +515,8 @@ class View():
     def show_entire_map(self):
         self.create_map_window()
         entire_grid = self.controller.model.dungeon.dungeon.maze
-        for index, val in np.ndenumerate(entire_grid):
-            print(index[0], index[1], val)
+        # for index, val in np.ndenumerate(entire_grid):
+        #     print(index[0], index[1], val)
         row_min = 100
         row_max = 0
         col_min = 100
