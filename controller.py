@@ -21,18 +21,18 @@ class Controller:
         self.__monster_blocking_exit = False
 
         self.door_dict = {
-            "C1" : self.move_down,
-            "D1" : self.move_down,
-            "E1" : self.move_down,
-            "G3" : self.move_right,
-            "G4" : self.move_right,
-            "G5" : self.move_right,
-            "A3" : self.move_left,
-            "A4" : self.move_left,
-            "A5" : self.move_left,
-            "C7" : self.move_up,
-            "D7" : self.move_up,
-            "E7" : self.move_up,
+            "C1" : self.model.move_down,
+            "D1" : self.model.move_down,
+            "E1" : self.model.move_down,
+            "G3" : self.model.move_right,
+            "G4" : self.model.move_right,
+            "G5" : self.model.move_right,
+            "A3" : self.model.move_left,
+            "A4" : self.model.move_left,
+            "A5" : self.model.move_left,
+            "C7" : self.model.move_up,
+            "D7" : self.model.move_up,
+            "E7" : self.model.move_up,
         }
 
         # required for sound effects to function
@@ -43,22 +43,6 @@ class Controller:
 
     def set_model(self, saved_model):
         self.model = saved_model
-
-    ##################################
-    #        MOVEMENT FUNCTIONS      #
-    ##################################
-
-    def move_left(self):
-        return self.model.move_left()
-
-    def move_right(self):
-        return self.model.move_right()
-
-    def move_up(self):
-        return self.model.move_up()
-
-    def move_down(self):
-        return self.model.move_down()
 
     def reset_default_characters(self):
         print("TODO: Make this reset the game state")
@@ -86,8 +70,6 @@ class Controller:
         if alphanum in START_SPRITES_POSITION:
             candidate = START_SPRITES_POSITION[alphanum]
 
-            print(f"candidate: {candidate}")
-
             # fight monster if applicable
             if curr_room.monster:
                 if candidate == curr_room.monster.lower():
@@ -96,24 +78,23 @@ class Controller:
                         move_succeeds = False
 
             # potions
-            print(f"vision potion: {curr_room.vision}")
             if curr_room.vision and candidate == "vision_potion":
                 curr_room.vision = False
                 self.model.player.vision_potions += 1
+                self.announce("Picked up a vision potion!")
 
-            print(f"health potion: {curr_room.heal}")
-            if curr_room.heal and "health_potion" in candidate:
-                curr_room.heal = False
+            print(curr_room.heal)
+            print(candidate)
+            if curr_room.heal and candidate in ["healing_potion_g", "healing_potion_y"]:
+                curr_room.heal = None
                 self.model.player.health_potions += 1
+                self.announce("Picked up a health potion!")
 
             # pillars
-            print(f"pillar: {curr_room.pillar}")
             if curr_room.pillar and "pillar" in candidate:
                 self.model.pillars[curr_room.pillar] = True
+                self.model.game_stats["Pillars"] += f"{curr_room.pillar.upper()} "
                 curr_room.pillar = None
-
-        
-
 
         # resolve room transition if appropriate
         if alphanum in self.door_dict:
@@ -131,11 +112,17 @@ class Controller:
         This method is called when the player enters a new room and resolves whatever game behavior is appropriate for that transition.
         """
         current_room = self.model.get_curr_pos()
+        current_room.is_visited = True
+
         if current_room.monster is not None:
             self.__monster_blocking_exit = True
+
         if current_room.pit:
             self.pit_fall()
-        current_room.is_visited = True
+
+        if current_room.is_exit:
+            self.announce("You've reached the exit!")
+
 
     def gather(self, obj, pos):
         curr_pos = self.model.get_curr_pos()

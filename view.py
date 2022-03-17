@@ -372,7 +372,6 @@ class View:
 
         for game_object in objects_to_display:
             self.sprite_dict[game_object].draw()
-            print(f"drew a {game_object}")
 
     def clear_all_sprites(self):
         """
@@ -413,6 +412,9 @@ class View:
         click_pos = self.click_event_to_alphanum(event)
         if click_pos is None:
             return
+
+        # debug
+        print(click_pos)
 
         # activate_square returns True or False depending on whether the square is empty after resolution
         item_resolved = self.controller.activate_square(click_pos)
@@ -456,80 +458,7 @@ class View:
         clicked a doorway, not if the user appears in the next room in a doorway. It also redraws the room after
         every user click.
         """
-        rm = self.controller.get_room_data()
-        door_dict = rm.door_value
-        self.hide_all_sprites()
 
-        hero_dict = self.controller.get_hero_dict()
-        model_dict = self.controller.get_model_dict()
-
-        sprite_obj = hero_dict[self.sprite_position]
-
-        self.ok_to_leave = False
-
-        if rm.monster:
-            if self.controller.i_fought_a_monster:
-                self.ok_to_leave = True
-            else:
-                self.controller.model.announce(
-                    "You cannot leave until you kill the monster.Click on the monster to start battle")
-                self.ok_to_leave = False
-        else:
-            self.ok_to_leave = True
-
-        if rm.pit:
-            if self.pit_falls == 0:
-                self.controller.pit_fall()
-                self.pit_falls = 1
-
-        if clicked == True and self.ok_to_leave == True:
-            if self.sprite_position == "G5" or self.sprite_position == "G4" or self.sprite_position == "G3":
-                if door_dict["Right"] == True:
-                    self.controller.move_right()
-                    del hero_dict[self.sprite_position]
-                    self.sprite_position = self.sprite_position.replace("G", "A")
-                    hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
-                    self.sound_effect_play_count = 0
-                    self.controller.i_fought_a_monster = False
-                    self.pit_falls = 0
-            elif self.sprite_position == "C1" or self.sprite_position == "D1" or self.sprite_position =="E1":
-                if door_dict["Down"] == True:
-                    self.controller.move_down()
-                    del hero_dict[self.sprite_position]
-                    self.sprite_position = self.sprite_position.replace("1", "7")
-                    hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
-                    self.sound_effect_play_count = 0
-                    self.controller.i_fought_a_monster = False
-                    self.pit_falls = 0
-            elif self.sprite_position == "A5" or self.sprite_position == "A4" or self.sprite_position == "A3":
-                if door_dict["Left"] == True:
-                    self.controller.move_left()
-                    del hero_dict[self.sprite_position]
-                    self.sprite_position = self.sprite_position.replace("A", "G")
-                    hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
-                    self.sound_effect_play_count = 0
-                    self.controller.i_fought_a_monster = False
-                    self.pit_falls = 0
-            elif self.sprite_position == "C7" or self.sprite_position == "D7" or self.sprite_position == "E7":
-                if door_dict["Up"] == True:
-                    self.controller.move_upper()
-                    del hero_dict[self.sprite_position]
-                    self.sprite_position = self.sprite_position.replace("7", "1")
-                    hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
-                    self.sound_effect_play_count = 0
-                    self.controller.i_fought_a_monster = False
-                    self.pit_falls = 0
-            else:
-                pass
-
-        self.canvas.delete("all")
-        self.controller.refresh_room()
-        self.draw_room()
-        self.draw_all_sprites()
         self.sound_effect_play_count = self.sound_effect_play_count + 1
         if self.sound_effect_play_count == 1:
             self.controller.gather_sounds()
@@ -540,15 +469,6 @@ class View:
             self.controller.model.announce(f"{self.controller.model.player} has won the game!")
             self.controller.play("you_win")
             self.ask_new_game()
-
-
-
-    def check_sq_for_gatherable_objects(self, position_of_click):
-        model_dict = self.controller.get_model_dict()
-        for position, value in model_dict.items():
-            if position == position_of_click:
-                s_obj = model_dict[position]
-                return s_obj
 
 
     ##################################

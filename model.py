@@ -66,7 +66,7 @@ class Model:
         Moves the pointer for the current room to the left if a door exists.
         :returns: True if door exists, False otherwise.
         """
-        if self.curr_pos.door_value["left"]:
+        if self.curr_pos.door_value["Left"]:
             self.curr_pos = self.curr_pos.left_room
             return True
         else:
