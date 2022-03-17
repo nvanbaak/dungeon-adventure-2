@@ -417,9 +417,21 @@ class View:
         item_resolved = self.controller.activate_square(click_pos)
 
         if item_resolved:
-            self.hero_sprite.redraw_at(click_pos)
+            # in the case of a room transition, modify player location
+            if self.controller.check_for_room_transition():
+                if "1" in click_pos:
+                    click_pos.replace("1", "7")
+                elif "7" in click_pos:
+                    click_pos.replace("7", "1")
+                elif "A" in click_pos:
+                    click_pos.replace("A", "G")
+                elif "G" in click_pos:
+                    click_pos.replace("G", "A")
 
-        # self.on_square_clicked_manual(clicked)
+                # then redraw the room
+                self.load_current_room()
+
+            self.hero_sprite.redraw_at(click_pos)
 
 
     def pixels_to_alphanum(self, event):

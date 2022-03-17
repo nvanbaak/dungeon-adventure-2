@@ -12,6 +12,11 @@ class Controller:
         """
         self.model = model
         self.view = view
+
+        # used to track whether we've transitioned to a new room since the View class checked last
+        self.__room_transition = False
+
+        # required for sound effects to function
         pygame.init()
 
     def get_model(self):
@@ -41,6 +46,14 @@ class Controller:
 
     def get_numeric_notation(self, rowcol):
         return sprite.get_numeric_notation(rowcol)
+
+    def check_for_room_transition(self):
+        """
+        Returns True if we've transitioned to a new room, False otherwise.
+        """
+        output = self.__room_transition
+        self.__room_transition = False
+        return output
 
     ##################################
     #          GAME MECHANICS        #
