@@ -2,7 +2,6 @@ from dungeon_builder import DungeonBuilder
 from hero_factory import HeroFactory
 from sprite import Sprite
 from configurations import *
-# from game_observer import Publisher, Subscriber
 
 class Model:
 
@@ -22,6 +21,7 @@ class Model:
 
         :param hero:
         """
+        self.hero = hero
         self.game = DungeonBuilder.build_single_dungeon()
         self.dungeon = self.game[0]
         self.curr_pos = self.dungeon.enter_dungeon()
@@ -31,7 +31,6 @@ class Model:
             self.player = HeroFactory.create_priestess(name, self)
         else:
             self.player = HeroFactory.create_thief(name, self)
-        print(self.dungeon.dungeon.winning_path)
         self.dict = {}
         self.hero_dict = {}
         self.pillars = {"A": "", "E": "", "P": "", "I": ""}
@@ -67,13 +66,14 @@ class Model:
         self.dict.clear()
         self.hero_dict.clear()
         # for each sprite at alphanumeric home position specified in configurations.py, instantiate a Sprite object
-        #   of the specified subtype and store it in the dictionary, then pass a Model reference to that Sprite object
-        for position, value in START_SPRITES_POSITION.items():
-            self.dict[position] = sprite.create_sprite(value)
-            self.dict[position].keep_reference(self)
+        #   of the specified subtype and store it in the dictionary
+        for position, name in START_SPRITES_POSITION.items():
+            self.dict[position] = Sprite(name, None, position)
+
         # creates hero Sprite and stores it in a separate dictionary (so that the player can click on the same
         #  alphanumeric space on the board grid without displacing a sprite that is already there)
-        self.hero_dict[HERO_POSITION] = sprite.create_sprite(HERO_SPRITE)
+        self.hero_dict[HERO_POSITION] = Sprite(self.hero, None, HERO_POSITION)
+
         # check underlying model to verify that all sprites are visible that are supposed to be visible
         self.refresh_room()
 
@@ -116,7 +116,6 @@ class Model:
         self.move(initial_pos, final_pos)
 
     def move(self, start_pos, final_pos):
-        # print(f"M | move(start, final) | self[{final_pos}] = self.dict.pop({start_pos}, None)")
         self.hero_dict[final_pos] = self.hero_dict.pop(start_pos, None)
 
     def get_dict(self):

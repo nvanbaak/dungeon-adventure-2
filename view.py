@@ -158,11 +158,10 @@ class View:
 
     def setup_gui(self):
         """
-        Draw all elements of board needed to start game (menu, canvas, room, bottom frame & buttons) but no sprites.
+        Builds base elements of GUI and start
         """
         self.create_canvas()
         self.create_bottom_frame()
-        self.draw_room()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
 
     def create_canvas(self):
@@ -173,7 +172,6 @@ class View:
         self.canvas = Canvas(
             self.root, width=self.canvas_width, height=self.canvas_height, bg=BOARD_COLOR_1)
         self.canvas.pack(padx=8, pady=8)
-        
 
     def create_bottom_frame(self):
         """
@@ -264,6 +262,16 @@ class View:
     #     GRAPHICS FUNCTIONALITY     #
     ##################################
 
+    def start_new_game(self):
+        """
+        Resets game data to a fresh start, then displays the game state.
+        """
+        self.controller.reset_default_characters()
+
+        self.draw_room()
+        self.draw_all_sprites()
+        self.update_score_label()
+
     def draw_room(self):
         """
         Draws game's current room (walls only) based on player's current position in the dungeon.
@@ -327,19 +335,7 @@ class View:
 
 
 
-    def start_new_game(self):
-        """
-        reset_default_characters()
-            Clears dictionaries storing alphanumeric position of hero sprites and other game sprites.
-            Instantiates sprite objects of the type and location specified in configurations.py.
-            Refreshes room by checking underlying data and setting relevant sprite objects to "visible".
 
-        """
-        # clear dictionaries, instantiate sprite objects, refresh room by setting relevant sprite objects to 'visible'
-        self.controller.reset_default_characters()
-
-        self.draw_all_sprites()
-        self.update_score_label()
 
 
 
