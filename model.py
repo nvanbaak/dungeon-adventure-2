@@ -31,8 +31,7 @@ class Model:
             self.player = HeroFactory.create_priestess(name, self)
         else:
             self.player = HeroFactory.create_thief(name, self)
-        self.dict = {}
-        self.hero_dict = {}
+
         self.pillars = {"A": "", "E": "", "P": "", "I": ""}
         self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
         self.dungeon.update_monsters_to_room(self)
@@ -55,53 +54,19 @@ class Model:
     def move_down(self):
         self.curr_pos = self.curr_pos.down_room
 
-    def reset_default_characters(self):
+    def get_current_room_contents(self):
         """
-        Clears dictionaries storing alphanumeric position of hero sprites and other game sprites.
-        Instantiates sprite objects of the type and location specified in configurations.py.
-        Refreshes room by checking underlying data and setting relevant sprite objects to "visible".
+        Returns a list of all items in the room the player is in
         """
+        room_contents = self.curr_pos.room_contents
 
-        # clear dictionaries storing alphanumeric (center = D4) position of hero sprite and other game sprites
-        self.dict.clear()
-        self.hero_dict.clear()
-        # for each sprite at alphanumeric home position specified in configurations.py, instantiate a Sprite object
-        #   of the specified subtype and store it in the dictionary
-        for position, name in START_SPRITES_POSITION.items():
-            self.dict[position] = Sprite(name, None, position)
+        output_list = []
 
-        # creates hero Sprite and stores it in a separate dictionary (so that the player can click on the same
-        #  alphanumeric space on the board grid without displacing a sprite that is already there)
-        self.hero_dict[HERO_POSITION] = Sprite(self.hero, None, HERO_POSITION)
+        for game_object, contents in room_contents.items():
+            if contents:
+                output_list.append(contents)
 
-        # check underlying model to verify that all sprites are visible that are supposed to be visible
-        self.refresh_room()
-
-    def refresh_room(self):
-        for position, value in self.dict.items():
-            spr = value
-            if value.name == "abstraction_pillar" and self.curr_pos.pillar == "a":
-                spr.visible = True
-            if value.name == "encapsulation_pillar" and self.curr_pos.pillar == "e":
-                spr.visible = True
-            if value.name == "polymorphism_pillar" and self.curr_pos.pillar == "p":
-                spr.visible = True
-            if value.name == "inheritance_pillar" and self.curr_pos.pillar == "i":
-                spr.visible = True
-            if value.name == "pit" and self.curr_pos.pit == True:
-                spr.visible = True
-            if value.name == "healing_potion_y" and self.curr_pos.heal == "y":
-                spr.visible = True
-            if value.name == "healing_potion_g" and self.curr_pos.heal == "g":
-                spr.visible = True
-            if value.name == "vision_potion" and self.curr_pos.vision == True:
-                spr.visible = True
-            if value.name == "gremlin" and self.curr_pos.monster == "Gremlin":
-                spr.visible = True
-            if value.name == "skeleton" and self.curr_pos.monster == "Skeleton":
-                spr.visible = True
-            if value.name == "ogre" and self.curr_pos.monster == "Ogre":
-                spr.visible = True
+        return output_list
 
     def get_alphanumeric_position(self, rowcol):
         if self.is_on_board(rowcol):
@@ -117,9 +82,3 @@ class Model:
 
     def move(self, start_pos, final_pos):
         self.hero_dict[final_pos] = self.hero_dict.pop(start_pos, None)
-
-    def get_dict(self):
-        return self.dict
-
-    def get_hero_dict(self):
-        return self.hero_dict

@@ -1,18 +1,18 @@
 import tkinter as tk
 from tkinter import Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, TOP, PhotoImage, messagebox
-from unicodedata import name
+from tkinter import TclError
 from PIL import Image, ImageTk, ImageOps
-from controller import Controller
+
 from configurations import *
-import exceptions
-from tkinter import messagebox
+from controller import Controller
+from model import Model
+from preferenceswindow import PreferencesWindow
+from musicplayer import MusicPlayer
+from sprite import Sprite
+import save_load_game
+
 import sys
 import time
-from preferenceswindow import PreferencesWindow
-import save_load_game
-from sprite import Sprite
-from musicplayer import MusicPlayer
-from tkinter import TclError
 
 
 class View:
@@ -26,11 +26,13 @@ class View:
         self.root = root
 
         # utility classes
-        self.controller = Controller(self, hero_class, player_name)
+        self.model = Model(hero_class, player_name)
+        self.controller = Controller(self, self.model)
         self.music_player = MusicPlayer()
 
         # game data
-        self.hero_sprite = None
+        self.hero_sprite = Sprite(hero_class, self.canvas, HERO_POSITION)
+        self.sprite_dict = {}
 
         # TODO these variables will be deprecated
         self.vision = False
@@ -158,11 +160,13 @@ class View:
 
     def setup_gui(self):
         """
-        Builds base elements of GUI and start
+        Builds the base elements of the GUI
         """
         self.create_canvas()
-        self.create_bottom_frame()
+        self.draw_walls()
+        self.load_sprites()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
+        self.create_bottom_frame()
 
     def create_canvas(self):
         """
@@ -268,38 +272,17 @@ class View:
         """
         self.controller.reset_default_characters()
 
-        self.draw_room()
+        self.draw_doors()
         self.draw_all_sprites()
         self.update_score_label()
 
-    def draw_room(self):
+    def draw_doors(self):
         """
-        Draws game's current room (walls only) based on player's current position in the dungeon.
+        Draws doors where appropriate given the player's current locations.
         """
         room_pointer = self.controller.get_room_data()
         door_dict = room_pointer.door_value
 
-        # draw walls on each side of the room
-        up_wall = (
-                0, 0,
-                self.canvas_width, WALL_WIDTH)
-        down_wall = (
-                0, self.canvas_height - WALL_WIDTH,
-                self.canvas_width, self.canvas_height)
-        left_wall = (
-                0, 0, 
-                WALL_WIDTH, self.canvas_height)
-        right_wall = (
-                self.canvas_width - WALL_WIDTH, 
-                0, self.canvas_height, self.canvas_height)
-
-        for wall in [up_wall, down_wall, left_wall, right_wall]:
-            self.canvas.create_rectangle(
-                    wall[0], wall[1],
-                    wall[2], wall[3],
-                    fill="black")
-
-        # next, fill in the doors if they exist
         door_coords = {
             "Up" : (
                     self.canvas_width//3, 0, 
@@ -321,7 +304,39 @@ class View:
                 self.canvas.create_rectangle(
                         door[0], door[1],
                         door[2], door[3],
-                        fill=BOARD_COLOR_1)
+                        fill=BOARD_COLOR_1,
+                        tags="doors")
+
+    def draw_walls(self):
+        """
+        Draws walls on each side of the room.
+        """
+        up_wall = (
+                0, 0,
+                self.canvas_width, WALL_WIDTH)
+        down_wall = (
+                0, self.canvas_height - WALL_WIDTH,
+                self.canvas_width, self.canvas_height)
+        left_wall = (
+                0, 0, 
+                WALL_WIDTH, self.canvas_height)
+        right_wall = (
+                self.canvas_width - WALL_WIDTH, 
+                0, self.canvas_height, self.canvas_height)
+
+        for wall in [up_wall, down_wall, left_wall, right_wall]:
+            self.canvas.create_rectangle(
+                    wall[0], wall[1],
+                    wall[2], wall[3],
+                    fill="black")
+
+    def erase_doors(self):
+        """
+        removes all doors from the canvas;
+        this prevents memory leaks from drawing
+        the same door on top of itself in every room
+        """
+        self.canvas.delete("doors")
 
     def reload_colors(self, color):
         """
@@ -332,72 +347,34 @@ class View:
         # self.canvas.pack()
         self.draw_all_sprites()
 
-
-
-
-
-
-
-
-
-
-    ##################################
-    #           UNSORTED             #
-    ##################################
-
-    def doorway_refresh(self, hero_dict, clicked):
-        sprite = hero_dict[self.sprite_position]
-        doors = ["C1", "D1", "E1", "C7", "D7", "E7", "G3", "G4", "G5", "A3", "A4", "A5"]
-        if sprite.name == "warrior" and self.sprite_position in doors:
-            for doorway in doors:
-                if self.sprite_position == doorway:
-                    self.on_square_clicked_manual(False)
+    def load_sprites(self):
+        """
+        Instantiates a Sprite object for each type of object in the dungeon
+        """
+        for position, name in START_SPRITES_POSITION.items():
+            self.sprite_dict[name] = Sprite(name, self.canvas, position)
 
     def draw_all_sprites(self):
-        for position, sprite in self.controller.get_all_peices_on_board():
-            self.draw_single_sprite(position, sprite)
-        for position, sprite in self.controller.get_hero_dict_items():
-            self.draw_single_sprite(position, sprite)
+        """
+        Gets a list of all game objeects in the current room and displays the corresponding sprites
+        """
+        objects_to_display = self.model.get_current_room_contents()
 
-    def draw_single_sprite(self, position, sprite):
-        UNDER_64 = (64, 64)
-        EXTRA_LARGE = (256, 256)
-        x, y = self.controller.get_numeric_notation(position)
-        if sprite:
-            filename = "sprites_image/{}.png".format(
-                sprite.name.lower())
-            image = Image.open(filename)
-            w, h = image.size
-            if sprite.name == "pit":
-                image = ImageOps.contain(image, EXTRA_LARGE)
-            else:
-                image = ImageOps.contain(image, UNDER_64)
+        for game_object in objects_to_display:
+            self.sprite_dict[game_object].draw()
 
-            if self.sprite_mirror == True and sprite.name == "warrior":
-                image = image.transpose(Image.FLIP_LEFT_RIGHT)
-            self.images[filename] = ImageTk.PhotoImage(image)
+    def clear_all_sprites(self):
+        """
+        Deletes all sprites from the canvas.  Used when transitioning between rooms.
+        """
+        self.canvas.delete("sprites")
 
-            x0, y0 = self.calculate_sprite_coordinate(x, y)
-            ci = self.canvas.create_image(x0, y0, image=self.images[
-                                     filename], anchor="c")
-            if sprite.name == "warrior":
-                sprite.visible = True
-            if sprite.visible == False:
-                self.canvas.itemconfig(ci, state="hidden")
-            else:
-                self.canvas.itemconfig(ci, state="normal")
-            # print(f"ADD OTHER HERO TYPES")
-            if sprite.name == "warrior":
-                self.sprite_position = position
-                self.sprite_xy = (x0, y0)
-        self.update_score_label()
 
-    def calculate_sprite_coordinate(self, row, col):
-        x0 = (col * SQUARE_SIZE) + \
-            int(SQUARE_SIZE / 2)
-        y0 = ((6 - row) * SQUARE_SIZE) + \
-            int(SQUARE_SIZE / 2)
-        return (x0, y0)
+
+
+    ##################################
+    # GAME CONTROLS (TODO move these to controller)
+    ##################################
 
     def on_square_clicked_manual(self, clicked):
         """
@@ -490,16 +467,6 @@ class View:
             self.controller.play("you_win")
             self.ask_new_game()
 
-    def check_sq_for_gatherable_objects(self, position_of_click):
-        model_dict = self.controller.get_model_dict()
-        for position, value in model_dict.items():
-            if position == position_of_click:
-                s_obj = model_dict[position]
-                return s_obj
-
-    def process_gatherable_object(self, obj, pos):
-        self.controller.gather(obj, pos)
-
     def on_square_clicked(self, event):
         try:
             clicked = True
@@ -524,6 +491,73 @@ class View:
 
         except TclError:
             pass
+
+    def check_sq_for_gatherable_objects(self, position_of_click):
+        model_dict = self.controller.get_model_dict()
+        for position, value in model_dict.items():
+            if position == position_of_click:
+                s_obj = model_dict[position]
+                return s_obj
+
+
+
+    ##################################
+    #           UNSORTED             #
+    ##################################
+
+    def doorway_refresh(self, hero_dict, clicked):
+        sprite = hero_dict[self.sprite_position]
+        doors = ["C1", "D1", "E1", "C7", "D7", "E7", "G3", "G4", "G5", "A3", "A4", "A5"]
+        if sprite.name == "warrior" and self.sprite_position in doors:
+            for doorway in doors:
+                if self.sprite_position == doorway:
+                    self.on_square_clicked_manual(False)
+
+    def draw_all_sprites(self):
+        for position, sprite in self.controller.get_all_peices_on_board():
+            self.draw_single_sprite(position, sprite)
+        for position, sprite in self.controller.get_hero_dict_items():
+            self.draw_single_sprite(position, sprite)
+
+    def draw_single_sprite(self, position, sprite):
+        UNDER_64 = (64, 64)
+        EXTRA_LARGE = (256, 256)
+        x, y = self.controller.get_numeric_notation(position)
+        if sprite:
+            filename = "sprites_image/{}.png".format(
+                sprite.name.lower())
+            image = Image.open(filename)
+            w, h = image.size
+            if sprite.name == "pit":
+                image = ImageOps.contain(image, EXTRA_LARGE)
+            else:
+                image = ImageOps.contain(image, UNDER_64)
+
+            if self.sprite_mirror == True and sprite.name == "warrior":
+                image = image.transpose(Image.FLIP_LEFT_RIGHT)
+            self.images[filename] = ImageTk.PhotoImage(image)
+
+            x0, y0 = self.calculate_sprite_coordinate(x, y)
+            ci = self.canvas.create_image(x0, y0, image=self.images[
+                                     filename], anchor="c")
+            if sprite.name == "warrior":
+                sprite.visible = True
+            if sprite.visible == False:
+                self.canvas.itemconfig(ci, state="hidden")
+            else:
+                self.canvas.itemconfig(ci, state="normal")
+            # print(f"ADD OTHER HERO TYPES")
+            if sprite.name == "warrior":
+                self.sprite_position = position
+                self.sprite_xy = (x0, y0)
+        self.update_score_label()
+
+
+
+
+    def process_gatherable_object(self, obj, pos):
+        self.controller.gather(obj, pos)
+
 
     def hide_all_sprites(self):
 
