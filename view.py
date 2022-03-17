@@ -390,6 +390,8 @@ class View:
 
         info_fields = []
         for key, value in game_stats.items():
+            if value == "":
+                value = "None"
             info_fields.append(f"{key}: {value}")
         label_text = " | ".join(info_fields)
 
@@ -408,8 +410,7 @@ class View:
         """
         Event handling for click event.  Resolves any object interactions in the clicked square and then moves the player to the square if no object remains there.
         """
-
-        click_pos = self.pixels_to_alphanum(event)
+        click_pos = self.click_event_to_alphanum(event)
         if click_pos is None:
             return
 
@@ -419,6 +420,7 @@ class View:
         if item_resolved:
             # in the case of a room transition, modify player location
             if self.controller.check_for_room_transition():
+                print("changing rooms")
                 if "1" in click_pos:
                     click_pos.replace("1", "7")
                 elif "7" in click_pos:
@@ -427,16 +429,16 @@ class View:
                     click_pos.replace("A", "G")
                 elif "G" in click_pos:
                     click_pos.replace("G", "A")
+                print(f"new potision {click_pos}")
 
                 # then redraw the room
                 self.load_current_room()
 
             self.hero_sprite.redraw_at(click_pos)
 
-
-    def pixels_to_alphanum(self, event):
+    def click_event_to_alphanum(self, event):
         """
-        Given a click event, returns the alphanumeric position that was clicked
+        Given a click event, returns the alphanumeric position that was clicked.  Returns None if the player clicked out of bounds.
         """
         col_size = row_size = SQUARE_SIZE
         clicked_column = event.x // col_size
@@ -550,40 +552,6 @@ class View:
             if position == position_of_click:
                 s_obj = model_dict[position]
                 return s_obj
-
-
-
-    ##################################
-    #           UNSORTED             #
-    ##################################
-
-    def doorway_refresh(self, hero_dict, clicked):
-        sprite = hero_dict[self.sprite_position]
-        doors = ["C1", "D1", "E1", "C7", "D7", "E7", "G3", "G4", "G5", "A3", "A4", "A5"]
-        if sprite.name == "warrior" and self.sprite_position in doors:
-            for doorway in doors:
-                if self.sprite_position == doorway:
-                    self.on_square_clicked_manual(False)
-
-
-        self.update_score_label()
-
-    def process_gatherable_object(self, obj, pos):
-        self.controller.gather(obj, pos)
-
-
-
-
-
-    def shift(self, start_pos, end_pos):
-        self.controller.pre_move_validation(start_pos, end_pos)
- 
-
-
-
-
-
-
 
 
     ##################################

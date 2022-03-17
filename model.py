@@ -62,34 +62,55 @@ class Model:
         return self.curr_pos
 
     def move_left(self):
-        self.curr_pos = self.curr_pos.left_room
+        """
+        Moves the pointer for the current room to the left if a door exists.
+        :returns: True if door exists, False otherwise.
+        """
+        if self.curr_pos.left_room:
+            self.curr_pos = self.curr_pos.left_room
+            return True
+        else:
+            return False
 
     def move_right(self):
-        self.curr_pos = self.curr_pos.right_room
+        """
+        Moves the pointer for the current room to the right if a door exists.
+        :returns: True if door exists, False otherwise.
+        """
+        if self.curr_pos.right_room:
+            self.curr_pos = self.curr_pos.right_room
+            return True
+        else:
+            return False
 
     def move_up(self):
-        self.curr_pos = self.curr_pos.upper_room
+        """
+        Moves the pointer for the current room to the north if a door exists.
+        :returns: True if door exists, False otherwise.
+        """
+        if self.curr_pos.upper_room:
+            self.curr_pos = self.curr_pos.upper_room
+            return True
+        else:
+            return False
 
     def move_down(self):
-        self.curr_pos = self.curr_pos.down_room
+        """
+        Moves the pointer for the current room to the down if a door exists.
+        :returns: True if door exists, False otherwise.
+        """
+        if self.curr_pos.down_room:
+            self.curr_pos = self.curr_pos.down_room
+            return True
+        else:
+            return False
 
     def get_current_room_contents(self):
         """
         Returns a list of all items in the room the player is in
         """
-        room_contents = self.curr_pos.room_contents
-
-        output_list = []
-
-        for game_object, contents in room_contents.items():
-            if contents:
-                output_list.append(contents)
-
-        return output_list
-
-
-
-
+        current_room = self.curr_pos
+        return current_room.list_room_contents()
 
     def pre_move_validation(self, initial_pos, final_pos):
         self.move(initial_pos, final_pos)

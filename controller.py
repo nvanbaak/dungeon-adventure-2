@@ -1,7 +1,7 @@
-from numpy import block
-import model
-import sprite
+from tkinter.tix import Tree
 import pygame
+
+from configurations import START_SPRITES_POSITION
 
 class Controller:
 
@@ -15,6 +15,24 @@ class Controller:
 
         # used to track whether we've transitioned to a new room since the View class checked last
         self.__room_transition = False
+
+        # gets set to True upon entering a room with a monster
+        self.__monster_blocking_exit = False
+
+        self.door_dict = {
+            "C1" : self.move_down,
+            "D1" : self.move_down,
+            "E1" : self.move_down,
+            "G3" : self.move_right,
+            "G4" : self.move_right,
+            "G5" : self.move_right,
+            "A3" : self.move_left,
+            "A4" : self.move_left,
+            "A5" : self.move_left,
+            "C7" : self.move_up,
+            "D7" : self.move_up,
+            "E7" : self.move_up,
+        }
 
         # required for sound effects to function
         pygame.init()
@@ -35,7 +53,7 @@ class Controller:
     def move_right(self):
         return self.model.move_right()
 
-    def move_upper(self):
+    def move_up(self):
         return self.model.move_up()
 
     def move_down(self):
@@ -43,9 +61,6 @@ class Controller:
 
     def reset_default_characters(self):
         print("TODO: Make this reset the game state")
-
-    def get_numeric_notation(self, rowcol):
-        return sprite.get_numeric_notation(rowcol)
 
     def check_for_room_transition(self):
         """
@@ -63,7 +78,40 @@ class Controller:
         """
         Resolves whatever actions are appropriate for the objects located at the designated square.
         """
-        return True
+        move_succeeds = True
+        curr_room = self.model.get_curr_pos()
+
+        if alphanum in START_SPRITES_POSITION:
+            candidate = START_SPRITES_POSITION[alphanum]
+
+            if curr_room.monster:
+                if candidate == curr_room.monster.lower():
+                    monster_hp = self.combat()
+                    if monster_hp > 0:
+                        move_succeeds = False
+
+        if alphanum in self.door_dict:
+            if self.__monster_blocking_exit:
+                self.announce("Your debilitating sense of honor won't let you leave without fighting this room's guardian at least once!")
+            else:
+                self.__room_transition = self.door_dict[alphanum]()
+                if self.__room_transition:
+                    self.resolve_transition()
+
+        return move_succeeds
+
+    def resolve_transition(self):
+        """
+        This method is called when the player enters a new room and resolves whatever game behavior is appropriate for that transition.
+        """
+        current_room = self.model.get_curr_pos()
+        if current_room.monster is not None:
+            self.__monster_blocking_exit = True
+        if current_room.pit:
+            self.pit_fall()
+
+
+
 
     def gather(self, obj, pos):
         curr_pos = self.model.get_curr_pos()
@@ -147,27 +195,44 @@ class Controller:
             self.play("pillar")
         if curr_pos.monster == "Gremlin" or curr_pos.monster == "Ogre" or curr_pos.monster == "Skeleton":
             self.play("monster")
-        if curr_pos.pit == True:
-            self.play("welcome_pit")
         if self.model.player.hp <= 0:
             self.play("game_over")
             self.view.ask_new_game()
 
     def combat(self):
         curr_pos = self.model.get_curr_pos()
-        if curr_pos.monster == "Gremlin" or curr_pos.monster == "Skeleton" or curr_pos.monster == "Ogre":
-            print(f"Pre-battle hit points: Player: {self.model.player.hp} | {curr_pos.monster} | {curr_pos.monster_obj.hp}")
-            self.model.player.combat(curr_pos.monster_obj)
-            print(f"Post-battle hit points: Player: {self.model.player.hp} | {curr_pos.monster} | {curr_pos.monster_obj.hp}")
-            if self.model.player.hp <= 0:
-                self.model.game_stats["Hit Points"] = self.model.player.hp
-                self.view.update_score_label()
-                self.play("game_over")
-                self.view.ask_new_game()
-            return curr_pos.monster_obj.hp
+        monster_name = curr_pos.monster
+
+        # fighting the monster enables escape
+        self.__monster_blocking_exit = False
+
+        # resolve combat
+        self.announce(f"Pre-battle hit points: Player: {self.model.player.hp} | {monster_name} | {curr_pos.monster_obj.hp}")
+
+        self.model.player.combat(curr_pos.monster_obj)
+
+        self.announce(f"Post-battle hit points: Player: {self.model.player.hp} | {monster_name} | {curr_pos.monster_obj.hp}")
+
+        # resolve monster death is applicable
+        monster_hp = curr_pos.monster_obj.hp
+        if monster_hp <= 0:
+            self.announce(f"{monster_name} was defeated!")
+            # curr_pos.monster_obj = None
+            curr_pos.monster = None 
+            self.view.load_current_room()
+
+        # resolve player death if applicable
+        if self.model.player.hp <= 0:
+            self.model.game_stats["Hit Points"] = self.model.player.hp
+            self.view.update_score_label()
+            self.play("game_over")
+            self.view.ask_new_game()
+
+        return monster_hp
 
     def pit_fall(self):
         self.model.player.fall_into_pit()
+        self.play("welcome_pit")
         if self.model.player.hp <= 0:
             self.model.game_stats["Hit Points"] = self.model.player.hp
             self.view.update_score_label()
@@ -209,3 +274,8 @@ class Controller:
         if curr_pos.pillar == "i":
             curr_pos.pillar = None
 
+    def announce(self, message):
+        """
+        TODO passes announcement to game log
+        """
+        print(message)
