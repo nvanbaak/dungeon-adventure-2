@@ -137,35 +137,40 @@ class View:
         # get dictionary of this room's doors to neighboring rooms
         door_dict = rm.door_value
 
-        # wall width to be used in drawing grid of rooms
-        WALL_WIDTH = 25
+        # draw walls on each side of the room
+        up_wall = (0, 0, self.canvas_width, WALL_WIDTH)
+        down_wall = (0, self.canvas_height - WALL_WIDTH, self.canvas_width, self.canvas_height)
+        left_wall = (0, 0, WALL_WIDTH, self.canvas_height)
+        right_wall = (self.canvas_width - WALL_WIDTH, 0, self.canvas_height, self.canvas_height)
 
-        # loop through door dictionary and draw doors if they exist, full walls if not
-        # (doors are full walls with the center 1/3 removed)
-        for key, value in door_dict.items():
-            if key == "Up" and value == True:
-                self.canvas.create_rectangle(0, 0, self.canvas_width/3, WALL_WIDTH, fill="black")
-                self.canvas.create_rectangle((2 * self.canvas_width)/3, 0, self.canvas_width, WALL_WIDTH, fill="black")
-            elif key == "Up" and value == False:
-                self.canvas.create_rectangle(0, 0, self.canvas_width, WALL_WIDTH, fill="black")
-            if key == "Down" and value == True:
-                self.canvas.create_rectangle(0, self.canvas_height - WALL_WIDTH, self.canvas_width/3, self.canvas_height, fill="black")
-                self.canvas.create_rectangle((2 * self.canvas_width)/3, self.canvas_height - WALL_WIDTH, self.canvas_width, self.canvas_height, fill="black")
-            elif key == "Down" and value == False:
-                self.canvas.create_rectangle(0, self.canvas_height - WALL_WIDTH, self.canvas_width, self.canvas_height, fill="black")
-            if key == "Left" and value == True:
-                self.canvas.create_rectangle(0, 0, WALL_WIDTH, self.canvas_height/3, fill="black")
-                self.canvas.create_rectangle(0, (2 * self.canvas_height)/3, WALL_WIDTH, self.canvas_height, fill="black")
-            elif key == "Left" and value == False:
-                self.canvas.create_rectangle(0, 0, WALL_WIDTH, self.canvas_height, fill="black")
-            if key == "Right" and value == True:
-                self.canvas.create_rectangle(self.canvas_width - WALL_WIDTH, 0, self.canvas_width, self.canvas_height/3, fill="black")
-                self.canvas.create_rectangle(self.canvas_width - WALL_WIDTH, (2 * self.canvas_height)/3, self.canvas_width, self.canvas_height, fill="black")
-            elif key == "Right" and value == False:
-                self.canvas.create_rectangle(self.canvas_width - WALL_WIDTH, 0, self.canvas_height, self.canvas_height, fill="black")
-            else:
-                pass
-            self.canvas.pack()
+        for wall in [up_wall, down_wall, left_wall, right_wall]:
+            self.canvas.create_rectangle(wall[0], wall[1], wall[2], wall[3], fill="black")
+
+        # next, fill in the doors if they exist
+        door_coords = {
+            "Up" : (
+                    self.canvas_width//3, 0, 
+                    2 * self.canvas_width//3, WALL_WIDTH),
+            "Down" : (
+                    self.canvas_width//3, self.canvas_height - WALL_WIDTH,
+                    2 * self.canvas_width//3, self.canvas_height),
+            "Left" : (
+                    0, self.canvas_height//3,
+                    WALL_WIDTH, 2 * self.canvas_height//3),
+            "Right" : (
+                    self.canvas_width - WALL_WIDTH, self.canvas_height//3,
+                    self.canvas_width, 2 * self.canvas_height//3
+            )
+        }
+
+        for dir in ["Up", "Down", "Left", "Right"]:
+            if door_dict[dir]:
+                door = door_coords[dir]
+                self.canvas.create_rectangle(
+                            door[0], door[1], door[2], door[3],
+                            fill=BOARD_COLOR_1)
+  
+
         # get the game score from Model so that it will be accurate when scoreboard is refreshed
         self.controller.load_hit_points()
 

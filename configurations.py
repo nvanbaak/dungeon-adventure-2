@@ -8,6 +8,8 @@ DIMENSION_OF_EACH_SQUARE = 64
 X_AXIS_LABELS = ('A', 'B', 'C', 'D', 'E', 'F', 'G')
 Y_AXIS_LABELS = (1, 2, 3, 4, 5, 6, 7)
 
+WALL_WIDTH = 25
+
 HERO_SPRITE = "w"
 HERO_POSITION = "D4"
 
@@ -20,6 +22,9 @@ SHORT_NAME = {'W': 'Warrior',  'P': 'Priestess',  'T': 'Thief',  'O': 'Ogre', 'G
               'AP': 'Abstraction_pillar', 'EP': 'Encapsulation_pillar', 'IP': 'Inheritance_pillar',
               'PP': 'Polymorphism_pillar', 'PT': 'Pit', 'HY': 'Healing_potion_y', 'HG': 'Healing_potion_g',
               'V': 'Vision_potion', 'E': 'Entrance', 'EX': 'Exit'}
+
+
+
 
 '''
 User Modifiable Options
