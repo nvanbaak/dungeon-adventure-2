@@ -66,7 +66,7 @@ class Model:
         Moves the pointer for the current room to the left if a door exists.
         :returns: True if door exists, False otherwise.
         """
-        if self.curr_pos.left_room:
+        if self.curr_pos.door_value["left"]:
             self.curr_pos = self.curr_pos.left_room
             return True
         else:
@@ -77,7 +77,7 @@ class Model:
         Moves the pointer for the current room to the right if a door exists.
         :returns: True if door exists, False otherwise.
         """
-        if self.curr_pos.right_room:
+        if self.curr_pos.door_value["Right"]:
             self.curr_pos = self.curr_pos.right_room
             return True
         else:
@@ -88,7 +88,7 @@ class Model:
         Moves the pointer for the current room to the north if a door exists.
         :returns: True if door exists, False otherwise.
         """
-        if self.curr_pos.upper_room:
+        if self.curr_pos.door_value["Up"]:
             self.curr_pos = self.curr_pos.upper_room
             return True
         else:
@@ -99,7 +99,7 @@ class Model:
         Moves the pointer for the current room to the down if a door exists.
         :returns: True if door exists, False otherwise.
         """
-        if self.curr_pos.down_room:
+        if self.curr_pos.door_value["Down"]:
             self.curr_pos = self.curr_pos.down_room
             return True
         else:

@@ -110,9 +110,6 @@ class Controller:
         if current_room.pit:
             self.pit_fall()
 
-
-
-
     def gather(self, obj, pos):
         curr_pos = self.model.get_curr_pos()
         if obj.name == "healing_potion_y":

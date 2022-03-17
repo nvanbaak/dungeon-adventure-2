@@ -420,16 +420,14 @@ class View:
         if item_resolved:
             # in the case of a room transition, modify player location
             if self.controller.check_for_room_transition():
-                print("changing rooms")
                 if "1" in click_pos:
-                    click_pos.replace("1", "7")
+                    click_pos = click_pos.replace("1", "7")
                 elif "7" in click_pos:
-                    click_pos.replace("7", "1")
+                    click_pos = click_pos.replace("7", "1")
                 elif "A" in click_pos:
-                    click_pos.replace("A", "G")
+                    click_pos = click_pos.replace("A", "G")
                 elif "G" in click_pos:
-                    click_pos.replace("G", "A")
-                print(f"new potision {click_pos}")
+                    click_pos = click_pos.replace("G", "A")
 
                 # then redraw the room
                 self.load_current_room()
