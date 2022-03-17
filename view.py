@@ -674,8 +674,14 @@ class View():
             im = Image.open(filename)
             image = ImageOps.contain(im, UNDER_100)
             ph = ImageTk.PhotoImage(image, master=canvas)
-            spr_start_x = spr_start_x + WALL_CLEARANCE + rm_start_x
-            spr_start_y = spr_start_y + WALL_CLEARANCE + rm_start_y
+            if spr_start_x == 0:
+                # bordering left wall
+                spr_start_x = spr_start_x + WALL_CLEARANCE
+            if spr_start_y == 0:
+                # bordering top wall
+                spr_start_y = spr_start_y + WALL_CLEARANCE
+            spr_start_x = spr_start_x + rm_start_x
+            spr_start_y = spr_start_y + rm_start_y
             label = tk.Label(canvas, image=ph, bg=self.board_color_1)
             label.config(width=UNDER_100[0], height=UNDER_100[1])
             label.image = ph
