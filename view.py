@@ -189,6 +189,10 @@ class View():
 
     def use_health(self):
         self.controller.use_health_potion()
+        self.controller.model.game_stats["Health Potions"] = self.controller.model.player.health_potions
+        self.controller.model.game_stats["Hit Points"] = self.controller.model.player.hp
+        if self.controller.model.player.health_potions < 1:
+            self.health_button.pack_forget()
         self.update_score_label()
 
     def draw_room(self):
@@ -230,7 +234,6 @@ class View():
         self.draw_all_sprites()
         self.update_score_label()
         # self.info_label.config(text="")
-        self.show_entire_map()
 
     def on_close_window(self, root):
         root.destroy()
@@ -384,6 +387,7 @@ class View():
         if rm.is_exit == True and m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and m.pillars["I"] == True:
             self.controller.model.announce(f"{self.controller.model.player} has won the game!")
             self.controller.play("you_win")
+            self.show_entire_map()
             self.ask_new_game()
 
     def check_sq_for_gatherable_objects(self, position_of_click):
@@ -404,9 +408,13 @@ class View():
             position_of_click = self.controller.get_alphanumeric_position(
                 (clicked_row, clicked_column))
 
-            gatherable_obj = self.check_sq_for_gatherable_objects(position_of_click)
-            if gatherable_obj:
-                self.process_gatherable_object(gatherable_obj, position_of_click)
+            rm = self.controller.get_room_data()
+            if rm.is_entrance:
+                pass
+            else:
+                gatherable_obj = self.check_sq_for_gatherable_objects(position_of_click)
+                if gatherable_obj:
+                    self.process_gatherable_object(gatherable_obj, position_of_click)
 
             self.shift(self.sprite_position, position_of_click)
             self.sprite_position = position_of_click
@@ -468,6 +476,7 @@ class View():
         if rm.is_exit == True and m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and \
                 m.pillars["I"] == True:
             lbl_txt = "Y O U  W I N !!!!!"
+            self.info_label["text"] = lbl_txt
         self.info_label["text"] = lbl_txt
 
     def use_vision(self):
@@ -508,9 +517,9 @@ class View():
         col_min = 100
         col_max = 0
         grid_h = entire_grid.shape[0]
-        print(f"grid height (shape[0]): {grid_h}")
+        # print(f"grid height (shape[0]): {grid_h}")
         grid_w = entire_grid.shape[1]
-        print(f"grid width (shape[1]): {grid_w}")
+        # print(f"grid width (shape[1]): {grid_w}")
         # print(f"for r in range (0, len(entire_grid[0]): {len(entire_grid[0])}")
         # print(f"for c in range (0, len(entire_grid[1]): {len(entire_grid[1])}")
         # for r in range(0, len(entire_grid[0])-1):
@@ -518,7 +527,7 @@ class View():
         for r in range(0, grid_h):
             for c in range(0, grid_w):
                 if entire_grid[r][c]:
-                    print(f"entire_grid[{r}][{c}]: {entire_grid[r][c]}: {entire_grid[r][c].location}")
+                    # print(f"entire_grid[{r}][{c}]: {entire_grid[r][c]}: {entire_grid[r][c].location}")
                     row_min = min(row_min, entire_grid[r][c].location[0])
                     row_max = max(row_max, entire_grid[r][c].location[0])
                     col_min = min(col_min, entire_grid[r][c].location[1])
@@ -526,11 +535,11 @@ class View():
                     self.draw_vision_room(entire_grid[r][c], c, r, "map")
                 else:
                     pass
-        print(f"row_min: {row_min}")
-        print(f"row_max: {row_max}")
-        print(f"col_min: {col_min}")
-        print(f"col_max: {col_max}")
-        print(" ")
+        # print(f"row_min: {row_min}")
+        # print(f"row_max: {row_max}")
+        # print(f"col_min: {col_min}")
+        # print(f"col_max: {col_max}")
+        # print(" ")
 
     def draw_vision_room(self, rm, col, row, type):
         #these will be unnecessary after show_entire_map is called from the end of the game
@@ -554,82 +563,82 @@ class View():
             size = 300
 
         if type == "map":
-            print(f"The screen width is: {self.map_canvas_width}")
-            print(f"The screen height is: {self.map_canvas_height}")
+            # print(f"The screen width is: {self.map_canvas_width}")
+            # print(f"The screen height is: {self.map_canvas_height}")
             entire_grid = self.controller.model.dungeon.dungeon.maze
             grid_h = entire_grid.shape[0]
             grid_w = entire_grid.shape[1]
-            print(f"The grid with is {grid_w}")
-            print(f"The grid height is {grid_h}")
+            # print(f"The grid with is {grid_w}")
+            # print(f"The grid height is {grid_h}")
             size = int(.92 * (min(self.map_canvas_width/grid_w, self.map_canvas_height/grid_h)))
-            print(f"Maze is wider than height, so square size {size} should be smaller than {int(self.map_canvas_height/grid_h)}")
-            print(f"Maze is taller than wide, so square size {size} should be smaller than {int(self.map_canvas_width/grid_w)}")
+            # print(f"Maze is wider than height, so square size {size} should be smaller than {int(self.map_canvas_height/grid_h)}")
+            # print(f"Maze is taller than wide, so square size {size} should be smaller than {int(self.map_canvas_width/grid_w)}")
             vision_room_width = size
             vision_room_height = size
             canvas = self.map_canvas
             ROWS = grid_h
             COLS = grid_w
             vision_sq_dim = int(vision_room_width / 3)
-            print(f"ROWS: {ROWS}")
-            print(f"COLS: {COLS}")
-            print(f"vision square dimension: {vision_sq_dim}")
+            # print(f"ROWS: {ROWS}")
+            # print(f"COLS: {COLS}")
+            # print(f"vision square dimension: {vision_sq_dim}")
 
         vx = col * vision_room_width
         vy = row * vision_room_height
-        print(f"vx: {vx}")
-        print(f"vy: {vy}")
+        # print(f"vx: {vx}")
+        # print(f"vy: {vy}")
 
         vrs = []
         VISION_SQUARE = vision_sq_dim
-        print(f"room location: {rm.location}")
+        # print(f"room location: {rm.location}")
         if rm.heal == "y":
             vrs.append([sprite.create_sprite("healing_potion_y"), 0, 0])
-            print(f"vrs[{len(vrs)-1}]: healing potion appended at {(0, 0)}")
+            # print(f"vrs[{len(vrs)-1}]: healing potion appended at {(0, 0)}")
         if rm.heal == "g":
             vrs.append([sprite.create_sprite("healing_potion_g"), 0, 2 * VISION_SQUARE])
-            print(f"vrs[{len(vrs)-1}]: healing potion appended at {(0, 2 * VISION_SQUARE)}")
+            # print(f"vrs[{len(vrs)-1}]: healing potion appended at {(0, 2 * VISION_SQUARE)}")
         if rm.vision == True:
             vrs.append([sprite.create_sprite("vision_potion"), 0, 1 * VISION_SQUARE])
-            print(f"vrs[{len(vrs)-1}]: vision potion appended at {(0, 1 * VISION_SQUARE)}")
+            # print(f"vrs[{len(vrs)-1}]: vision potion appended at {(0, 1 * VISION_SQUARE)}")
         if rm.pillar == "a":
             vrs.append([sprite.create_sprite("abstraction_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-            print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
+            # print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         if rm.pillar == "e":
             vrs.append([sprite.create_sprite("encapsulation_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-            print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
+            # print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         if rm.pillar == "p":
             vrs.append([sprite.create_sprite("polymorphism_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-            print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
+            # print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         if rm.pillar == "i":
             vrs.append([sprite.create_sprite("inheritance_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-            print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
+            # print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         if rm.monster == "Gremlin":
             vrs.append([sprite.create_sprite("gremlin"), 2 * VISION_SQUARE, 0])
-            print(f"vrs[{len(vrs)-1}]: monster appended at {(2 * VISION_SQUARE, 0)}")
+            # print(f"vrs[{len(vrs)-1}]: monster appended at {(2 * VISION_SQUARE, 0)}")
         if rm.monster == "Ogre":
             vrs.append([sprite.create_sprite("ogre"), 2 * VISION_SQUARE, 0])
-            print(f"vrs[{len(vrs)-1}]: monster appended at {(2 * VISION_SQUARE, 0)}")
+            # print(f"vrs[{len(vrs)-1}]: monster appended at {(2 * VISION_SQUARE, 0)}")
         if rm.monster == "Skeleton":
             vrs.append([sprite.create_sprite("skeleton"), 2 * VISION_SQUARE, 0])
-            print(f"vrs[{len(vrs)-1}]: monster appended at {(2 * VISION_SQUARE, 0)}")
+            # print(f"vrs[{len(vrs)-1}]: monster appended at {(2 * VISION_SQUARE, 0)}")
         if rm.pit == True:
             vrs.append([sprite.create_sprite("pit"), 2 * VISION_SQUARE, 2 * VISION_SQUARE])
-            print(f"vrs[{len(vrs)-1}]: pit appended at {(2 * VISION_SQUARE, 2 * VISION_SQUARE)}")
+            # print(f"vrs[{len(vrs)-1}]: pit appended at {(2 * VISION_SQUARE, 2 * VISION_SQUARE)}")
         if rm.is_entrance:
             vrs.append([sprite.create_sprite("entrance"), 0 * VISION_SQUARE, 1 * VISION_SQUARE])
-            print(f"vrs[{len(vrs)-1}]: entrance appended at {(0 * VISION_SQUARE, 1 * VISION_SQUARE)}")
+            # print(f"vrs[{len(vrs)-1}]: entrance appended at {(0 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         if rm.is_exit:
             vrs.append([sprite.create_sprite("exit"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-            print(f"vrs[{len(vrs)-1}]: exit appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
+            # print(f"vrs[{len(vrs)-1}]: exit appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         orig_rm = self.controller.get_room_data()
         if rm == orig_rm:
             vrs.append([sprite.create_sprite(HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
-            print(f"vrs[{len(vrs)-1}]: hero appended at {(VISION_SQUARE, VISION_SQUARE)}")
+            # print(f"vrs[{len(vrs)-1}]: hero appended at {(VISION_SQUARE, VISION_SQUARE)}")
 
-        print(f"for i in range (0, len(vrs)): {len(vrs)}")
+        # print(f"for i in range (0, len(vrs)): {len(vrs)}")
         for i in range(0, len(vrs)):
-            print(f"x pos: {vrs[i][1]} (vrs[{i}][1]) | y pos: {vrs[i][2]} (vrs[{i}][2]) || {vrs[i][0]} ")
-            print(f"draw_vision_sprite(vrs[{i}]) : {vrs[i]} | vx: {vx} | vy: {vy}")
+            # print(f"x pos: {vrs[i][1]} (vrs[{i}][1]) | y pos: {vrs[i][2]} (vrs[{i}][2]) || {vrs[i][0]} ")
+            # print(f"draw_vision_sprite(vrs[{i}]) : {vrs[i]} | vx: {vx} | vy: {vy}")
             self.draw_vision_sprite(vrs[i][0], vrs[i][1], vrs[i][2], vx, vy, canvas)
 
         for key, value in door_dict.items():
