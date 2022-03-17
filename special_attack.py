@@ -12,10 +12,10 @@ class SpecialAttack(ABC):
     If not rendered an extra attack or caught, the character does the normal attack.
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         if issubclass(type(self), DungeonCharacter):
-            self.__extra_attack_chance = 0.0
-            self.__caught_chance = 0.0
+            for k, v in kwargs.items():
+                setattr(self, k, v)
         else:
             raise TypeError("should inherit Dungeonchar class")
 
