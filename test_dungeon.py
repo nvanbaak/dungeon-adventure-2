@@ -17,9 +17,5 @@ class MyTestCase(unittest.TestCase):
         enter = dun.enter_dungeon()
         self.assertEqual(enter.is_entrance, True, "not in the entrance room")
 
-<<<<<<< HEAD
-=======
-
->>>>>>> dev
 if __name__ == '__main__':
     unittest.main()
