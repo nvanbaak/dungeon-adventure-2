@@ -27,9 +27,6 @@ class View:
         # key is filename (e.g, "sprites_image/warrior.png", value is ImageTK PhotoImage object)
         self.images = {}
 
-        # saves the game background color specified in the config file, in case user opts to change
-        self.board_color_1 = BOARD_COLOR_1
-
         # records x,y position of hero sprite. used for moving sprite (and mirroring image left/right as necessary)
         self.sprite_xy = (0, 0)
 
@@ -232,6 +229,50 @@ class View:
         create_vision_button()
         create_health_button()
 
+
+    ##################################
+    #    GUI BUTTOM FUNCTIONALITY    #
+    ##################################
+
+    def use_health(self):
+        self.controller.use_health_potion()
+        self.update_score_label()
+
+    def use_vision(self):
+        self.create_vision_window()
+        vision_grid = self.controller.use_vision_potion(self.controller.get_room_data())
+        row_min = 100
+        row_max = 0
+        col_min = 100
+        col_max = 0
+        for r in range(0, len(vision_grid[0])):
+            for c in range(0, len(vision_grid[1])):
+                if vision_grid[r][c]:
+                    row_min = min(row_min, vision_grid[r][c].location[0])
+                    row_max = max(row_max, vision_grid[r][c].location[0])
+                    col_min = min(col_min, vision_grid[r][c].location[1])
+                    col_max = max(col_max, vision_grid[r][c].location[1])
+                    self.draw_vision_room(vision_grid[r][c], c, r, "vision")
+                else:
+                    pass
+        self.controller.model.game_stats["Vision Potions"] = self.controller.model.player.vision_potions
+        self.vision = False
+        self.vision_button.pack_forget()
+        self.update_score_label()
+
+    def create_vision_window(self):
+        self.vision_window = tk.Tk()
+        self.vision_canvas_width = 900
+        self.vision_canvas_height = 900
+        self.vision_canvas = Canvas(
+            self.vision_window, width=self.vision_canvas_width, height=self.vision_canvas_height, bg=self.board_color_1)
+        self.vision_canvas.pack(padx=8, pady=8)
+
+
+    ##################################
+    #     GRAPHICS FUNCTIONALITY     #
+    ##################################
+
     def draw_room(self):
         """
         Draws game's current room (walls only) based on player's current position in the dungeon.
@@ -282,7 +323,19 @@ class View:
                         door[0], door[1],
                         door[2], door[3],
                         fill=BOARD_COLOR_1)
-       
+
+    def reload_colors(self, color):
+        """
+        Redraws the room wih a new color; unsure if this works
+        """
+        self.draw_room()
+        self.canvas.config(bg=color)
+        # self.canvas.pack()
+        self.draw_all_sprites()
+
+
+
+
     def start_new_game(self):
         """
         reset_default_characters()
@@ -292,7 +345,7 @@ class View:
 
         """
         # catch event of manual game window close by user
-        self.root.protocol("WM_DELETE_WINDOW", lambda: self.on_close_window(self.root))
+        # self.root.protocol("WM_DELETE_WINDOW", lambda: self.on_close_window(self.root))
 
         # clear dictionaries, instantiate sprite objects, refresh room by setting relevant sprite objects to 'visible'
         self.controller.reset_default_characters()
@@ -303,32 +356,8 @@ class View:
         self.draw_all_sprites()
         self.update_score_label()
 
-    def reload_colors(self, color_1):
-        self.board_color_1 = color_1
-        self.draw_room()
-        self.canvas.config(bg=self.board_color_1)
-        self.canvas.pack()
-        self.draw_all_sprites()
 
-    def create_vision_window(self):
-        self.vision_window = tk.Tk()
-        self.vision_canvas_width = 900
-        self.vision_canvas_height = 900
-        self.vision_canvas = Canvas(
-            self.vision_window, width=self.vision_canvas_width, height=self.vision_canvas_height, bg=self.board_color_1)
-        self.vision_canvas.pack(padx=8, pady=8)
 
-    def create_map_window(self):
-        self.map_window = tk.Tk()
-        self.map_canvas_width = 900
-        self.map_canvas_height = 900
-        self.map_canvas = Canvas(
-            self.map_window, width=self.map_canvas_width, height=self.map_canvas_height, bg=self.board_color_1)
-        self.map_canvas.pack(padx=8, pady=8)
-
-    def use_health(self):
-        self.controller.use_health_potion()
-        self.update_score_label()
 
     def on_close_window(self, root):
         root.destroy()
@@ -569,27 +598,7 @@ class View:
             lbl_txt = "Y O U  W I N !!!!!"
         self.info_label["text"] = lbl_txt
 
-    def use_vision(self):
-        self.create_vision_window()
-        vision_grid = self.controller.use_vision_potion(self.controller.get_room_data())
-        row_min = 100
-        row_max = 0
-        col_min = 100
-        col_max = 0
-        for r in range(0, len(vision_grid[0])):
-            for c in range(0, len(vision_grid[1])):
-                if vision_grid[r][c]:
-                    row_min = min(row_min, vision_grid[r][c].location[0])
-                    row_max = max(row_max, vision_grid[r][c].location[0])
-                    col_min = min(col_min, vision_grid[r][c].location[1])
-                    col_max = max(col_max, vision_grid[r][c].location[1])
-                    self.draw_vision_room(vision_grid[r][c], c, r, "vision")
-                else:
-                    pass
-        self.controller.model.game_stats["Vision Potions"] = self.controller.model.player.vision_potions
-        self.vision = False
-        self.vision_button.pack_forget()
-        self.update_score_label()
+
 
     def draw_vision_room(self, rm, i, j, type):
         WALL_WIDTH = 10
