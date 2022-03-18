@@ -105,7 +105,7 @@ class Controller:
                 if self.model.player_has_all_pillars():
                     self.announce(f"{self.model.player_name} has won the game!")
                     self.play("yay")
-                    self.__game_over = True
+                    self.view.ask_new_game()
 
         # resolve room transition if appropriate
         if alphanum in self.door_dict:
@@ -140,6 +140,12 @@ class Controller:
 
         if current_room.is_exit:
             self.announce("You've reached the exit!")
+            if self.model.player_has_all_pillars():
+                self.announce("You've won!")
+                self.view.load_current_room()
+                self.view.ask_new_game()
+            else:
+                self.announce("You need to find more pillars before you can leave.")
 
     def combat(self):
         curr_pos = self.model.get_curr_pos()

@@ -33,7 +33,7 @@ class Model:
         else:
             self.player = HeroFactory.create_thief(name, self)
 
-        self.pillars = {"A": "", "E": "", "P": "", "I": ""}
+        self.pillars = {"a": "", "e": "", "p": "", "i": ""}
         self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
         self.announcements = []
 
