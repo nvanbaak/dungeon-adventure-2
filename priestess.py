@@ -16,7 +16,7 @@ class Priestess(Hero, Healable):
         """ after taking damage, if the priestess is not dead, it heals itself"""
         hp_before_attack = self.hp
         super().take_damage(dmg, source)
-        if self._is_alive and hp_before_attack > self.hp:
+        if self._is_alive and hp_before_attack > self.hp and source != "pit":
             heal_message = self.heal_itself()
             self.model.announce(f"{self.name}: {heal_message}")
 
