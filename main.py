@@ -1,7 +1,3 @@
-import tkinter as tk
-from main_menu import MainMenu
+from menu_factory import MenuFactory as mf
 
-root = tk.Tk()
-root.title("Dungeon Adventure II: Dungeon Harder")
-menu = MainMenu(root)
-root.mainloop()
+menu = mf.create_main_menu()

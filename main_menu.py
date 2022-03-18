@@ -6,12 +6,13 @@ class MainMenu:
     """
     class representing the main menu of the game
     """
-    def __init__(self, root) -> None:
+    def __init__(self) -> None:
         # references
         self.view = None
 
         # tk objects
-        self.root = root
+        self.root = tk.Tk()
+        self.root.title("Dungeon Adventure II: Dungeon Harder")
         self.canvas = None
         self.title_image = None
         self.hero_image = None
@@ -41,6 +42,7 @@ class MainMenu:
 
         # init
         self.build_menu()
+        self.root.mainloop()
 
     ##################################
     #      TK WIDGET CONSTRUCTION    #
