@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import LEFT, N, Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, TOP, PhotoImage, messagebox
-from tkinter import TclError
 from PIL import Image, ImageTk, ImageOps
 
 from configurations import *
@@ -147,10 +146,12 @@ class View:
         sg = save_load_game.SaveGame
         if self.clicked != "Select":
             m = sg.load_game(sg, selected_game)
-            self.controller.set_model(m)
-            self.controller.reset_default_characters()
-            self.draw_all_sprites()
+            self.model = m 
+            self.controller = Controller(self, self.model)
+            self.hero_sprite.name = self.model.hero
+            self.load_current_room()
             self.update_frame_info()
+            self.update_game_log()
 
     def on_delete_games_menu_clicked(self):
         sg = save_load_game.SaveGame()
