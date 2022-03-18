@@ -22,6 +22,7 @@ class Model:
         :param hero:
         """
         self.hero = hero_class
+        self.player_name = name
         self.game = DungeonBuilder.build_single_dungeon()
         self.dungeon = self.game[0]
         self.curr_pos = self.dungeon.enter_dungeon()

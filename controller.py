@@ -19,6 +19,7 @@ class Controller:
 
         # gets set to True upon entering a room with a monster
         self.__monster_blocking_exit = False
+        self.__game_over = False
 
         self.door_dict = {
             "C1" : self.model.move_down,
@@ -34,6 +35,8 @@ class Controller:
             "D7" : self.model.move_up,
             "E7" : self.model.move_up,
         }
+
+        self.sfx_dict = {}
 
         # required for sound effects to function
         pygame.init()
@@ -83,8 +86,6 @@ class Controller:
                 self.model.player.vision_potions += 1
                 self.announce("Picked up a vision potion!")
 
-            print(curr_room.heal)
-            print(candidate)
             if curr_room.heal and candidate in ["healing_potion_g", "healing_potion_y"]:
                 curr_room.heal = None
                 self.model.player.health_potions += 1
@@ -95,6 +96,12 @@ class Controller:
                 self.model.pillars[curr_room.pillar] = True
                 self.model.game_stats["Pillars"] += f"{curr_room.pillar.upper()} "
                 curr_room.pillar = None
+
+            if curr_room.is_exit and candidate == "exit":
+                if self.model.player_has_all_pillars():
+                    self.announce(f"{self.model.player_name} has won the game!")
+                    self.play("you_win")
+                    self.__game_over = True
 
         # resolve room transition if appropriate
         if alphanum in self.door_dict:
@@ -114,6 +121,10 @@ class Controller:
         current_room = self.model.get_curr_pos()
         current_room.is_visited = True
 
+        # stop all playback from previous room
+        for sfx in self.sfx_dict:
+            self.sfx_dict[sfx].set_volume(0)
+
         if current_room.monster is not None:
             self.__monster_blocking_exit = True
 
@@ -122,71 +133,6 @@ class Controller:
 
         if current_room.is_exit:
             self.announce("You've reached the exit!")
-
-
-    def gather(self, obj, pos):
-        curr_pos = self.model.get_curr_pos()
-        if obj.name == "healing_potion_y":
-            obj.visible = False
-            curr_pos.heal = None
-            self.model.player.health_potions += 1
-            self.model.game_stats["Healing Potions"] = self.model.player.health_potions
-            self.view.show_health_button = True
-            self.view.health_button.pack()
-        if obj.name == "healing_potion_g":
-            obj.visible = False
-            curr_pos.heal = None
-            self.model.player.health_potions += 1
-            self.model.game_stats["Healing Potions"] = self.model.player.health_potions
-            self.view.show_health_button = True
-            self.view.health_button.pack()
-        if obj.name == "vision_potion":
-            obj.visible = False
-            curr_pos.vision = False
-            self.model.player.vision_potions += 1
-            self.model.game_stats["Vision Potions"] = self.model.player.vision_potions
-            self.view.vision = True
-            self.view.vision_button.pack()
-        if obj.name == "gremlin":
-            monster_after_combat = self.combat()
-            if monster_after_combat < 0:
-                curr_pos.monster = ""
-            self.i_fought_a_monster = True
-        if obj.name == "skeleton":
-            monster_after_combat = self.combat()
-            if monster_after_combat < 0:
-                curr_pos.monster = ""
-            self.i_fought_a_monster = True
-        if obj.name == "ogre":
-            monster_after_combat = self.combat()
-            if monster_after_combat < 0:
-                curr_pos.monster = ""
-            self.i_fought_a_monster = True
-        if obj.name == "abstraction_pillar":
-            if self.model.pillars["A"] == "":
-                obj.visible = False
-                curr_pos.pillar = ""
-                self.model.pillars["A"] = True
-                self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "A "
-        if obj.name == "encapsulation_pillar":
-            if self.model.pillars["E"] == "":
-                obj.visible = False
-                curr_pos.pillar = ""
-                self.model.pillars["E"] = True
-                self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "E "
-        if obj.name == "polymorphism_pillar":
-            if self.model.pillars["P"] == "":
-                obj.visible = False
-                curr_pos.pillar = ""
-                self.model.pillars["P"] = True
-                self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "P "
-        if obj.name == "inheritance_pillar":
-            if self.model.pillars["I"] == "":
-                obj.visible = False
-                curr_pos.pillar = ""
-                self.model.pillars["I"] = True
-                self.model.game_stats["Pillars"] = str(self.model.game_stats["Pillars"]) + "I "
-        self.model.game_stats["Hit Points"] = self.model.player.hp
 
     def gather_sounds(self):
         curr_pos = self.model.get_curr_pos()
@@ -257,11 +203,17 @@ class Controller:
         self.model.player.use_health_potion()
 
     def play(self, file):
-        filename = "audio/{}.wav".format(
-            file)
-        sound = pygame.mixer.Sound(filename)
-        pygame.mixer.Sound.play(sound)
-        pygame.mixer.music.stop()
+        """
+        plays a sound.  If the sound is already playing it stops it before playing a new one.
+        params:
+        :file: a string corresponding to a .wav file in the audio folder
+        """
+        if file in self.sfx_dict:
+            self.sfx_dict[file].set_volume(0)
+        filename = f"audio/{file}.wav"
+        self.sfx_dict[file] = pygame.mixer.Sound(filename)
+        pygame.mixer.Sound.play(self.sfx_dict[file])
+
 
     def load_hit_points(self):
         self.model.game_stats["Hit Points"] = self.model.player.hp

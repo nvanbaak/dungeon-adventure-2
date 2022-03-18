@@ -145,7 +145,7 @@ class View:
             self.controller.reset_default_characters()
             self.draw_all_sprites()
             self.on_square_clicked_manual(True)
-            self.update_score_label()
+            self.update_frame_info()
             if self.vision == False:
                 self.vision_button.pack_forget()
 
@@ -224,7 +224,7 @@ class View:
 
     def use_health(self):
         self.controller.use_health_potion()
-        self.update_score_label()
+        self.update_frame_info()
 
     def use_vision(self):
         self.create_vision_window()
@@ -246,7 +246,7 @@ class View:
         self.controller.model.game_stats["Vision Potions"] = self.controller.model.player.vision_potions
         self.vision = False
         self.vision_button.pack_forget()
-        self.update_score_label()
+        self.update_frame_info()
 
     def create_vision_window(self):
         self.vision_window = tk.Tk()
@@ -275,7 +275,7 @@ class View:
         self.controller.reset_default_characters()
 
         self.load_current_room()
-        self.update_score_label()
+        self.update_frame_info()
 
     def draw_walls(self):
         """
@@ -379,7 +379,7 @@ class View:
         """
         self.canvas.delete("sprites")
 
-    def update_score_label(self):
+    def update_frame_info(self):
         """
         Modifies the text in the bottom frame using information from Model.
         """
@@ -413,9 +413,6 @@ class View:
         if click_pos is None:
             return
 
-        # debug
-        print(click_pos)
-
         # activate_square returns True or False depending on whether the square is empty after resolution
         item_resolved = self.controller.activate_square(click_pos)
 
@@ -435,6 +432,9 @@ class View:
         self.hero_sprite.redraw_at(click_pos)
         self.load_current_room()
 
+        # finally, update bottom frame
+        self.update_frame_info()
+
     def click_event_to_alphanum(self, event):
         """
         Given a click event, returns the alphanumeric position that was clicked.  Returns None if the player clicked out of bounds.
@@ -449,27 +449,6 @@ class View:
             return None
 
         return f"{X_AXIS_LABELS[clicked_column]}{Y_AXIS_LABELS[clicked_row]}"
-
-
-
-    def on_square_clicked_manual(self, clicked):
-        """
-        This is to prevent an infinite loop when the user clicks near a door. The room only changes if the user
-        clicked a doorway, not if the user appears in the next room in a doorway. It also redraws the room after
-        every user click.
-        """
-
-        self.sound_effect_play_count = self.sound_effect_play_count + 1
-        if self.sound_effect_play_count == 1:
-            self.controller.gather_sounds()
-        if clicked == True:
-            self.doorway_refresh(hero_dict, clicked)
-        m = self.controller.get_model()
-        if rm.is_exit == True and m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and m.pillars["I"] == True:
-            self.controller.model.announce(f"{self.controller.model.player} has won the game!")
-            self.controller.play("you_win")
-            self.ask_new_game()
-
 
     ##################################
     #        NEED REFACTORING
@@ -576,7 +555,7 @@ class View:
             m = self.controller.get_model()
             m.pillars = {"A": "", "E": "", "P": "", "I": ""}
             self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
-            self.update_score_label()
+            self.update_frame_info()
             self.on_new_game_menu_clicked()
             self.root.destroy()
             time.sleep(3)
