@@ -39,6 +39,7 @@ class View():
         self.canvas.bind("<Button-1>", self.on_square_clicked)
         self.root.bind("<Key>", self.on_key_pressed)
         self.vision_window = ""
+        self.secret_view = False
         self.start_new_game()
 
     def create_board_base(self):
@@ -409,6 +410,7 @@ class View():
     def on_key_pressed(self, event):
         if event.char == "x":
             # print(self.visited.items())
+            self.secret_view = True
             self.show_entire_map()
 
     def on_square_clicked(self, event):
@@ -652,10 +654,16 @@ class View():
         if vis[rm.location[0]][rm.location[1]]:
             visited = True
 
-        if type == "map":
+        if type == "map" and self.secret_view == True:
+            # secret view, want to show location in maze so only show player sprite in current room
+            if rm == orig_rm:
+                vrs.append([sprite.create_sprite(HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
+        elif type == "map" and self.secret_view == False:
+            # end of game view: want to show player sprite in all rooms visited
             if rm == orig_rm or visited == True:
                 vrs.append([sprite.create_sprite(HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
         else:
+            # vision potion room, so only want to show player sprite in current location
             if rm == orig_rm:
                 vrs.append([sprite.create_sprite(HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
 
