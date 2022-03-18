@@ -458,6 +458,7 @@ class View:
             label_text = "Y O U  D I E D !!!!!"
         elif exit_flag and self.model.player_has_all_pillars():
             label_text = "Y O U  W I N !!!!!"
+            self.show_entire_map()
 
         self.info_label.destroy()
         self.info_label = Label(self.bottom_frame, text=label_text)
@@ -549,7 +550,7 @@ class View:
             size = 300
 
         if type == "map":
-            entire_grid = self.controller.model.dungeon.dungeon.maze
+            entire_grid = self.model.dungeon.dungeon.maze
             grid_h = entire_grid.shape[0]
             grid_w = entire_grid.shape[1]
             size = int(.92 * (min(self.map_canvas_width/grid_w, self.map_canvas_height/grid_h)))
@@ -559,6 +560,7 @@ class View:
             ROWS = grid_h
             COLS = grid_w
             vision_sq_dim = int(vision_room_width / 3)
+            WALL_WIDTH = int(vision_sq_dim/10)
 
         vx = col * vision_room_width
         vy = row * vision_room_height
@@ -592,7 +594,6 @@ class View:
         if rm.is_exit:
             vrs.append([Sprite("exit", canvas), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
 
-        print(vrs)
         orig_rm = self.model.get_curr_pos()
 
         vis = self.model.visited
@@ -614,9 +615,8 @@ class View:
                 vrs.append([self.hero_sprite, VISION_SQUARE, VISION_SQUARE])
 
         for i in range(0, len(vrs)):
-            print(f"vrs[{i}]::: {vrs[i][0].name}")
-            print(vrs[i][0], vrs[i][1], vrs[i][2], vx, vy, canvas)
-            self.draw_vision_sprite(vrs[i][0], vrs[i][1], vrs[i][2], vx, vy, canvas)
+            # print(vrs[i][0], vrs[i][1], vrs[i][2], vx, vy, canvas)
+            self.draw_vision_sprite(vrs[i][0], vrs[i][1], vrs[i][2], vx, vy, canvas, VISION_SQUARE)
 
         for key, value in door_dict.items():
             if key == "Up" and value == True:
@@ -651,26 +651,29 @@ class View:
                 pass
             canvas.pack()
 
-    def draw_vision_sprite(self, sprite, spr_start_x, spr_start_y, rm_start_x, rm_start_y, canvas):
-        UNDER_100 = (70, 70)
+    def draw_vision_sprite(self, sprite, spr_start_x, spr_start_y, rm_start_x, rm_start_y, canvas, VISION_SQUARE):
+        SPRITE_SIZE = (int(.9 * VISION_SQUARE), int(.9 * VISION_SQUARE))
 
         if isinstance(sprite, Sprite):
-            WALL_CLEARANCE = 15
+            WALL_CLEARANCE = int(VISION_SQUARE/10)
             filename = "sprites_image/{}.png".format(
                 sprite.name)
             im = Image.open(filename)
-            image = ImageOps.contain(im, UNDER_100)
+            image = ImageOps.contain(im, SPRITE_SIZE)
             ph = ImageTk.PhotoImage(image, master=canvas)
-            if spr_start_x == 0:
-                # bordering left wall
-                spr_start_x = spr_start_x + WALL_CLEARANCE
-            if spr_start_y == 0:
-                # bordering top wall
-                spr_start_y = spr_start_y + WALL_CLEARANCE
+            if spr_start_x == 0 or spr_start_y == 0:
+                if spr_start_x == 0:
+                    spr_start_x = spr_start_x + WALL_CLEARANCE
+                if spr_start_y == 0:
+                    # bordering top wall
+                    spr_start_y = spr_start_y + WALL_CLEARANCE
+            else:
+                spr_start_x = spr_start_x - WALL_CLEARANCE
+                spr_start_y = spr_start_y - WALL_CLEARANCE
             spr_start_x = spr_start_x + rm_start_x
             spr_start_y = spr_start_y + rm_start_y
             label = tk.Label(canvas, image=ph, bg=BOARD_COLOR_1)
-            label.config(width=UNDER_100[0], height=UNDER_100[1])
+            label.config(width=SPRITE_SIZE[0], height=SPRITE_SIZE[1])
             label.image = ph
             label.place(x=spr_start_x, y=spr_start_y)
             canvas.pack()
@@ -678,27 +681,34 @@ class View:
     def on_key_pressed(self, event):
         if event.char == "x":
             self.secret_view = True
-            self.use_vision()
-            # self.show_entire_map()
+            self.show_entire_map()
         else:
             self.secret_view = False
 
-    # def show_entire_map(self):
-    #     self.create_map_window()
-    #     entire_grid = self.controller.model.dungeon.dungeon.maze
-    #     row_min = 100
-    #     row_max = 0
-    #     col_min = 100
-    #     col_max = 0
-    #     grid_h = entire_grid.shape[0]
-    #     grid_w = entire_grid.shape[1]
-    #     for r in range(0, grid_h):
-    #         for c in range(0, grid_w):
-    #             if entire_grid[r][c]:
-    #                 row_min = min(row_min, entire_grid[r][c].location[0])
-    #                 row_max = max(row_max, entire_grid[r][c].location[0])
-    #                 col_min = min(col_min, entire_grid[r][c].location[1])
-    #                 col_max = max(col_max, entire_grid[r][c].location[1])
-    #                 self.draw_vision_room(entire_grid[r][c], c, r, "map")
-    #             else:
-    #                 pass
+    def show_entire_map(self):
+        self.create_map_window()
+        entire_grid = self.controller.model.dungeon.dungeon.maze
+        # row_min = 100
+        # row_max = 0
+        # col_min = 100
+        # col_max = 0
+        grid_h = entire_grid.shape[0]
+        grid_w = entire_grid.shape[1]
+        for r in range(0, grid_h):
+            for c in range(0, grid_w):
+                if entire_grid[r][c]:
+                    # row_min = min(row_min, entire_grid[r][c].location[0])
+                    # row_max = max(row_max, entire_grid[r][c].location[0])
+                    # col_min = min(col_min, entire_grid[r][c].location[1])
+                    # col_max = max(col_max, entire_grid[r][c].location[1])
+                    self.draw_vision_room(entire_grid[r][c], c, r, "map")
+                else:
+                    pass
+
+    def create_map_window(self):
+        self.map_window = tk.Tk()
+        self.map_canvas_width = self.map_window.winfo_screenwidth()
+        self.map_canvas_height = self.map_window.winfo_screenheight()
+        self.map_canvas = Canvas(
+            self.map_window, width=self.map_canvas_width, height=self.map_canvas_height, bg=BOARD_COLOR_1)
+        self.map_canvas.pack(padx=8, pady=8)
