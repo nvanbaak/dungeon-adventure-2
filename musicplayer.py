@@ -1,6 +1,6 @@
 import simpleaudio as sa
-# from pydub import AudioSegment
-# from pydub.playback import play
+from pydub import AudioSegment
+from pydub.playback import play
 
 class MusicPlayer:
     """

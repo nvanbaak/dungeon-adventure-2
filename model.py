@@ -1,33 +1,26 @@
 from dungeon_builder import DungeonBuilder
-from hero import Hero
-from warrior import Warrior
-from priestess import Priestess
-from thief import Thief
-from ogre import Ogre
-from gremlin import Gremlin
-from skeleton import Skeleton
+from hero_factory import HeroFactory
 import sprite
 from configurations import *
 # from game_observer import Publisher, Subscriber
 
-class Model():
+class Model:
 
     # print("M | class variables initialized before __init__")
     dict = {}
     hero_dict = {}
 
-    def __init__(self, hero = "warrior"):
+    def __init__(self, hero = "warrior", name = "Player"):
         self.game = DungeonBuilder.build_single_dungeon()
         self.dungeon = self.game[0]
         self.curr_pos = self.dungeon.enter_dungeon()
         if hero == "warrior":
-            self.player = Warrior("TestWarrior", self)
+            self.player = HeroFactory.create_warrior(name, self)
         elif hero == "priestess":
-            self.player = Priestess("TestPriestess", self)
+            self.player = HeroFactory.create_priestess(name, self)
         else:
-            self.player = Thief("TestThief", self)
+            self.player = HeroFactory.create_thief(name, self)
         print(self.dungeon.dungeon.winning_path)
-        # print(self.dungeon.print_initial_map())
         # self.subscriber_m = Subscriber(self)
         self.pillars = {"A": "", "E": "", "P": "", "I": ""}
         self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}

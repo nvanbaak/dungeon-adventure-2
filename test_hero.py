@@ -6,7 +6,7 @@ class MockHero(Hero):
     concrete implementation of abstract Hero class
     """
     def __init__(self, name, model) -> None:
-        super().__init__(name, model)
+        super().__init__(name, model, hp_total = 100, attack_speed = 1, hit_chance = 0.5, damage_max= 30, damage_min= 20, chance_to_block = 0.0)
 
     def attack_target(self, target):
         return super().attack_target(target)
@@ -159,7 +159,7 @@ class Hero_Tests(unittest.TestCase):
         hero_hp_before_fall = test_hero.hp
         test_hero.fall_into_pit()
         self.assertLess(test_hero.hp, hero_hp_before_fall - 9)
-        self.assertGreater(test_hero.hp, hero_hp_before_fall - 20)
+        self.assertGreaterEqual(test_hero.hp, hero_hp_before_fall - 20)
 
 
 

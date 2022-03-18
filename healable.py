@@ -6,17 +6,19 @@ from dungeonchar import DungeonCharacter
 import random
 
 class Healable(ABC):
-    def __init__(self):
-        if issubclass(type(self), DungeonCharacter):
-            self.__chance_to_heal = 0.0
-            self.__min_heal_point = 0
-            self.__max_heal_point = 0
+    """has parameters and methods to add the healing power for dungeon character
+    gives the ability to the characters to heal based on the chance to heal and healed between min and max heal_points
+    """
 
+    def __init__(self, **kwargs):
+        if issubclass(type(self), DungeonCharacter):
+            for k, v in kwargs.items():
+                setattr(self, k, v)
         else:
             raise TypeError("should inherit Dungeonchar class")
 
-
     def __set_chance_to_heal(self, chance_to_heal):
+
         if isinstance(chance_to_heal, float) and 0 < chance_to_heal <= 1:
             self.__chance_to_heal = chance_to_heal
 
@@ -58,6 +60,8 @@ class Healable(ABC):
         pass
 
     def heal_itself(self):
+        """ generates a random chance anf if it is less than the character's healable chance,
+        generates a value between min_heal_point and max_heal_point and adds it to the character's hp"""
         heal_chance = random.random()
         if heal_chance  <= self.__chance_to_heal:
             healable = random.randint(self.__min_heal_point, self.__max_heal_point)

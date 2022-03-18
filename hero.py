@@ -6,9 +6,10 @@ class Hero(DungeonCharacter, ABC):
     """
     A class representing a character controlled by the player
     """
-    def __init__(self, name, model) -> None:
-        super().__init__(name, model)
-        self.__chance_to_block = 0.0
+    def __init__(self, name, model, **kwargs) -> None:
+        super().__init__(name, model, **kwargs)
+        for k, v in kwargs.items():
+            setattr(self, k, v)
         self.__health_potions = 0
         self.__vision_potions = 0
         self.__vision = 3
@@ -80,9 +81,9 @@ class Hero(DungeonCharacter, ABC):
         """ Reduces the hp by the dmg value"""
 
         self.hp -= dmg
-        self._DungeonCharacter__model.announce(f"{self.name} took {dmg} dmg from {source}!")
+        self.model.announce(f"{self.name} took {dmg} dmg from {source}!")
         if not self._is_alive:
-            self._DungeonCharacter__model.announce(f"{self.name} has died!")
+            self.model.announce(f"{self.name} has died!")
 
 
     def take_damage(self, dmg, source):
@@ -93,6 +94,8 @@ class Hero(DungeonCharacter, ABC):
         else:
             if self.chance_to_block < random.random():
                 self.__take_damage(dmg, source)
+            else:
+                self.model.announce(f" {self.name} has blocked the attack " )
 
     def fall_into_pit(self):
         """generates a random value range 10 to 20 and reduce it from the hero's hp"""

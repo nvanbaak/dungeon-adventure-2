@@ -9,10 +9,10 @@ class MockMonster(DungeonCharacter, Healable):
     """mock hero class to check the save and load of hero objects """
 
     def __init__(self, name, model):
-        # DungeonCharacter.__init__(self,name= name, model= model)
-        # Healable.__init__(self, chance_to_heal)
-        super().__init__(name= name, model= model)
-        super(DungeonCharacter, self).__init__()
+        super().__init__(name= name, model= model, hp_total = 100, attack_speed = 1, hit_chance = 0.5,
+                         damage_max= 30, damage_min= 20, chance_to_block = 0.0)
+        super(DungeonCharacter, self).__init__(chance_to_heal =0,min_heal_point = 0,
+                         max_heal_point = 1)
 
     def attack_target(self, target):
         pass
@@ -32,7 +32,7 @@ class MockMonster(DungeonCharacter, Healable):
 
 class MockHealable(Healable):
     def __init__(self):
-        super().__init__()
+        super().__init__(args= (0.0,0,0))
 
     def hp(self, value):
         pass

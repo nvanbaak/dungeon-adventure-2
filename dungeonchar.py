@@ -8,32 +8,22 @@ class DungeonCharacter(ABC):
     Abstract base class used for all dungeon characters
     """
 
-    def __init__(self, name, model) -> None:
+    def __init__(self, name, model, **kwargs) -> None:
         self.__name = name
-        self.__hp_total = random.choice(range(50, 100))
-        self.__hp = self.hp_total
-        self.__attack_speed = 1
-        self.__hit_chance = .5
-        self.__damage_min = 20
-        self.__damage_max = 30
         self.__model = model
-        self.__healable = False
-
-
-    def __set_healable(self, t_f):
-
-        if isinstance(t_f, bool):
-            self.__healable = t_f
-
-    def __get_healable(self):
-        
-        return self.__healable
-
-    healable = property(__get_healable, __set_healable)
+        self.__hp = 0
+        self.__damage_min = 0
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+        self.__hp = self.__hp_total
 
     @property
     def name(self):
         return self.__name
+
+    @property
+    def model(self):
+        return self.__model
 
     @property
     def hp(self):
@@ -145,17 +135,17 @@ class DungeonCharacter(ABC):
             if my_turn:
                 if my_attacks < self.attack_speed:
                     self.attack_target(target)
+                    my_turn = False
                     my_attacks += 1
                     if not target._is_alive:
                         break
-                my_turn = False
             else:
                 if target_attacks < target.attack_speed:
                     target.attack_target(self)
+                    my_turn = True
                     target_attacks += 1
                     if not self._is_alive:
                         break
-                my_turn = True
 
     def take_damage(self, dmg, source):
         self.hp -= dmg
