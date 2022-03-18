@@ -1,5 +1,3 @@
-from threading import current_thread
-from tkinter.tix import Tree
 import pygame
 
 from configurations import START_SPRITES_POSITION
@@ -20,6 +18,7 @@ class Controller:
         # gets set to True upon entering a room with a monster
         self.__monster_blocking_exit = False
         self.__game_over = False
+        self.announcements = []
 
         self.door_dict = {
             "C1" : self.model.move_down,
@@ -35,7 +34,6 @@ class Controller:
             "D7" : self.model.move_up,
             "E7" : self.model.move_up,
         }
-
         self.sfx_dict = {}
 
         # required for sound effects to function
@@ -100,7 +98,7 @@ class Controller:
                 curr_room.pillar = None
                 self.play("pillar")
 
-            if curr_room.is_entrace and candidate == "entrance":
+            if curr_room.is_entrance and candidate == "entrance":
                 move_succeeds = False
 
             if curr_room.is_exit and candidate == "exit":
@@ -117,6 +115,9 @@ class Controller:
                 self.__room_transition = self.door_dict[alphanum]()
                 if self.__room_transition:
                     self.resolve_transition()
+
+        # retrieve any messages from Model
+        self.get_messages_from_model()
 
         return move_succeeds
 
@@ -148,9 +149,12 @@ class Controller:
         self.__monster_blocking_exit = False
 
         # resolve combat
-        self.announce(f"Pre-battle hit points: Player: {self.model.player.hp} | {monster_name} | {curr_pos.monster_obj.hp}")
+        self.announce(f"Initiating combat! {self.model.player_name}: {self.model.player.hp} | {monster_name} | {curr_pos.monster_obj.hp}")
 
         self.model.player.combat(curr_pos.monster_obj)
+
+        # combat generates messages we'll want to grab before making more announcements
+        self.get_messages_from_model()
 
         self.announce(f"Post-battle hit points: Player: {self.model.player.hp} | {monster_name} | {curr_pos.monster_obj.hp}")
 
@@ -163,7 +167,7 @@ class Controller:
         # resolve player death if applicable
         if self.model.player.hp <= 0:
             self.model.game_stats["Hit Points"] = self.model.player.hp
-            self.view.update_score_label()
+            self.view.update_bottom_frame()
             self.play("wilhelm_scream")
             self.view.ask_new_game()
 
@@ -174,7 +178,7 @@ class Controller:
         self.play("welcome_pit")
         if self.model.player.hp <= 0:
             self.model.game_stats["Hit Points"] = self.model.player.hp
-            self.view.update_score_label()
+            self.view.update_bottom_frame()
             self.play("game_over")
             self.view.ask_new_game()
 
@@ -199,6 +203,14 @@ class Controller:
 
     def announce(self, message):
         """
-        TODO passes announcement to game log
+        Adds this message to announcements list.
         """
-        print(message)
+        self.announcements.append(message)
+
+    def get_messages_from_model(self):
+        """
+        Gets any announcements in Model and adds them to a list in this class.
+        """
+        while self.model.announcements:
+            msg = self.model.announcements.pop(0)
+            self.announcements.append(msg)

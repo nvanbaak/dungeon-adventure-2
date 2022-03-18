@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, TOP, PhotoImage, messagebox
+from tkinter import N, Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, TOP, PhotoImage, messagebox
 from tkinter import TclError
 from PIL import Image, ImageTk, ImageOps
 
@@ -38,11 +38,14 @@ class View:
         self.room_size = ROW_COUNT * SQUARE_SIZE
         self.canvas_width = self.room_size
         self.canvas_height = self.room_size
+        self.main_frame = None
         self.canvas = None
 
         self.info_label = None
         self.bottom_frame = None
-        self.side_frame = None
+        self.game_log = None
+        self.game_log_contents = [
+            "As you adventure, information about your progress will appear here."]
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_close_window)
 
@@ -167,11 +170,13 @@ class View:
         """
         Builds the base elements of the GUI
         """
+        self.main_frame = Frame(self.root, height=self.room_size)
+        self.main_frame.pack()
         self.create_canvas()
         self.draw_walls()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
         self.create_bottom_frame()
-        self.create_side_frame()
+        self.update_game_log()
 
     def create_canvas(self):
         """
@@ -179,8 +184,8 @@ class View:
         Parameters can be modified in configurations.py
         """
         self.canvas = Canvas(
-            self.root, width=self.canvas_width, height=self.canvas_height, bg=BOARD_COLOR_1)
-        self.canvas.pack(padx=8, pady=8)
+            self.main_frame, width=self.canvas_width, height=self.canvas_height, bg=BOARD_COLOR_1)
+        self.canvas.pack(side="left", padx=8, pady=8)
 
     def create_bottom_frame(self):
         """
@@ -220,13 +225,30 @@ class View:
         create_vision_button()
         create_health_button()
 
-    def create_side_frame(self):
+    def update_game_log(self):
         """
         Constructs a frame on the side of the screen, used for combat logs
         """
-        self.side_frame = Frame(self.root, width=150)
-        self.side_frame.pack(fill="y", side="right", padx=8, pady=5)
+        if self.game_log:
+            self.game_log.destroy()
 
+        self.get_announcements()
+
+        while( len(self.game_log_contents) > 13 ):
+            self.game_log_contents.pop(0)
+
+        log_text = "\n\n".join(self.game_log_contents)
+
+        self.game_log = Label(self.main_frame, width=20, height=10, text=log_text, wraplength=150, anchor=N)
+        self.game_log.pack(fill="y", side="right", padx=8, pady=8)
+
+    def get_announcements(self):
+        """
+        Retrieves announcements from controller
+        """
+        while self.controller.announcements:
+            announce = self.controller.announcements.pop(0)
+            self.game_log_contents.append(announce)
 
     ##################################
     #    GUI BUTTON FUNCTIONALITY    #
@@ -391,7 +413,7 @@ class View:
 
     def update_frame_info(self):
         """
-        Modifies the text in the bottom frame using information from Model.
+        Modifies the text in the bottom frame using information from Model.  Also updates game log.
         """
         game_stats = self.model.get_game_stats()
         exit_flag = self.model.get_curr_pos().is_exit
@@ -461,8 +483,9 @@ class View:
         self.hero_sprite.redraw_at(click_pos)
         self.load_current_room()
 
-        # finally, update bottom frame
+        # finally, update frames
         self.update_frame_info()
+        self.update_game_log()
 
     def click_event_to_alphanum(self, event):
         """
