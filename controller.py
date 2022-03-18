@@ -85,22 +85,25 @@ class Controller:
                 curr_room.vision = False
                 self.model.player.vision_potions += 1
                 self.announce("Picked up a vision potion!")
+                self.play("magic_harp")
 
             if curr_room.heal and candidate in ["healing_potion_g", "healing_potion_y"]:
                 curr_room.heal = None
                 self.model.player.health_potions += 1
                 self.announce("Picked up a health potion!")
+                self.play("magic_harp")
 
             # pillars
             if curr_room.pillar and "pillar" in candidate:
                 self.model.pillars[curr_room.pillar] = True
                 self.model.game_stats["Pillars"] += f"{curr_room.pillar.upper()} "
                 curr_room.pillar = None
+                self.play("pillar")
 
             if curr_room.is_exit and candidate == "exit":
                 if self.model.player_has_all_pillars():
                     self.announce(f"{self.model.player_name} has won the game!")
-                    self.play("you_win")
+                    self.play("yay")
                     self.__game_over = True
 
         # resolve room transition if appropriate
@@ -180,7 +183,7 @@ class Controller:
         if self.model.player.hp <= 0:
             self.model.game_stats["Hit Points"] = self.model.player.hp
             self.view.update_score_label()
-            self.play("game_over")
+            self.play("wilhelm_scream")
             self.view.ask_new_game()
 
         return monster_hp
