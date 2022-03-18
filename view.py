@@ -40,13 +40,14 @@ class View:
         self.canvas_height = self.room_size
         self.canvas = None
 
+        self.info_label = None
+        self.bottom_frame = None
+
         self.root.protocol("WM_DELETE_WINDOW", self.on_close_window)
 
         # init
         self.create_top_menu()
         self.setup_gui()
-
-        self.interactables = {}
 
         self.hero_sprite = Sprite(hero_class, self.canvas, HERO_POSITION)
         self.sprite_dict = {}
@@ -186,10 +187,10 @@ class View:
         """
         def create_frame():
             self.bottom_frame = Frame(self.root, height=64)
-            self.info_label = Label(
-                self.bottom_frame, text="")
-            self.info_label.pack(side="left", padx=8, pady=5)
             self.bottom_frame.pack(fill="x", side="bottom")
+            
+            self.info_label = Label(self.bottom_frame)
+            self.info_label.pack(side="left", padx=8, pady=5)
 
         def create_vision_button():
             """
@@ -386,8 +387,25 @@ class View:
         game_stats = self.model.get_game_stats()
         exit_flag = self.model.get_curr_pos().is_exit
 
+        pillar_str = ""
+        # collate pillar information
+        for pillar in self.model.pillars:
+            if self.model.pillars[pillar]:
+                pillar_str += f"{pillar} "
+  
+        # if none, say none.  Otherwise remove trailing space
+        if pillar_str == "": pillar_str = "None"
+        else: pillar_str = pillar_str[:-1]
+
+        hud_data = {
+            "Hit Points:" : self.model.player.hp,
+            "Pillars" : pillar_str,
+            "Health Potions" : self.model.player.health_potions,
+            "Vision Potions" : self.model.player.vision_potions
+        }
+
         info_fields = []
-        for key, value in game_stats.items():
+        for key, value in hud_data.items():
             if value == "":
                 value = "None"
             info_fields.append(f"{key}: {value}")
@@ -397,7 +415,10 @@ class View:
             label_text = "Y O U  D I E D !!!!!"
         elif exit_flag and self.model.player_has_all_pillars():
             label_text = "Y O U  W I N !!!!!"
-        self.info_label.config(text=label_text)
+
+        self.info_label.destroy()
+        self.info_label = Label(self.bottom_frame, text=label_text)
+        self.info_label.pack()
 
 
     ##################################
