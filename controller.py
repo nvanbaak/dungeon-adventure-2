@@ -167,7 +167,7 @@ class Controller:
         # resolve player death if applicable
         if self.model.player.hp <= 0:
             self.model.game_stats["Hit Points"] = self.model.player.hp
-            self.view.update_bottom_frame()
+            self.view.update_frame_info()
             self.play("wilhelm_scream")
             self.view.ask_new_game()
 
@@ -178,8 +178,8 @@ class Controller:
         self.play("welcome_pit")
         if self.model.player.hp <= 0:
             self.model.game_stats["Hit Points"] = self.model.player.hp
-            self.view.update_bottom_frame()
-            self.play("game_over")
+            self.view.update_frame_info()
+            self.play("wilhelm_scream")
             self.view.ask_new_game()
 
     def use_vision_potion(self, room):
@@ -214,3 +214,4 @@ class Controller:
         while self.model.announcements:
             msg = self.model.announcements.pop(0)
             self.announcements.append(msg)
+

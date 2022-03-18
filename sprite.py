@@ -10,8 +10,8 @@ class Sprite():
     :canvas: a reference to the game canvas, used to draw the sprite
     :position: an alphanumeric code used to determine where to draw the sprite
     """
-    def __init__(self, name, canvas, position):
-        self.name = name 
+    def __init__(self, name, canvas, position=None):
+        self.__name = name 
 
         # tk references
         self.canvas : tk.Canvas = canvas
@@ -20,7 +20,15 @@ class Sprite():
 
         # display parameters
         self.__mirror = False
-        self.__x_pos, self.__y_pos = self.parse_position_code(position)
+        if position:
+            self.__x_pos, self.__y_pos = self.parse_position_code(position)
+
+    @property
+    def name(self):
+        return self.__name
+    @name.setter
+    def name(self, value):
+        self.__name = value
 
     @property
     def position(self):
