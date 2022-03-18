@@ -383,7 +383,6 @@ class View:
         """
         Modifies the text in the bottom frame using information from Model.
         """
-
         game_stats = self.model.get_game_stats()
         exit_flag = self.model.get_curr_pos().is_exit
 
@@ -398,11 +397,11 @@ class View:
             label_text = "Y O U  D I E D !!!!!"
         elif exit_flag and self.model.player_has_all_pillars():
             label_text = "Y O U  W I N !!!!!"
-        self.info_label["text"] = label_text
+        self.info_label.config(text=label_text)
 
 
     ##################################
-    # GAME CONTROLS (TODO move these to controller)
+    #        CONTROL HANDLING        #
     ##################################
 
     def on_square_clicked(self, event):

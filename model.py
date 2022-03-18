@@ -35,6 +35,8 @@ class Model:
 
         self.pillars = {"A": "", "E": "", "P": "", "I": ""}
         self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
+        self.announcements = []
+
         self.dungeon.update_monsters_to_room(self)
 
     def get_game_stats(self):
@@ -57,7 +59,10 @@ class Model:
         return self.player.hp <= 0
 
     def announce(self, message):
-        print(message)
+        """
+        Saves an announcement to the announcements list, where it will be picked up by other classes. 
+        """
+        self.announcements.append(message)
 
     def get_curr_pos(self):
         return self.curr_pos
