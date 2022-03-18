@@ -240,6 +240,7 @@ class Maze:
     def __set_impassable(self):
         """
         Ensures that a  room is not an entrance/exit and randomly sets some rooms impassable (dead_ends).
+        the chance is 0.3
         """
         self.__impassable_rooms = []  # only to test and validate the impassable rooms
         for row in range(0, self.__rowCount):
@@ -299,7 +300,7 @@ class Maze:
                         heal_type = random.choice(("y", "g"))
                         self.__map[row, col].heal = str(heal_type)
                         self.__healing_potion_rooms.append(self.__map[row, col])  # for testing
-                    vision_chance = random.choice([0, 1], p=[0.1, 0.9])
+                    vision_chance = random.choice([0, 1], p=[0.9, 0.1])
                     if vision_chance == 1:
                         self.__map[row, col].vision = True
                         self.__vision_potion_rooms.append(self.__map[row, col])  # for testing
