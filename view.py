@@ -559,6 +559,10 @@ class View:
         self.update_frame_info()
         self.update_game_log()
 
+        # Then end the game if appropriate
+        if self.controller.game_over:
+            self.ask_new_game()
+
     def click_event_to_alphanum(self, event):
         """
         Given a click event, returns the alphanumeric position that was clicked.  Returns None if the player clicked out of bounds.
