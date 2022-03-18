@@ -344,13 +344,10 @@ class View():
 
     def start_new_game(self):
         self.root.protocol("WM_DELETE_WINDOW", lambda: self.on_close_window(self.root))
-        # print("V | start_new_game | calls controller.reset_default_characters()()")
         self.controller.reset_default_characters()
         self.send_view_reference_to_controller()
-        # print("V | start_new_game | calls draw_all_sprites()")
         self.draw_all_sprites()
         self.update_score_label()
-        # self.info_label.config(text="")
 
     def on_close_window(self, root):
         root.destroy()
@@ -366,10 +363,6 @@ class View():
                 if self.sprite_position == doorway:
                     self.on_square_clicked_manual(False)
 
-    # def load_sprites(self):
-    #     for position, name in START_SPRITES_POSITION.items():
-    #         self.sprite_dict[name] = Sprite(name, self.canvas, position)
-
     def draw_all_sprites(self):
         for position, sprite in self.controller.get_all_peices_on_board():
             self.draw_single_sprite(position, sprite)
@@ -377,8 +370,6 @@ class View():
             self.draw_single_sprite(position, sprite)
 
     def draw_single_sprite(self, position, sprite):
-        # print(f"V | draw_single_sprite | position: {position} | sprite {sprite}")
-        # print(f"V | call get_numeric_notation(position) via Controller")
         UNDER_64 = (64, 64)
         EXTRA_LARGE = (256, 256)
         x, y = self.controller.get_numeric_notation(position)
@@ -416,7 +407,6 @@ class View():
             int(DIMENSION_OF_EACH_SQUARE / 2)
         y0 = ((6 - row) * DIMENSION_OF_EACH_SQUARE) + \
             int(DIMENSION_OF_EACH_SQUARE / 2)
-        # print(f"V | calculate_sprite_coordinates | return {x0}, {y0}")
         return (x0, y0)
 
     def on_square_clicked_manual(self, clicked):
@@ -459,7 +449,6 @@ class View():
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("G", "A")
                     hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
                     self.sound_effect_play_count = 0
                     self.controller.i_fought_a_monster = False
                     self.pit_falls = 0
@@ -469,7 +458,6 @@ class View():
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("1", "7")
                     hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
                     self.sound_effect_play_count = 0
                     self.controller.i_fought_a_monster = False
                     self.pit_falls = 0
@@ -479,7 +467,6 @@ class View():
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("A", "G")
                     hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
                     self.sound_effect_play_count = 0
                     self.controller.i_fought_a_monster = False
                     self.pit_falls = 0
@@ -489,7 +476,6 @@ class View():
                     del hero_dict[self.sprite_position]
                     self.sprite_position = self.sprite_position.replace("7", "1")
                     hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
                     self.sound_effect_play_count = 0
                     self.controller.i_fought_a_monster = False
                     self.pit_falls = 0
@@ -524,9 +510,10 @@ class View():
 
     def on_key_pressed(self, event):
         if event.char == "x":
-            # print(self.visited.items())
             self.secret_view = True
             self.show_entire_map()
+        else:
+            self.secret_view = False
 
     def on_square_clicked(self, event):
         try:
@@ -612,12 +599,6 @@ class View():
         self.info_label["text"] = lbl_txt
 
     def use_vision(self):
-        # if self.vision_window != "":
-        #     try:
-        #         self.vision_window.destroy()
-        #     except:
-        #         self.vision_window = ""
-        # else:
         self.create_vision_window()
         vision_grid = self.controller.use_vision_potion(self.controller.get_room_data())
         row_min = 100
@@ -642,24 +623,15 @@ class View():
     def show_entire_map(self):
         self.create_map_window()
         entire_grid = self.controller.model.dungeon.dungeon.maze
-        # for index, val in np.ndenumerate(entire_grid):
-        #     print(index[0], index[1], val)
         row_min = 100
         row_max = 0
         col_min = 100
         col_max = 0
         grid_h = entire_grid.shape[0]
-        # print(f"grid height (shape[0]): {grid_h}")
         grid_w = entire_grid.shape[1]
-        # print(f"grid width (shape[1]): {grid_w}")
-        # print(f"for r in range (0, len(entire_grid[0]): {len(entire_grid[0])}")
-        # print(f"for c in range (0, len(entire_grid[1]): {len(entire_grid[1])}")
-        # for r in range(0, len(entire_grid[0])-1):
-            # for c in range(0, len(entire_grid[1])-1):
         for r in range(0, grid_h):
             for c in range(0, grid_w):
                 if entire_grid[r][c]:
-                    # print(f"entire_grid[{r}][{c}]: {entire_grid[r][c]}: {entire_grid[r][c].location}")
                     row_min = min(row_min, entire_grid[r][c].location[0])
                     row_max = max(row_max, entire_grid[r][c].location[0])
                     col_min = min(col_min, entire_grid[r][c].location[1])
@@ -667,18 +639,11 @@ class View():
                     self.draw_vision_room(entire_grid[r][c], c, r, "map")
                 else:
                     pass
-        # print(f"row_min: {row_min}")
-        # print(f"row_max: {row_max}")
-        # print(f"col_min: {col_min}")
-        # print(f"col_max: {col_max}")
-        # print(" ")
 
     def draw_vision_room(self, rm, col, row, type):
-        #these will be unnecessary after show_entire_map is called from the end of the game
         vision_room_width = 0
         vision_room_height = 0
         canvas = ""
-        ###
         grid_h = 0
         grid_w = 0
         vision_sq_dim = 100
@@ -695,73 +660,48 @@ class View():
             size = 300
 
         if type == "map":
-            # print(f"The screen width is: {self.map_canvas_width}")
-            # print(f"The screen height is: {self.map_canvas_height}")
             entire_grid = self.controller.model.dungeon.dungeon.maze
             grid_h = entire_grid.shape[0]
             grid_w = entire_grid.shape[1]
-            # print(f"The grid with is {grid_w}")
-            # print(f"The grid height is {grid_h}")
             size = int(.92 * (min(self.map_canvas_width/grid_w, self.map_canvas_height/grid_h)))
-            # print(f"Maze is wider than height, so square size {size} should be smaller than {int(self.map_canvas_height/grid_h)}")
-            # print(f"Maze is taller than wide, so square size {size} should be smaller than {int(self.map_canvas_width/grid_w)}")
             vision_room_width = size
             vision_room_height = size
             canvas = self.map_canvas
             ROWS = grid_h
             COLS = grid_w
             vision_sq_dim = int(vision_room_width / 3)
-            # print(f"ROWS: {ROWS}")
-            # print(f"COLS: {COLS}")
-            # print(f"vision square dimension: {vision_sq_dim}")
 
         vx = col * vision_room_width
         vy = row * vision_room_height
-        # print(f"vx: {vx}")
-        # print(f"vy: {vy}")
 
         vrs = []
         VISION_SQUARE = vision_sq_dim
-        # print(f"room location: {rm.location}")
         if rm.heal == "y":
             vrs.append([sprite.create_sprite("healing_potion_y"), 0, 0])
-            # print(f"vrs[{len(vrs)-1}]: healing potion appended at {(0, 0)}")
         if rm.heal == "g":
             vrs.append([sprite.create_sprite("healing_potion_g"), 0, 2 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: healing potion appended at {(0, 2 * VISION_SQUARE)}")
         if rm.vision == True:
             vrs.append([sprite.create_sprite("vision_potion"), 0, 1 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: vision potion appended at {(0, 1 * VISION_SQUARE)}")
         if rm.pillar == "a":
             vrs.append([sprite.create_sprite("abstraction_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         if rm.pillar == "e":
             vrs.append([sprite.create_sprite("encapsulation_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         if rm.pillar == "p":
             vrs.append([sprite.create_sprite("polymorphism_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         if rm.pillar == "i":
             vrs.append([sprite.create_sprite("inheritance_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         if rm.monster == "Gremlin":
             vrs.append([sprite.create_sprite("gremlin"), 2 * VISION_SQUARE, 0])
-            # print(f"vrs[{len(vrs)-1}]: monster appended at {(2 * VISION_SQUARE, 0)}")
         if rm.monster == "Ogre":
             vrs.append([sprite.create_sprite("ogre"), 2 * VISION_SQUARE, 0])
-            # print(f"vrs[{len(vrs)-1}]: monster appended at {(2 * VISION_SQUARE, 0)}")
         if rm.monster == "Skeleton":
             vrs.append([sprite.create_sprite("skeleton"), 2 * VISION_SQUARE, 0])
-            # print(f"vrs[{len(vrs)-1}]: monster appended at {(2 * VISION_SQUARE, 0)}")
         if rm.pit == True:
             vrs.append([sprite.create_sprite("pit"), 2 * VISION_SQUARE, 2 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: pit appended at {(2 * VISION_SQUARE, 2 * VISION_SQUARE)}")
         if rm.is_entrance:
             vrs.append([sprite.create_sprite("entrance"), 0 * VISION_SQUARE, 1 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: entrance appended at {(0 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         if rm.is_exit:
             vrs.append([sprite.create_sprite("exit"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: exit appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         orig_rm = self.controller.get_room_data()
 
         vis = self.controller.get_visited_array()
@@ -782,10 +722,7 @@ class View():
             if rm == orig_rm:
                 vrs.append([sprite.create_sprite(HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
 
-        # print(f"for i in range (0, len(vrs)): {len(vrs)}")
         for i in range(0, len(vrs)):
-            # print(f"x pos: {vrs[i][1]} (vrs[{i}][1]) | y pos: {vrs[i][2]} (vrs[{i}][2]) || {vrs[i][0]} ")
-            # print(f"draw_vision_sprite(vrs[{i}]) : {vrs[i]} | vx: {vx} | vy: {vy}")
             self.draw_vision_sprite(vrs[i][0], vrs[i][1], vrs[i][2], vx, vy, canvas)
 
         for key, value in door_dict.items():
@@ -819,30 +756,6 @@ class View():
                                              vy + vision_room_height, fill="black")
             else:
                 pass
-
-    def drw_vis_spr(self, sprite, spr_start_x, spr_start_y, rm_start_x, rm_start_y, canvas):
-        UNDER_100 = (70, 70)
-
-        if isinstance(sprite, Sprite):
-            WALL_CLEARANCE = 15
-            filename = "sprites_image/{}.png".format(
-                sprite.name.lower())
-            im = Image.open(filename)
-            image = ImageOps.contain(im, UNDER_100)
-            ph = ImageTk.PhotoImage(image, master=canvas)
-            if spr_start_x == 0:
-                # bordering left wall
-                spr_start_x = spr_start_x + WALL_CLEARANCE
-            if spr_start_y == 0:
-                # bordering top wall
-                spr_start_y = spr_start_y + WALL_CLEARANCE
-            spr_start_x = spr_start_x + rm_start_x
-            spr_start_y = spr_start_y + rm_start_y
-            label = tk.Label(canvas, image=ph, bg=self.board_color_1)
-            label.config(width=UNDER_100[0], height=UNDER_100[1])
-            label.image = ph
-            label.place(x=spr_start_x, y=spr_start_y)
-
 
     def draw_vision_sprite(self, sprite, spr_start_x, spr_start_y, rm_start_x, rm_start_y, canvas):
         UNDER_100 = (70, 70)
