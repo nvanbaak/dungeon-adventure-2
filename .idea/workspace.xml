@@ -2,12 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb48ee86-23da-41ec-b755-0c0576d15e5c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dungeon_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/dungeon_builder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/maze_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/maze_generator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/priestess.py" beforeDir="false" afterPath="$PROJECT_DIR$/priestess.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sprite.py" beforeDir="false" afterPath="$PROJECT_DIR$/sprite.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dungeondb.db" beforeDir="false" afterPath="$PROJECT_DIR$/dungeondb.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/options.ini" beforeDir="false" afterPath="$PROJECT_DIR$/options.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preferenceswindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/preferenceswindow.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/view.py" beforeDir="false" afterPath="$PROJECT_DIR$/view.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -176,18 +175,23 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/view.py</url>
-          <line>603</line>
+          <line>607</line>
           <option name="timeStamp" value="472" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/view.py</url>
-          <line>553</line>
+          <line>557</line>
           <option name="timeStamp" value="475" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/view.py</url>
-          <line>657</line>
+          <line>661</line>
           <option name="timeStamp" value="480" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/view.py</url>
+          <line>401</line>
+          <option name="timeStamp" value="481" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
