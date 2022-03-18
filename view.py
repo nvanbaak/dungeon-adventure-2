@@ -16,26 +16,54 @@ from musicplayer import MusicPlayer
 from tkinter import TclError
 
 class View():
+
+    """
+    View class holds the entirety of the game's GUI elements.
+    """
+
     def __init__(self, root, controller):
+        # holds the alphanumeric position of the hero sprite on the room's game "board" (center = D4)
         self.sprite_position = None
+
+        # dictionary to store sprite images.
+        # key is filename (e.g, "sprites_image/warrior.png", value is ImageTK PhotoImage object)
         self.images = {}
+
+        # saves the game background color specified in the config file, in case user opts to change
         self.board_color_1 = BOARD_COLOR_1
+
+        # records x,y position of hero sprite. used for moving sprite (and mirroring image left/right as necessary)
         self.sprite_xy = (0, 0)
+
+        # for tracking whether hero sprite has moved in opposite direction (such that image should be mirrored)
         self.sprite_mirror = False
 
+        # instantiates a MusicPlayer object which will be used to play game's soundtrack
         self.music_player = MusicPlayer()
+
+        # count that ensures sprite sound effects are only played once per room
         self.sound_effect_play_count = 0
+
+        # boolean to check if player has any vision potions, so that button can be shown/hidden accordingly
         self.vision = False
         self.music_on = True
         self.show_health_button = False
 
-        self.play_obj = ""
+        # boolean to track whether background music is on
+        self.music_on = True
+
         self.controller : Controller = controller
 
         self.root = root
+
+        # for storing canvas width/height after creation, for later use in draw_room()
         self.canvas_width = 0
         self.canvas_height = 0
+
+        # draw all elements of board needed to start game (menu, canvas, room, bottom frame & buttons) but no sprites
         self.create_board_base()
+
+        # bind the canvas to any mouse click
         self.canvas.bind("<Button-1>", self.on_square_clicked)
         self.root.bind("<Key>", self.on_key_pressed)
         self.vision_window = ""
@@ -43,6 +71,10 @@ class View():
         self.start_new_game()
 
     def create_board_base(self):
+        """
+        Draw all elements of board needed to start game (menu, canvas, room, bottom frame & buttons) but no sprites.
+        """
+
         self.create_top_menu()
         self.create_canvas()
         self.draw_room()
@@ -51,11 +83,17 @@ class View():
         self.create_health_button()
 
     def create_top_menu(self):
+        """
+        Create game menu bar. Create file and edit submenus.
+        """
         self.menu_bar = Menu(self.root)
         self.create_file_menu()
         self.create_edit_menu()
 
     def create_file_menu(self):
+        """
+        Create File submenus for New Game, Save Game, Load Game, and Delete All Saved Games.
+        """
         self.file_menu = Menu(self.menu_bar, tearoff=0)
         self.file_menu.add_command(
             label="New Game", command=self.on_new_game_menu_clicked)
@@ -69,6 +107,9 @@ class View():
         self.root.config(menu=self.menu_bar)
 
     def create_edit_menu(self):
+        """
+        Create Edit submenus for Sound and Background Color preferences.
+        """
         self.edit_menu = Menu(self.menu_bar, tearoff=0)
         self.edit_menu.add_command(
             label="Background Color", command=self.on_preference_menu_clicked)
@@ -76,6 +117,80 @@ class View():
             label="Sound", command=self.music_player.toggle_music)
         self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
         self.root.config(menu=self.menu_bar)
+
+    def create_canvas(self):
+        """
+        Create game board canvas of squares based on values in configurations.py (number of ROWS/COLS,
+        DIMENSIONS_OF_EACH_SQUARE)
+        """
+        self.canvas_width = NUMBER_OF_COLUMNS * DIMENSION_OF_EACH_SQUARE
+        self.canvas_height = NUMBER_OF_ROWS * DIMENSION_OF_EACH_SQUARE
+        self.canvas = Canvas(
+            self.root, width=self.canvas_width, height=self.canvas_height, bg=self.board_color_1)
+        self.canvas.pack(padx=8, pady=8)
+
+    def draw_room(self):
+        """
+        Draws game's current room (walls only) based on player's current position in the dungeon.
+        """
+
+        # get pointer to current room object
+        rm = self.controller.get_room_data()
+
+        # get dictionary of this room's doors to neighboring rooms
+        door_dict = rm.door_value
+
+        # wall width to be used in drawing grid of rooms
+        WALL_WIDTH = 25
+
+        # loop through door dictionary and draw doors if they exist, full walls if not
+        # (doors are full walls with the center 1/3 removed)
+        for key, value in door_dict.items():
+            if key == "Up" and value == True:
+                self.canvas.create_rectangle(0, 0, self.canvas_width/3, WALL_WIDTH, fill="black")
+                self.canvas.create_rectangle((2 * self.canvas_width)/3, 0, self.canvas_width, WALL_WIDTH, fill="black")
+            elif key == "Up" and value == False:
+                self.canvas.create_rectangle(0, 0, self.canvas_width, WALL_WIDTH, fill="black")
+            if key == "Down" and value == True:
+                self.canvas.create_rectangle(0, self.canvas_height - WALL_WIDTH, self.canvas_width/3, self.canvas_height, fill="black")
+                self.canvas.create_rectangle((2 * self.canvas_width)/3, self.canvas_height - WALL_WIDTH, self.canvas_width, self.canvas_height, fill="black")
+            elif key == "Down" and value == False:
+                self.canvas.create_rectangle(0, self.canvas_height - WALL_WIDTH, self.canvas_width, self.canvas_height, fill="black")
+            if key == "Left" and value == True:
+                self.canvas.create_rectangle(0, 0, WALL_WIDTH, self.canvas_height/3, fill="black")
+                self.canvas.create_rectangle(0, (2 * self.canvas_height)/3, WALL_WIDTH, self.canvas_height, fill="black")
+            elif key == "Left" and value == False:
+                self.canvas.create_rectangle(0, 0, WALL_WIDTH, self.canvas_height, fill="black")
+            if key == "Right" and value == True:
+                self.canvas.create_rectangle(self.canvas_width - WALL_WIDTH, 0, self.canvas_width, self.canvas_height/3, fill="black")
+                self.canvas.create_rectangle(self.canvas_width - WALL_WIDTH, (2 * self.canvas_height)/3, self.canvas_width, self.canvas_height, fill="black")
+            elif key == "Right" and value == False:
+                self.canvas.create_rectangle(self.canvas_width - WALL_WIDTH, 0, self.canvas_height, self.canvas_height, fill="black")
+            else:
+                pass
+            self.canvas.pack()
+        # get the game score from Model so that it will be accurate when scoreboard is refreshed
+        self.controller.load_hit_points()
+
+    def start_new_game(self):
+        """
+        reset_default_characters()
+            Clears dictionaries storing alphanumeric position of hero sprites and other game sprites.
+            Instantiates sprite objects of the type and location specified in configurations.py.
+            Refreshes room by checking underlying data and setting relevant sprite objects to "visible".
+
+        """
+        # catch event of manual game window close by user
+        self.root.protocol("WM_DELETE_WINDOW", lambda: self.on_close_window(self.root))
+
+        # clear dictionaries, instantiate sprite objects, refresh room by setting relevant sprite objects to 'visible'
+        self.controller.reset_default_characters()
+
+        # make sure Controller has a reference to View object (used for gather() and gather_sounds() in Controller)
+        self.send_view_reference_to_controller()
+
+        self.draw_all_sprites()
+        self.update_score_label()
 
     def on_preference_menu_clicked(self):
         self.show_preferences_window()
@@ -772,6 +887,11 @@ class View():
 
 
 def init_new_game():
+    """
+    Starts the game by instantiating a Tk object and a Controller object and passing them to the View constructor, then
+    starting mainloop. Currently resides outside View class so it can be called from there in the case of second game/restart.
+    """
+
     root = tk.Tk()
     root.title("Dungeon Adventure II: Dungeon Harder")
     View(root, Controller())
