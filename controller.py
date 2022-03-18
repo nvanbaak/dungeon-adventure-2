@@ -14,6 +14,7 @@ class Controller:
 
         # used to track whether we've transitioned to a new room since the View class checked last
         self.__room_transition = False
+        self.game_over = False
 
         # gets set to True upon entering a room with a monster
         self.__monster_blocking_exit = False
@@ -104,7 +105,7 @@ class Controller:
                 if self.model.player_has_all_pillars():
                     self.announce(f"{self.model.player_name} has won the game!")
                     self.play("yay")
-                    self.view.ask_new_game()
+                    self.game_over = True
 
         # resolve room transition if appropriate
         if alphanum in self.door_dict:
@@ -141,8 +142,7 @@ class Controller:
             self.announce("You've reached the exit!")
             if self.model.player_has_all_pillars():
                 self.announce("You've won!")
-                self.view.load_current_room()
-                self.view.ask_new_game()
+                self.game_over = True
             else:
                 self.announce("You need to find more pillars before you can leave.")
 
@@ -174,7 +174,7 @@ class Controller:
             self.model.game_stats["Hit Points"] = self.model.player.hp
             self.view.update_frame_info()
             self.play("wilhelm_scream")
-            self.view.ask_new_game()
+            self.game_over = True
 
         return monster_hp
 

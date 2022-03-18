@@ -117,7 +117,6 @@ class DungeonCharacter(ABC):
         Method for attacking a target
         """
         hit_landed = random.random() < self.hit_chance
-        print (f"{self.name} attacking {target.name}")
         if hit_landed:
             damage = random.randint(self.damage_min, self.damage_max)
             target.take_damage(damage, self.name)
