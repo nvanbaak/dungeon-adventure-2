@@ -214,4 +214,3 @@ class Controller:
         while self.model.announcements:
             msg = self.model.announcements.pop(0)
             self.announcements.append(msg)
-

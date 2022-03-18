@@ -8,7 +8,7 @@ from model import Model
 from preferenceswindow import PreferencesWindow
 from musicplayer import MusicPlayer
 from sprite import Sprite
-import save_load_game
+from save_load_game import SaveGame
 import menu_factory
 
 import sys
@@ -114,7 +114,7 @@ class View:
         saveload_canvas = Canvas(
             saveload_window, width=saveload_canvas_width, height=saveload_canvas_height, bg=BOARD_COLOR_1)
         saveload_label = Label(saveload_canvas)
-        sg = save_load_game.SaveGame()
+        sg = SaveGame()
         game_name = sg.game_name_generator()
         sg.save_game(game_name, self.controller.get_model())
         lbltxt = f"{game_name} successfully saved!"
@@ -123,34 +123,40 @@ class View:
         saveload_canvas.pack(padx=8, pady=8)
 
     def on_load_game_menu_clicked(self):
-        saveload_window = tk.Tk()
+        self.saveload_window = tk.Tk()
         saveload_canvas_width = 50
         saveload_canvas_height = 50
         saveload_canvas = Canvas(
-            saveload_window, width=saveload_canvas_width, height=saveload_canvas_height, bg=BOARD_COLOR_1)
+            self.saveload_window, width=saveload_canvas_width, height=saveload_canvas_height, bg=BOARD_COLOR_1)
         saveload_label = Label(saveload_canvas, text = "Select saved game")
         saveload_label.pack()
         saveload_canvas.pack(padx=8, pady=8)
-        sg = save_load_game.SaveGame
+        sg = SaveGame()
         saved_list = sg.saved_games_list()
-        self.clicked = tk.StringVar()
-        self.clicked.set("Select")
-        drop = tk.OptionMenu(saveload_canvas, self.clicked, *saved_list, command=self.open_saved)
-        drop.pack()
+        if len(saved_list) > 0:
+            self.clicked = tk.StringVar()
+            self.clicked.set("Select")
+            drop = tk.OptionMenu(saveload_canvas, self.clicked, *saved_list, command=self.open_saved)
+            drop.pack()
+        else: # no games saved
+            no_saved_game_label = Label(saveload_canvas, text = "No game saved to load")
+            no_saved_game_label.pack()
+            saveload_canvas.pack()
 
     def open_saved(self, selected_game):
-        sg = save_load_game.SaveGame
+        sg = SaveGame()
         if self.clicked != "Select":
-            m = sg.load_game(sg, selected_game)
+            m = sg.load_game(selected_game)
             self.model = m 
             self.controller = Controller(self, self.model)
             self.hero_sprite.name = self.model.hero
             self.load_current_room()
             self.update_frame_info()
             self.update_game_log()
+            self.saveload_window.destroy()  # destroys the saveload window after loading the game
 
     def on_delete_games_menu_clicked(self):
-        sg = save_load_game.SaveGame()
+        sg = SaveGame()
         sg.delete_all_saved_games()
 
     def on_preference_menu_clicked(self):
@@ -272,17 +278,9 @@ class View:
         self.create_vision_window()
         rm = self.model.get_curr_pos()
         vision_grid = self.controller.use_vision_potion(rm)
-        row_min = 100
-        row_max = 0
-        col_min = 100
-        col_max = 0
         for r in range(0, len(vision_grid[0])):
             for c in range(0, len(vision_grid[1])):
                 if vision_grid[r][c]:
-                    row_min = min(row_min, vision_grid[r][c].location[0])
-                    row_max = max(row_max, vision_grid[r][c].location[0])
-                    col_min = min(col_min, vision_grid[r][c].location[1])
-                    col_max = max(col_max, vision_grid[r][c].location[1])
                     self.draw_vision_room(vision_grid[r][c], c, r, "vision")
                 else:
                     pass
@@ -688,19 +686,11 @@ class View:
     def show_entire_map(self):
         self.create_map_window()
         entire_grid = self.controller.model.dungeon.dungeon.maze
-        # row_min = 100
-        # row_max = 0
-        # col_min = 100
-        # col_max = 0
         grid_h = entire_grid.shape[0]
         grid_w = entire_grid.shape[1]
         for r in range(0, grid_h):
             for c in range(0, grid_w):
                 if entire_grid[r][c]:
-                    # row_min = min(row_min, entire_grid[r][c].location[0])
-                    # row_max = max(row_max, entire_grid[r][c].location[0])
-                    # col_min = min(col_min, entire_grid[r][c].location[1])
-                    # col_max = max(col_max, entire_grid[r][c].location[1])
                     self.draw_vision_room(entire_grid[r][c], c, r, "map")
                 else:
                     pass

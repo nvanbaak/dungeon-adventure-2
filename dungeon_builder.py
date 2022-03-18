@@ -9,7 +9,7 @@ class DungeonBuilder:
     @staticmethod
     def build_single_dungeon():
         """build a single dungeon"""
-        dun0 = Dungeon(4,6)
+        dun0 = Dungeon(6,6)
         result=[dun0]
         DungeonBuilder.__update_floor_details(result)
         return result
