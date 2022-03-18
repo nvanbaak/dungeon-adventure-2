@@ -1,61 +1,80 @@
 import tkinter as tk
-from tkinter import Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, TOP, PhotoImage, messagebox
+from tkinter import N, Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, TOP, PhotoImage, messagebox
+from tkinter import TclError
 from PIL import Image, ImageTk, ImageOps
-from controller import Controller
+
 from configurations import *
-import exceptions
-import numpy as np
-from tkinter import messagebox
+from controller import Controller
+from model import Model
+from preferenceswindow import PreferencesWindow
+from musicplayer import MusicPlayer
+from sprite import Sprite
+import save_load_game
+
 import sys
 import time
-import preferenceswindow
-import save_load_game
-import sprite
-from sprite import Sprite
-from musicplayer import MusicPlayer
-from tkinter import TclError
 
-class View():
-    def __init__(self, root, controller):
-        self.sprite_position = None
-        self.images = {}
-        self.board_color_1 = BOARD_COLOR_1
-        self.sprite_xy = (0, 0)
-        self.sprite_mirror = False
 
+class View:
+    """
+    View class holds the entirety of the game's GUI elements.
+    """
+    def __init__(self, parent, root, hero_class, player_name):
+
+        # misc object references
+        self.parent = parent
+        self.root = root
+
+        # utility classes
+        self.model = Model(hero_class, player_name)
+        self.controller = Controller(self, self.model)
         self.music_player = MusicPlayer()
-        self.sound_effect_play_count = 0
+
+        # TODO these variables will be deprecated
         self.vision = False
-        self.music_on = True
         self.show_health_button = False
 
-        self.play_obj = ""
-        self.controller : Controller = controller
+        # tk parameters
+        self.room_size = ROW_COUNT * SQUARE_SIZE
+        self.canvas_width = self.room_size
+        self.canvas_height = self.room_size
+        self.main_frame = None
+        self.canvas = None
 
-        self.root = root
-        self.canvas_width = 0
-        self.canvas_height = 0
-        self.create_board_base()
-        self.canvas.bind("<Button-1>", self.on_square_clicked)
-        self.root.bind("<Key>", self.on_key_pressed)
-        self.vision_window = ""
-        self.secret_view = False
+        self.info_label = None
+        self.bottom_frame = None
+        self.game_log = None
+        self.game_log_contents = [
+            "As you adventure, information about your progress will appear here."]
+
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close_window)
+
+        # init
+        self.create_top_menu()
+        self.setup_gui()
+
+        self.hero_sprite = Sprite(hero_class, self.canvas, HERO_POSITION)
+        self.sprite_dict = {}
+        self.load_sprites()
+
         self.start_new_game()
 
-    def create_board_base(self):
-        self.create_top_menu()
-        self.create_canvas()
-        self.draw_room()
-        self.create_bottom_frame()
-        self.create_vision_button()
-        self.create_health_button()
+    ##################################
+    #       MENU BUILD METHODS       #
+    ##################################
 
     def create_top_menu(self):
+        """
+        Create game menu bar. Create file and edit submenus.
+        """
         self.menu_bar = Menu(self.root)
         self.create_file_menu()
         self.create_edit_menu()
 
     def create_file_menu(self):
+        """
+        Create File submenus for New Game, Save Game, Load Game, and Delete All Saved Games.
+        """
         self.file_menu = Menu(self.menu_bar, tearoff=0)
         self.file_menu.add_command(
             label="New Game", command=self.on_new_game_menu_clicked)
@@ -69,6 +88,9 @@ class View():
         self.root.config(menu=self.menu_bar)
 
     def create_edit_menu(self):
+        """
+        Create Edit submenus for Sound and Background Color preferences.
+        """
         self.edit_menu = Menu(self.menu_bar, tearoff=0)
         self.edit_menu.add_command(
             label="Background Color", command=self.on_preference_menu_clicked)
@@ -77,11 +99,10 @@ class View():
         self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
         self.root.config(menu=self.menu_bar)
 
-    def on_preference_menu_clicked(self):
-        self.show_preferences_window()
 
-    def show_preferences_window(self):
-        preferenceswindow.PreferencesWindow(self)
+    ##################################
+    #       MENU FUNCTIONALITY       #
+    ##################################
 
     def on_new_game_menu_clicked(self):
         self.root.destroy()
@@ -104,23 +125,6 @@ class View():
         saveload_label.pack()
         saveload_canvas.pack(padx=8, pady=8)
 
-    def on_delete_games_menu_clicked(self):
-        sg = save_load_game.SaveGame()
-        sg.delete_all_saved_games()
-
-    def open_saved(self, selected_game):
-        sg = save_load_game.SaveGame
-        if self.clicked != "Select":
-            m = sg.load_game(sg, selected_game)
-            self.controller.set_model(m)
-            self.draw_room()
-            self.controller.reset_default_characters()
-            self.draw_all_sprites()
-            self.on_square_clicked_manual(True)
-            self.update_score_label()
-            if self.vision == False:
-                self.vision_button.pack_forget()
-
     def on_load_game_menu_clicked(self):
         saveload_window = tk.Tk()
         saveload_canvas_width = 50
@@ -137,372 +141,124 @@ class View():
         drop = tk.OptionMenu(saveload_canvas, self.clicked, *saved_list, command=self.open_saved)
         drop.pack()
 
-    def reload_colors(self, color_1):
-        self.board_color_1 = color_1
-        self.draw_room()
-        self.canvas.config(bg=self.board_color_1)
-        self.canvas.pack()
-        self.draw_all_sprites()
+    def open_saved(self, selected_game):
+        sg = save_load_game.SaveGame
+        if self.clicked != "Select":
+            m = sg.load_game(sg, selected_game)
+            self.controller.set_model(m)
+            self.draw_room()
+            self.controller.reset_default_characters()
+            self.draw_all_sprites()
+            self.on_square_clicked_manual(True)
+            self.update_frame_info()
+            if self.vision == False:
+                self.vision_button.pack_forget()
+
+    def on_delete_games_menu_clicked(self):
+        sg = save_load_game.SaveGame()
+        sg.delete_all_saved_games()
+
+    def on_preference_menu_clicked(self):
+        PreferencesWindow(self)
+
+
+    ##################################
+    #        GUI CONSTRUCTION        #
+    ##################################
+
+    def setup_gui(self):
+        """
+        Builds the base elements of the GUI
+        """
+        self.main_frame = Frame(self.root, height=self.room_size)
+        self.main_frame.pack()
+        self.create_canvas()
+        self.draw_walls()
+        self.canvas.bind("<Button-1>", self.on_square_clicked)
+        self.create_bottom_frame()
+        self.update_game_log()
 
     def create_canvas(self):
-        self.canvas_width = NUMBER_OF_COLUMNS * DIMENSION_OF_EACH_SQUARE
-        self.canvas_height = NUMBER_OF_ROWS * DIMENSION_OF_EACH_SQUARE
+        """
+        Creates the base canvas for the game.
+        Parameters can be modified in configurations.py
+        """
         self.canvas = Canvas(
-            self.root, width=self.canvas_width, height=self.canvas_height, bg=self.board_color_1)
-        self.canvas.pack(padx=8, pady=8)
-
-    def create_vision_window(self):
-        self.vision_window = tk.Tk()
-        # self.vision_window.overrideredirect(True)
-        self.vision_canvas_width = 900
-        self.vision_canvas_height = 900
-        self.vision_canvas = Canvas(
-            self.vision_window, width=self.vision_canvas_width, height=self.vision_canvas_height, bg=self.board_color_1)
-        self.vision_canvas.pack(padx=8, pady=8)
-
-    def create_map_window(self):
-        self.map_window = tk.Tk()
-        self.map_canvas_width = self.map_window.winfo_screenwidth()
-        self.map_canvas_height = self.map_window.winfo_screenheight()
-        self.map_canvas = Canvas(
-            self.map_window, width=self.map_canvas_width, height=self.map_canvas_height, bg=self.board_color_1)
-        self.map_canvas.pack(padx=8, pady=8)
+            self.main_frame, width=self.canvas_width, height=self.canvas_height, bg=BOARD_COLOR_1)
+        self.canvas.pack(side="left", padx=8, pady=8)
 
     def create_bottom_frame(self):
-        self.bottom_frame = Frame(self.root, height=64)
-        self.info_label = Label(
-            self.bottom_frame, text="")
-        self.info_label.pack(side="left", padx=8, pady=5)
-        self.bottom_frame.pack(fill="x", side="bottom")
+        """
+        Constructs a frame at the base of the window
+        and adds the relevant widgets.
+        """
+        def create_frame():
+            self.bottom_frame = Frame(self.root, height=64)
+            self.bottom_frame.pack(fill="x", side="bottom")
+            
+            self.info_label = Label(self.bottom_frame)
+            self.info_label.pack(side="left", padx=8, pady=5)
 
-    def create_vision_button(self):
-        self.vision_button = Button(self.bottom_frame, text="Use Vision", command=self.use_vision)
-        self.vision_button.configure(activebackground="#33B5E5")
-        self.vision_button.pack(side=TOP)
-        if self.vision == False:
-            self.vision_button.pack_forget()
+        def create_vision_button():
+            """
+            Constructs the vision potion button
+            and addis it to the bottom frame.
+            """
+            self.vision_button = Button(self.bottom_frame, text="Use Vision", command=self.use_vision)
+            self.vision_button.configure(activebackground="#33B5E5")
+            self.vision_button.pack(side=TOP)
+            if self.vision == False:
+                self.vision_button.pack_forget()
 
-    def create_health_button(self):
-        self.health_button = Button(self.bottom_frame, text="Use Health", command=self.use_health)
-        self.health_button.configure(activebackground="#33B5E5")
-        self.health_button.pack(side=TOP)
-        if self.show_health_button == False:
-            self.health_button.pack_forget()
+        def create_health_button():
+            """
+            Constructs the health potion button
+            and adds it to the bottom frame.
+            """
+            self.health_button = Button(self.bottom_frame, text="Use Health", command=self.use_health)
+            self.health_button.configure(activebackground="#33B5E5")
+            self.health_button.pack(side=TOP)
+            if self.show_health_button == False:
+                self.health_button.pack_forget()
+
+        create_frame()
+        create_vision_button()
+        create_health_button()
+
+    def update_game_log(self):
+        """
+        Constructs a frame on the side of the screen, used for combat logs
+        """
+        if self.game_log:
+            self.game_log.destroy()
+
+        self.get_announcements()
+
+        while( len(self.game_log_contents) > 13 ):
+            self.game_log_contents.pop(0)
+
+        log_text = "\n\n".join(self.game_log_contents)
+
+        self.game_log = Label(self.main_frame, width=20, height=10, text=log_text, wraplength=150, anchor=N)
+        self.game_log.pack(fill="y", side="right", padx=8, pady=8)
+
+    def get_announcements(self):
+        """
+        Retrieves announcements from controller
+        """
+        while self.controller.announcements:
+            announce = self.controller.announcements.pop(0)
+            self.game_log_contents.append(announce)
+
+    ##################################
+    #    GUI BUTTON FUNCTIONALITY    #
+    ##################################
 
     def use_health(self):
         self.controller.use_health_potion()
-        self.controller.model.game_stats["Health Potions"] = self.controller.model.player.health_potions
-        self.controller.model.game_stats["Hit Points"] = self.controller.model.player.hp
-        if self.controller.model.player.health_potions < 1:
-            self.health_button.pack_forget()
-        self.update_score_label()
-
-    def draw_room(self):
-        WALL_WIDTH = 25
-        rm = self.controller.get_room_data()
-        door_dict = rm.door_value
-        for key, value in door_dict.items():
-            if key == "Up" and value == True:
-                self.canvas.create_rectangle(0, 0, self.canvas_width/3, WALL_WIDTH, fill="black")
-                self.canvas.create_rectangle((2 * self.canvas_width)/3, 0, self.canvas_width, WALL_WIDTH, fill="black")
-            elif key == "Up" and value == False:
-                self.canvas.create_rectangle(0, 0, self.canvas_width, 25, fill="black")
-            if key == "Down" and value == True:
-                self.canvas.create_rectangle(0, self.canvas_height - WALL_WIDTH, self.canvas_width/3, self.canvas_height, fill="black")
-                self.canvas.create_rectangle((2 * self.canvas_width)/3, self.canvas_height - WALL_WIDTH, self.canvas_width, self.canvas_height, fill="black")
-            elif key == "Down" and value == False:
-                self.canvas.create_rectangle(0, self.canvas_height - WALL_WIDTH, self.canvas_width, self.canvas_height, fill="black")
-            if key == "Left" and value == True:
-                self.canvas.create_rectangle(0, 0, WALL_WIDTH, self.canvas_height/3, fill="black")
-                self.canvas.create_rectangle(0, (2 * self.canvas_height)/3, WALL_WIDTH, self.canvas_height, fill="black")
-            elif key == "Left" and value == False:
-                self.canvas.create_rectangle(0, 0, WALL_WIDTH, self.canvas_height, fill="black")
-            if key == "Right" and value == True:
-                self.canvas.create_rectangle(self.canvas_width - WALL_WIDTH, 0, self.canvas_width, self.canvas_height/3, fill="black")
-                self.canvas.create_rectangle(self.canvas_width - WALL_WIDTH, (2 * self.canvas_height)/3, self.canvas_width, self.canvas_height, fill="black")
-            elif key == "Right" and value == False:
-                self.canvas.create_rectangle(self.canvas_width - WALL_WIDTH, 0, self.canvas_height, self.canvas_height, fill="black")
-            else:
-                pass
-            self.canvas.pack()
-        self.controller.load_hit_points()
-
-    def start_new_game(self):
-        self.root.protocol("WM_DELETE_WINDOW", lambda: self.on_close_window(self.root))
-        # print("V | start_new_game | calls controller.reset_default_characters()()")
-        self.controller.reset_default_characters()
-        self.send_view_reference_to_controller()
-        # print("V | start_new_game | calls draw_all_sprites()")
-        self.draw_all_sprites()
-        self.update_score_label()
-        # self.info_label.config(text="")
-
-    def on_close_window(self, root):
-        root.destroy()
-
-    def send_view_reference_to_controller(self):
-        self.controller.accept_view_reference(self)
-
-    def doorway_refresh(self, hero_dict, clicked):
-        sprite = hero_dict[self.sprite_position]
-        doors = ["C1", "D1", "E1", "C7", "D7", "E7", "G3", "G4", "G5", "A3", "A4", "A5"]
-        if sprite.name == "warrior" and self.sprite_position in doors:
-            for doorway in doors:
-                if self.sprite_position == doorway:
-                    self.on_square_clicked_manual(False)
-
-    # def load_sprites(self):
-    #     for position, name in START_SPRITES_POSITION.items():
-    #         self.sprite_dict[name] = Sprite(name, self.canvas, position)
-
-    def draw_all_sprites(self):
-        for position, sprite in self.controller.get_all_peices_on_board():
-            self.draw_single_sprite(position, sprite)
-        for position, sprite in self.controller.get_hero_dict_items():
-            self.draw_single_sprite(position, sprite)
-
-    def draw_single_sprite(self, position, sprite):
-        # print(f"V | draw_single_sprite | position: {position} | sprite {sprite}")
-        # print(f"V | call get_numeric_notation(position) via Controller")
-        UNDER_64 = (64, 64)
-        EXTRA_LARGE = (256, 256)
-        x, y = self.controller.get_numeric_notation(position)
-        if sprite:
-            filename = "sprites_image/{}.png".format(
-                sprite.name.lower())
-            image = Image.open(filename)
-            w, h = image.size
-            if sprite.name == "pit":
-                image = ImageOps.contain(image, EXTRA_LARGE)
-            else:
-                image = ImageOps.contain(image, UNDER_64)
-
-            if self.sprite_mirror == True and sprite.name == "warrior":
-                image = image.transpose(Image.FLIP_LEFT_RIGHT)
-            self.images[filename] = ImageTk.PhotoImage(image)
-
-            x0, y0 = self.calculate_sprite_coordinate(x, y)
-            ci = self.canvas.create_image(x0, y0, image=self.images[
-                                     filename], anchor="c")
-            if sprite.name == "warrior":
-                sprite.visible = True
-            if sprite.visible == False:
-                self.canvas.itemconfig(ci, state="hidden")
-            else:
-                self.canvas.itemconfig(ci, state="normal")
-            # print(f"ADD OTHER HERO TYPES")
-            if sprite.name == "warrior":
-                self.sprite_position = position
-                self.sprite_xy = (x0, y0)
-        self.update_score_label()
-
-    def calculate_sprite_coordinate(self, row, col):
-        x0 = (col * DIMENSION_OF_EACH_SQUARE) + \
-            int(DIMENSION_OF_EACH_SQUARE / 2)
-        y0 = ((6 - row) * DIMENSION_OF_EACH_SQUARE) + \
-            int(DIMENSION_OF_EACH_SQUARE / 2)
-        # print(f"V | calculate_sprite_coordinates | return {x0}, {y0}")
-        return (x0, y0)
-
-    def on_square_clicked_manual(self, clicked):
-        """
-        This is to prevent an infinite loop when the user clicks near a door. The room only changes if the user
-        clicked a doorway, not if the user appears in the next room in a doorway. It also redraws the room after
-        every user click.
-        """
-        rm = self.controller.get_room_data()
-        door_dict = rm.door_value
-
-        self.hide_all_sprites()
-
-        hero_dict = self.controller.get_hero_dict()
-        model_dict = self.controller.get_model_dict()
-
-        sprite_obj = hero_dict[self.sprite_position]
-
-        self.ok_to_leave = False
-
-        if rm.monster:
-            if self.controller.i_fought_a_monster:
-                self.ok_to_leave = True
-            else:
-                self.controller.model.announce(
-                    "You cannot leave until you kill the monster.Click on the monster to start battle")
-                self.ok_to_leave = False
-        else:
-            self.ok_to_leave = True
-
-        if rm.pit:
-            if self.pit_falls == 0:
-                self.controller.pit_fall()
-                self.pit_falls = 1
-
-        if clicked == True and self.ok_to_leave == True:
-            if self.sprite_position == "G5" or self.sprite_position == "G4" or self.sprite_position == "G3":
-                if door_dict["Right"] == True:
-                    self.controller.move_right()
-                    del hero_dict[self.sprite_position]
-                    self.sprite_position = self.sprite_position.replace("G", "A")
-                    hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
-                    self.sound_effect_play_count = 0
-                    self.controller.i_fought_a_monster = False
-                    self.pit_falls = 0
-            elif self.sprite_position == "C1" or self.sprite_position == "D1" or self.sprite_position =="E1":
-                if door_dict["Down"] == True:
-                    self.controller.move_down()
-                    del hero_dict[self.sprite_position]
-                    self.sprite_position = self.sprite_position.replace("1", "7")
-                    hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
-                    self.sound_effect_play_count = 0
-                    self.controller.i_fought_a_monster = False
-                    self.pit_falls = 0
-            elif self.sprite_position == "A5" or self.sprite_position == "A4" or self.sprite_position == "A3":
-                if door_dict["Left"] == True:
-                    self.controller.move_left()
-                    del hero_dict[self.sprite_position]
-                    self.sprite_position = self.sprite_position.replace("A", "G")
-                    hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
-                    self.sound_effect_play_count = 0
-                    self.controller.i_fought_a_monster = False
-                    self.pit_falls = 0
-            elif self.sprite_position == "C7" or self.sprite_position == "D7" or self.sprite_position == "E7":
-                if door_dict["Up"] == True:
-                    self.controller.move_upper()
-                    del hero_dict[self.sprite_position]
-                    self.sprite_position = self.sprite_position.replace("7", "1")
-                    hero_dict[self.sprite_position] = sprite_obj
-                    # self.controller.gather()
-                    self.sound_effect_play_count = 0
-                    self.controller.i_fought_a_monster = False
-                    self.pit_falls = 0
-            else:
-                pass
-
-        self.canvas.delete("all")
-        self.controller.refresh_room()
-        self.draw_room()
-        self.draw_all_sprites()
-        self.sound_effect_play_count = self.sound_effect_play_count + 1
-        if self.sound_effect_play_count == 1:
-            self.controller.gather_sounds()
-        if clicked == True:
-            self.doorway_refresh(hero_dict, clicked)
-        m = self.controller.get_model()
-        if rm.is_exit == True and m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and m.pillars["I"] == True:
-            self.controller.model.announce(f"{self.controller.model.player} has won the game!")
-            self.controller.play("you_win")
-            self.show_entire_map()
-            self.ask_new_game()
-
-    def check_sq_for_gatherable_objects(self, position_of_click):
-        model_dict = self.controller.get_model_dict()
-        for position, value in model_dict.items():
-            if position == position_of_click:
-                s_obj = model_dict[position]
-                return s_obj
-
-    def process_gatherable_object(self, obj, pos):
-        self.controller.gather(obj, pos)
-
-    def on_key_pressed(self, event):
-        if event.char == "x":
-            # print(self.visited.items())
-            self.secret_view = True
-            self.show_entire_map()
-
-    def on_square_clicked(self, event):
-        try:
-            clicked = True
-            clicked_row, clicked_column = self.get_clicked_row_column(event)
-            xy = self.get_clicked_xy(event)
-            position_of_click = self.controller.get_alphanumeric_position(
-                (clicked_row, clicked_column))
-
-            rm = self.controller.get_room_data()
-
-            vis = self.controller.get_visited_array()
-            vis[rm.location[0]][rm.location[1]] = True
-
-            if rm.is_entrance:
-                pass
-            else:
-                gatherable_obj = self.check_sq_for_gatherable_objects(position_of_click)
-                if gatherable_obj:
-                    self.process_gatherable_object(gatherable_obj, position_of_click)
-
-            self.shift(self.sprite_position, position_of_click)
-            self.sprite_position = position_of_click
-
-            if self.sprite_xy[0] < xy[0]:
-                self.sprite_mirror = False
-            else:
-                self.sprite_mirror = True
-
-            self.on_square_clicked_manual(clicked)
-
-        except TclError:
-            pass
-
-    def hide_all_sprites(self):
-
-        model_dict = self.controller.get_model_dict()
-
-        for position, value in model_dict.items():
-            if value.name == "warrior":
-                pass
-            else:
-                s_obj = model_dict[position]
-                s_obj.visible = False
-
-    def get_clicked_row_column(self, event):
-        col_size = row_size = DIMENSION_OF_EACH_SQUARE
-        clicked_column = event.x // col_size
-        clicked_row = 6 - (event.y // row_size)
-        return (clicked_row, clicked_column)
-
-    def get_row_column(self, x, y):
-        col_size = row_size = DIMENSION_OF_EACH_SQUARE
-        xcol = x // col_size
-        xrow = y // row_size
-        return (xrow, xcol)
-
-    def get_clicked_xy(self, event):
-        x = event.x
-        y = event.y
-        return (x, y)
-
-    def shift(self, start_pos, end_pos):
-        try:
-            self.controller.pre_move_validation(start_pos, end_pos)
-        except exceptions.NameError as error:
-            self.info_label["text"] = error.__class__.__name__
-
-    def update_score_label(self):
-        rm = self.controller.get_room_data()
-        m = self.controller.get_model()
-        stat_dict = self.controller.get_game_stats()
-
-        lbl_txt = ""
-        for key, value in stat_dict.items():
-            lbl_txt = lbl_txt + str(key) + ": " + str(value) + " | "
-        if self.controller.model.player.hp <= 0:
-            lbl_txt = "Y O U  D I E D !!!!!"
-        if rm.is_exit == True and m.pillars["E"] == True and m.pillars["E"] == True and m.pillars["A"] == True and \
-                m.pillars["I"] == True:
-            lbl_txt = "Y O U  W I N !!!!!"
-            self.info_label["text"] = lbl_txt
-        self.info_label["text"] = lbl_txt
+        self.update_frame_info()
 
     def use_vision(self):
-        # if self.vision_window != "":
-        #     try:
-        #         self.vision_window.destroy()
-        #     except:
-        #         self.vision_window = ""
-        # else:
         self.create_vision_window()
         vision_grid = self.controller.use_vision_potion(self.controller.get_room_data())
         row_min = 100
@@ -522,235 +278,327 @@ class View():
         self.controller.model.game_stats["Vision Potions"] = self.controller.model.player.vision_potions
         self.vision = False
         self.vision_button.pack_forget()
-        self.update_score_label()
+        self.update_frame_info()
 
-    def show_entire_map(self):
-        self.create_map_window()
-        entire_grid = self.controller.model.dungeon.dungeon.maze
-        # for index, val in np.ndenumerate(entire_grid):
-        #     print(index[0], index[1], val)
-        row_min = 100
-        row_max = 0
-        col_min = 100
-        col_max = 0
-        grid_h = entire_grid.shape[0]
-        # print(f"grid height (shape[0]): {grid_h}")
-        grid_w = entire_grid.shape[1]
-        # print(f"grid width (shape[1]): {grid_w}")
-        # print(f"for r in range (0, len(entire_grid[0]): {len(entire_grid[0])}")
-        # print(f"for c in range (0, len(entire_grid[1]): {len(entire_grid[1])}")
-        # for r in range(0, len(entire_grid[0])-1):
-            # for c in range(0, len(entire_grid[1])-1):
-        for r in range(0, grid_h):
-            for c in range(0, grid_w):
-                if entire_grid[r][c]:
-                    # print(f"entire_grid[{r}][{c}]: {entire_grid[r][c]}: {entire_grid[r][c].location}")
-                    row_min = min(row_min, entire_grid[r][c].location[0])
-                    row_max = max(row_max, entire_grid[r][c].location[0])
-                    col_min = min(col_min, entire_grid[r][c].location[1])
-                    col_max = max(col_max, entire_grid[r][c].location[1])
-                    self.draw_vision_room(entire_grid[r][c], c, r, "map")
-                else:
-                    pass
-        # print(f"row_min: {row_min}")
-        # print(f"row_max: {row_max}")
-        # print(f"col_min: {col_min}")
-        # print(f"col_max: {col_max}")
-        # print(" ")
+    def create_vision_window(self):
+        self.vision_window = tk.Tk()
+        self.vision_canvas_width = 900
+        self.vision_canvas_height = 900
+        self.vision_canvas = Canvas(
+            self.vision_window, width=self.vision_canvas_width, height=self.vision_canvas_height, bg=self.board_color_1)
+        self.vision_canvas.pack(padx=8, pady=8)
 
-    def draw_vision_room(self, rm, col, row, type):
-        #these will be unnecessary after show_entire_map is called from the end of the game
-        vision_room_width = 0
-        vision_room_height = 0
-        canvas = ""
-        ###
-        grid_h = 0
-        grid_w = 0
-        vision_sq_dim = 100
-        size = 0
-        ROWS = 3
-        COLS = 3
+    def on_close_window(self):
+        """
+        Event handler for window closure..
+        """
+        self.music_player.stop_music()
+        self.root.destroy()
+
+
+    ##################################
+    #     GRAPHICS FUNCTIONALITY     #
+    ##################################
+
+    def start_new_game(self):
+        """
+        Resets game data to a fresh start, then displays the game state.
+        """
+        self.controller.reset_default_characters()
+
+        self.load_current_room()
+        self.update_frame_info()
+
+    def draw_walls(self):
+        """
+        Draws walls on each side of the room.
+        """
+        up_wall = (
+                0, 0,
+                self.canvas_width, WALL_WIDTH)
+        down_wall = (
+                0, self.canvas_height - WALL_WIDTH,
+                self.canvas_width, self.canvas_height)
+        left_wall = (
+                0, 0, 
+                WALL_WIDTH, self.canvas_height)
+        right_wall = (
+                self.canvas_width - WALL_WIDTH, 
+                0, self.canvas_height, self.canvas_height)
+
+        for wall in [up_wall, down_wall, left_wall, right_wall]:
+            self.canvas.create_rectangle(
+                    wall[0], wall[1],
+                    wall[2], wall[3],
+                    fill="black")
+
+    def load_current_room(self):
+        """
+        gets all GUI-relevant information about the current room and displays it.
+        """
+        self.draw_doors()
+        self.draw_all_sprites()
+
+    def draw_doors(self, fill_color=BOARD_COLOR_1):
+        """
+        Draws doors where appropriate given the player's current locations.
+        """
+        self.erase_doors()
+        door_dict = self.model.get_curr_pos().door_value
+
+        door_coords = {
+            "Up" : (
+                    self.canvas_width//3, 0, 
+                    2 * self.canvas_width//3, WALL_WIDTH),
+            "Down" : (
+                    self.canvas_width//3, self.canvas_height - WALL_WIDTH,
+                    2 * self.canvas_width//3, self.canvas_height),
+            "Left" : (
+                    0, self.canvas_height//3,
+                    WALL_WIDTH, 2 * self.canvas_height//3),
+            "Right" : (
+                    self.canvas_width - WALL_WIDTH, self.canvas_height//3,
+                    self.canvas_width, 2 * self.canvas_height//3)
+        }
+
+        for dir in ["Up", "Down", "Left", "Right"]:
+            if door_dict[dir]:
+                door = door_coords[dir]
+                self.canvas.create_rectangle(
+                        door[0], door[1],
+                        door[2], door[3],
+                        fill=fill_color,
+                        tags="doors")
+
+    def erase_doors(self):
+        """
+        removes all doors from the canvas;
+        this prevents memory leaks from drawing
+        the same door on top of itself in every room
+        """
+        self.canvas.delete("doors")
+
+    def reload_colors(self, color):
+        """
+        Redraws the room wih a new color; unsure if this works
+        """
+        self.canvas.config(bg=color)
+        self.erase_doors()
+        self.draw_doors(color)
+
+    def load_sprites(self):
+        """
+        Instantiates a Sprite object for each type of object in the dungeon
+        """
+        for position, name in START_SPRITES_POSITION.items():
+            self.sprite_dict[name] = Sprite(name, self.canvas, position)
+
+    def draw_all_sprites(self):
+        """
+        Draws the hero, then gets a list of all game objeects in the current room and displays the corresponding sprites.
+        """
+        self.canvas.delete("sprites")
+        self.hero_sprite.draw()
+
+        objects_to_display = self.model.get_current_room_contents()
+
+        for game_object in objects_to_display:
+            self.sprite_dict[game_object].draw()
+
+    def clear_all_sprites(self):
+        """
+        Deletes all sprites from the canvas.  Used when transitioning between rooms.
+        """
+        self.canvas.delete("sprites")
+
+    def update_frame_info(self):
+        """
+        Modifies the text in the bottom frame using information from Model.  Also updates game log.
+        """
+        game_stats = self.model.get_game_stats()
+        exit_flag = self.model.get_curr_pos().is_exit
+
+        pillar_str = ""
+        # collate pillar information
+        for pillar in self.model.pillars:
+            if self.model.pillars[pillar]:
+                pillar_str += f"{pillar} "
+  
+        # if none, say none.  Otherwise remove trailing space
+        if pillar_str == "": pillar_str = "None"
+        else: pillar_str = pillar_str[:-1]
+
+        hud_data = {
+            "Hit Points:" : self.model.player.hp,
+            "Pillars" : pillar_str,
+            "Health Potions" : self.model.player.health_potions,
+            "Vision Potions" : self.model.player.vision_potions
+        }
+
+        info_fields = []
+        for key, value in hud_data.items():
+            if value == "":
+                value = "None"
+            info_fields.append(f"{key}: {value}")
+        label_text = " | ".join(info_fields)
+
+        if self.model.player_is_dead():
+            label_text = "Y O U  D I E D !!!!!"
+        elif exit_flag and self.model.player_has_all_pillars():
+            label_text = "Y O U  W I N !!!!!"
+
+        self.info_label.destroy()
+        self.info_label = Label(self.bottom_frame, text=label_text)
+        self.info_label.pack(side="left", padx=8, pady=5)
+
+
+    ##################################
+    #        CONTROL HANDLING        #
+    ##################################
+
+    def on_square_clicked(self, event):
+        """
+        Event handling for click event.  Resolves any object interactions in the clicked square and then moves the player to the square if no object remains there.
+        """
+        click_pos = self.click_event_to_alphanum(event)
+        if click_pos is None:
+            return
+
+        # activate_square returns True or False depending on whether the square is empty after resolution
+        item_resolved = self.controller.activate_square(click_pos)
+
+        if item_resolved:
+            # in the case of a room transition, modify player location
+            if self.controller.check_for_room_transition():
+                if "1" in click_pos:
+                    click_pos = click_pos.replace("1", "7")
+                elif "7" in click_pos:
+                    click_pos = click_pos.replace("7", "1")
+                elif "A" in click_pos:
+                    click_pos = click_pos.replace("A", "G")
+                elif "G" in click_pos:
+                    click_pos = click_pos.replace("G", "A")
+
+        # then redraw the room
+        self.hero_sprite.redraw_at(click_pos)
+        self.load_current_room()
+
+        # finally, update frames
+        self.update_frame_info()
+        self.update_game_log()
+
+    def click_event_to_alphanum(self, event):
+        """
+        Given a click event, returns the alphanumeric position that was clicked.  Returns None if the player clicked out of bounds.
+        """
+        col_size = row_size = SQUARE_SIZE
+        clicked_column = event.x // col_size
+        clicked_row = 6 - (event.y // row_size)
+
+        if clicked_row not in range(7):
+            return None
+        if clicked_column not in range(7):
+            return None
+
+        return f"{X_AXIS_LABELS[clicked_column]}{Y_AXIS_LABELS[clicked_row]}"
+
+    ##################################
+    #        NEED REFACTORING
+    ##################################
+
+    def draw_vision_room(self, rm, i, j, type):
         WALL_WIDTH = 10
         door_dict = rm.door_value
-
-        if type == "vision":
-            vision_room_width = self.vision_canvas_width / 3
-            vision_room_height = self.vision_canvas_height / 3
-            canvas = self.vision_canvas
-            size = 300
-
+        vision_square_width = self.vision_canvas_width / 3
+        vision_square_height = self.vision_canvas_height / 3
         if type == "map":
-            # print(f"The screen width is: {self.map_canvas_width}")
-            # print(f"The screen height is: {self.map_canvas_height}")
-            entire_grid = self.controller.model.dungeon.dungeon.maze
-            grid_h = entire_grid.shape[0]
-            grid_w = entire_grid.shape[1]
-            # print(f"The grid with is {grid_w}")
-            # print(f"The grid height is {grid_h}")
-            size = int(.92 * (min(self.map_canvas_width/grid_w, self.map_canvas_height/grid_h)))
-            # print(f"Maze is wider than height, so square size {size} should be smaller than {int(self.map_canvas_height/grid_h)}")
-            # print(f"Maze is taller than wide, so square size {size} should be smaller than {int(self.map_canvas_width/grid_w)}")
-            vision_room_width = size
-            vision_room_height = size
-            canvas = self.map_canvas
-            ROWS = grid_h
-            COLS = grid_w
-            vision_sq_dim = int(vision_room_width / 3)
-            # print(f"ROWS: {ROWS}")
-            # print(f"COLS: {COLS}")
-            # print(f"vision square dimension: {vision_sq_dim}")
-
-        vx = col * vision_room_width
-        vy = row * vision_room_height
-        # print(f"vx: {vx}")
-        # print(f"vy: {vy}")
+            pass
+            # vision_square_width = self.vision_canvas_width / 3
+            # vision_square_height = self.vision_canvas_height / 3
+        vi = i * vision_square_width
+        vj = j * vision_square_height
 
         vrs = []
-        VISION_SQUARE = vision_sq_dim
-        # print(f"room location: {rm.location}")
+        VISION_SQUARE = 100
         if rm.heal == "y":
             vrs.append([sprite.create_sprite("healing_potion_y"), 0, 0])
-            # print(f"vrs[{len(vrs)-1}]: healing potion appended at {(0, 0)}")
         if rm.heal == "g":
             vrs.append([sprite.create_sprite("healing_potion_g"), 0, 2 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: healing potion appended at {(0, 2 * VISION_SQUARE)}")
         if rm.vision == True:
             vrs.append([sprite.create_sprite("vision_potion"), 0, 1 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: vision potion appended at {(0, 1 * VISION_SQUARE)}")
         if rm.pillar == "a":
             vrs.append([sprite.create_sprite("abstraction_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         if rm.pillar == "e":
             vrs.append([sprite.create_sprite("encapsulation_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         if rm.pillar == "p":
             vrs.append([sprite.create_sprite("polymorphism_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         if rm.pillar == "i":
             vrs.append([sprite.create_sprite("inheritance_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: pillar appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         if rm.monster == "Gremlin":
             vrs.append([sprite.create_sprite("gremlin"), 2 * VISION_SQUARE, 0])
-            # print(f"vrs[{len(vrs)-1}]: monster appended at {(2 * VISION_SQUARE, 0)}")
         if rm.monster == "Ogre":
             vrs.append([sprite.create_sprite("ogre"), 2 * VISION_SQUARE, 0])
-            # print(f"vrs[{len(vrs)-1}]: monster appended at {(2 * VISION_SQUARE, 0)}")
         if rm.monster == "Skeleton":
             vrs.append([sprite.create_sprite("skeleton"), 2 * VISION_SQUARE, 0])
-            # print(f"vrs[{len(vrs)-1}]: monster appended at {(2 * VISION_SQUARE, 0)}")
         if rm.pit == True:
             vrs.append([sprite.create_sprite("pit"), 2 * VISION_SQUARE, 2 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: pit appended at {(2 * VISION_SQUARE, 2 * VISION_SQUARE)}")
         if rm.is_entrance:
             vrs.append([sprite.create_sprite("entrance"), 0 * VISION_SQUARE, 1 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: entrance appended at {(0 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         if rm.is_exit:
             vrs.append([sprite.create_sprite("exit"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-            # print(f"vrs[{len(vrs)-1}]: exit appended at {(2 * VISION_SQUARE, 1 * VISION_SQUARE)}")
         orig_rm = self.controller.get_room_data()
-
-        vis = self.controller.get_visited_array()
-        visited = False
-        if vis[rm.location[0]][rm.location[1]]:
-            visited = True
-
-        if type == "map" and self.secret_view == True:
-            # secret view, want to show location in maze so only show player sprite in current room
-            if rm == orig_rm:
-                vrs.append([sprite.create_sprite(HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
-        elif type == "map" and self.secret_view == False:
-            # end of game view: want to show player sprite in all rooms visited
-            if rm == orig_rm or visited == True:
-                vrs.append([sprite.create_sprite(HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
-        else:
-            # vision potion room, so only want to show player sprite in current location
-            if rm == orig_rm:
-                vrs.append([sprite.create_sprite(HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
-
-        # print(f"for i in range (0, len(vrs)): {len(vrs)}")
+        if rm == orig_rm:
+            vrs.append([sprite.create_sprite(HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
         for i in range(0, len(vrs)):
-            # print(f"x pos: {vrs[i][1]} (vrs[{i}][1]) | y pos: {vrs[i][2]} (vrs[{i}][2]) || {vrs[i][0]} ")
-            # print(f"draw_vision_sprite(vrs[{i}]) : {vrs[i]} | vx: {vx} | vy: {vy}")
-            self.draw_vision_sprite(vrs[i][0], vrs[i][1], vrs[i][2], vx, vy, canvas)
+            self.draw_vision_sprite(vrs[i][0], vrs[i][1], vrs[i][2], vi, vj)
 
         for key, value in door_dict.items():
             if key == "Up" and value == True:
-                canvas.create_rectangle(vx, vy, vx + (vision_room_width/3), vy + WALL_WIDTH, fill="black")
-                canvas.create_rectangle(vx + (2 * (vision_room_width/3)), vy, vx + vision_room_width,
-                                                     vy + WALL_WIDTH, fill="black")
+                self.vision_canvas.create_rectangle(vi, vj, vi + (vision_square_width/3), vj + WALL_WIDTH, fill="black")
+                self.vision_canvas.create_rectangle(vi + (2 * (vision_square_width/3)), vj, vi + vision_square_width,
+                                                     vj + WALL_WIDTH, fill="black")
             if key == "Up" and value == False:
-                canvas.create_rectangle(vx, vy, (vx + vision_room_width), vy + WALL_WIDTH, fill="black")
+                self.vision_canvas.create_rectangle(vi, vj, (vi + vision_square_width), vj + WALL_WIDTH, fill="black")
             if key == "Down" and value == True:
-                canvas.create_rectangle(vx, vy + vision_room_height - WALL_WIDTH, vx + (vision_room_width/3),
-                                             vy + vision_room_height, fill="black")
-                canvas.create_rectangle(vx + (2 * (vision_room_width/3)), vy + vision_room_height - WALL_WIDTH,
-                                             vx + vision_room_width, vy + vision_room_height, fill="black")
+                self.vision_canvas.create_rectangle(vi, vj + vision_square_height - WALL_WIDTH, vi + (vision_square_width/3),
+                                             vj + vision_square_height, fill="black")
+                self.vision_canvas.create_rectangle(vi + (2 * (vision_square_width/3)), vj + vision_square_height - WALL_WIDTH,
+                                             vi + vision_square_width, vj + vision_square_height, fill="black")
             if key == "Down" and value == False:
-                canvas.create_rectangle(vx, vy + vision_room_height - WALL_WIDTH, vx + vision_room_width,
-                                             vy + vision_room_height, fill="black")
+                self.vision_canvas.create_rectangle(vi, vj + vision_square_height - WALL_WIDTH, vi + vision_square_width,
+                                             vj + vision_square_height, fill="black")
             if key == "Left" and value == True:
-                canvas.create_rectangle(vx, vy, vx + WALL_WIDTH, vy + (vision_room_height/3), fill="black")
-                canvas.create_rectangle(vx, vy + (2 * (vision_room_height/3)), vx + WALL_WIDTH,
-                                             vy + vision_room_height, fill="black")
+                self.vision_canvas.create_rectangle(vi, vj, vi + WALL_WIDTH, vj + (vision_square_height/3), fill="black")
+                self.vision_canvas.create_rectangle(vi, vj + (2 * (vision_square_height/3)), vi + WALL_WIDTH,
+                                             vj + vision_square_height, fill="black")
             if key == "Left" and value == False:
-                canvas.create_rectangle(vx, vy, vx + WALL_WIDTH, vy + vision_room_height, fill="black")
+                self.vision_canvas.create_rectangle(vi, vj, vi + WALL_WIDTH, vj + vision_square_height, fill="black")
             if key == "Right" and value == True:
-                canvas.create_rectangle(vx + vision_room_width - WALL_WIDTH, vy, vx + vision_room_width,
-                                             vy + (vision_room_height/3), fill="black")
-                canvas.create_rectangle(vx + vision_room_width - WALL_WIDTH, vy + (2 * (vision_room_height/3)),
-                                             vx + vision_room_width, vy + vision_room_height, fill="black")
+                self.vision_canvas.create_rectangle(vi + vision_square_width - WALL_WIDTH, vj, vi + vision_square_width,
+                                             vj + (vision_square_height/3), fill="black")
+                self.vision_canvas.create_rectangle(vi + vision_square_width - WALL_WIDTH, vj + (2 * (vision_square_height/3)),
+                                             vi + vision_square_width, vj + vision_square_height, fill="black")
             if key == "Right" and value == False:
-                canvas.create_rectangle(vx + vision_room_width - WALL_WIDTH, vy, vx + vision_room_height,
-                                             vy + vision_room_height, fill="black")
+                self.vision_canvas.create_rectangle(vi + vision_square_width - WALL_WIDTH, vj, vi + vision_square_height,
+                                             vj + vision_square_height, fill="black")
             else:
                 pass
 
-    def drw_vis_spr(self, sprite, spr_start_x, spr_start_y, rm_start_x, rm_start_y, canvas):
+    def draw_vision_sprite(self, sprite, x_pos, y_pos, vi, vj):
         UNDER_100 = (70, 70)
 
         if isinstance(sprite, Sprite):
-            WALL_CLEARANCE = 15
             filename = "sprites_image/{}.png".format(
                 sprite.name.lower())
             im = Image.open(filename)
             image = ImageOps.contain(im, UNDER_100)
-            ph = ImageTk.PhotoImage(image, master=canvas)
-            if spr_start_x == 0:
-                # bordering left wall
-                spr_start_x = spr_start_x + WALL_CLEARANCE
-            if spr_start_y == 0:
-                # bordering top wall
-                spr_start_y = spr_start_y + WALL_CLEARANCE
-            spr_start_x = spr_start_x + rm_start_x
-            spr_start_y = spr_start_y + rm_start_y
-            label = tk.Label(canvas, image=ph, bg=self.board_color_1)
-            label.config(width=UNDER_100[0], height=UNDER_100[1])
+            ph = ImageTk.PhotoImage(image, master=self.vision_canvas)
+            x_pos = x_pos + 15 + vi
+            y_pos = y_pos + 15 + vj
+            label = tk.Label(self.vision_canvas, image=ph, bg=self.board_color_1)
+            label.config(width=70, height=70)
             label.image = ph
-            label.place(x=spr_start_x, y=spr_start_y)
-
-
-    def draw_vision_sprite(self, sprite, spr_start_x, spr_start_y, rm_start_x, rm_start_y, canvas):
-        UNDER_100 = (70, 70)
-
-        if isinstance(sprite, Sprite):
-            WALL_CLEARANCE = 15
-            filename = "sprites_image/{}.png".format(
-                sprite.name.lower())
-            im = Image.open(filename)
-            image = ImageOps.contain(im, UNDER_100)
-            ph = ImageTk.PhotoImage(image, master=canvas)
-            if spr_start_x == 0:
-                # bordering left wall
-                spr_start_x = spr_start_x + WALL_CLEARANCE
-            if spr_start_y == 0:
-                # bordering top wall
-                spr_start_y = spr_start_y + WALL_CLEARANCE
-            spr_start_x = spr_start_x + rm_start_x
-            spr_start_y = spr_start_y + rm_start_y
-            label = tk.Label(canvas, image=ph, bg=self.board_color_1)
-            label.config(width=UNDER_100[0], height=UNDER_100[1])
-            label.image = ph
-            label.place(x=spr_start_x, y=spr_start_y)
+            label.place(x=x_pos, y=y_pos)
 
     def ask_new_game(self):
         self.root.quit()
@@ -759,64 +607,13 @@ class View():
             m = self.controller.get_model()
             m.pillars = {"A": "", "E": "", "P": "", "I": ""}
             self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
-            self.update_score_label()
+            self.update_frame_info()
             self.on_new_game_menu_clicked()
-            # self.root.destroy()
-            # time.sleep(3)
-            # self.music_player.stop_music()
-            # self.root.quit()
-            # init_new_game()
+            self.root.destroy()
+            time.sleep(3)
+            self.music_player.stop_music()
+            self.root.quit()
+            init_new_game()
         else:
             self.root.destroy()
             sys.exit()
-
-
-def init_new_game():
-    root = tk.Tk()
-    root.title("Dungeon Adventure II: Dungeon Harder")
-    View(root, Controller())
-    root.mainloop()
-
-# def main(ctl):
-#     # print("V | main(ctl) | passed Controller object")
-#     # print("V | main(ctl) | create new Tk object as root")
-#     root = Tk()
-#     root.title("Dungeon Adventure II")
-#     # print("V | main(ctl) | create new View object with root & ctl as parameters")
-#     View(root, ctl)
-#     # print("V | main(ctl) | last step of View init is start_game() | last step of main is root.mainloop()")
-#     # ctl.setup_observer()
-#     root.mainloop()
-#
-# def init_new_game():
-#     # print("V | init_new_game() | call init of controller object from View, save as initial_game_data")
-#     initial_game_data = controller.Controller()
-#     # print("V | init new_game() | pass initial_game_data to main()")
-#     # print("V _ View now has enough initial game data to draw game screen")
-#     # print("V _ though View object has still not been initialized. need tk root created first")
-#     # start_music(initial_game_data, True)
-#     # start_music_2(True)
-#     main(initial_game_data)
-
-# def start_music(ctrl, tf):
-#     pass
-    # sound = AudioSegment.from_wav('audio/cyberpunk.wav')
-    # quieter_song = sound - 4
-    # ctrl.thread = threading.Thread(target=play, args=(quieter_song,))
-    # ctrl.thread.daemon = tf
-    # ctrl.thread.start()
-
-# def start_music_2(tf):
-    # song = AudioSegment.from_wav('audio/cyberpunk.wav')
-    # playback = _play_with_simpleaudio(song)
-    # if tf == False:
-    #     playback.stop()
-
-    # wav_obj = simpleaudio.WaveObject.from_wave_file('audio/cyberpunk.wav')
-    # play_obj = wav_obj.play()
-
-    # if tf == False:
-    #     play_obj.stop()
-
-# if __name__ == "__main__":
-#     init_new_game()

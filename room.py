@@ -35,6 +35,34 @@ class Room:
         self.__visited = False
         self.__monster_obj = None
 
+    def list_room_contents(self):
+        """
+        returns a list of strings representing the contents of the room
+        """
+        contents_list = []
+        if self.is_entrance:
+            contents_list.append("entrance")
+        if self.is_exit:
+            contents_list.append("exit")
+        if self.monster:
+            contents_list.append(self.monster.lower())
+        if self.pit:
+            contents_list.append("pit")
+        if self.heal:
+            contents_list.append("healing_potion_g")
+        if self.vision:
+            contents_list.append("vision_potion")
+        if self.pillar:
+            pillar_dict = {
+                "e" : "encapsulation_pillar",
+                "a" : "abstraction_pillar",
+                "p" : "polymorphism_pillar",
+                "i" : "inheritance_pillar"
+            }
+            pillar_name = self.room_contents["pillar"]
+            contents_list.append(pillar_dict[pillar_name])
+        return contents_list
+
     def __set_monster_obj(self, mons):
         if issubclass(type(mons), Monster):
             self.__monster_obj = mons
@@ -50,6 +78,8 @@ class Room:
         return self.__room_contents
 
     room_contents = property(__get_room_contents)
+
+
 
     def __get_door(self):
         return self.__door

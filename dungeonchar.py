@@ -117,6 +117,7 @@ class DungeonCharacter(ABC):
         Method for attacking a target
         """
         hit_landed = random.random() < self.hit_chance
+        print (f"{self.name} attacking {target.name}")
         if hit_landed:
             damage = random.randint(self.damage_min, self.damage_max)
             target.take_damage(damage, self.name)
@@ -135,17 +136,17 @@ class DungeonCharacter(ABC):
             if my_turn:
                 if my_attacks < self.attack_speed:
                     self.attack_target(target)
-                    my_turn = False
                     my_attacks += 1
                     if not target._is_alive:
                         break
+                my_turn = False
             else:
                 if target_attacks < target.attack_speed:
                     target.attack_target(self)
-                    my_turn = True
                     target_attacks += 1
                     if not self._is_alive:
                         break
+                my_turn = True
 
     def take_damage(self, dmg, source):
         self.hp -= dmg

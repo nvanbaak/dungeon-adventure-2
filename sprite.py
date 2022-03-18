@@ -1,80 +1,103 @@
-"""
-"""
-
 from configurations import *
-import sys
-import exceptions
-
-
-def create_sprite(sprite):
-    # print(f"P | create_sprite | {sprite}")
-    if isinstance(sprite, str):
-        if sprite.upper() in SHORT_NAME.keys():
-            sprite = SHORT_NAME[sprite.upper()]
-        sprite = sprite.capitalize()
-        if sprite in SHORT_NAME.values():
-            # returns an object of type specified in variable 'sprite'
-            return eval("{classname}()".format(classname=sprite))
-    raise exceptions.NameError("invalid sprite name: '{}'".format(sprite))
-
-def get_numeric_notation(rowcol):
-    row, col = rowcol
-    return int(col) - 1, X_AXIS_LABELS.index(row)
-
+import tkinter as tk
+from PIL import Image, ImageTk, ImageOps
 
 class Sprite():
+    """
+    Class that handles displaying the art asset for one game object
+    params:
+    :name: a string corresponding to a .png file in the images folder
+    :canvas: a reference to the game canvas, used to draw the sprite
+    :position: an alphanumeric code used to determine where to draw the sprite
+    """
+    def __init__(self, name, canvas, position):
+        self.name = name 
 
-    def __init__(self):
-        self.name = self.__class__.__name__.lower()
-        self.visible = False
+        # tk references
+        self.canvas : tk.Canvas = canvas
+        self.image : Image = None
+        self.image_id = None
 
-    def keep_reference(self, model):
-        self.model = model
+        # display parameters
+        self.__mirror = False
+        self.__x_pos, self.__y_pos = self.parse_position_code(position)
 
-class Abstraction_pillar(Sprite):
-    pass
+    @property
+    def position(self):
+        return (self.__x_pos, self.__y_pos)
+    @position.setter
+    def position(self, xy):
+        self.__x_pos, self.__y_pos = xy
 
-class Encapsulation_pillar(Sprite):
-    pass
+    @property
+    def mirror(self):
+        return self.__mirror
+    @mirror.setter
+    def mirror(self, value):
+        if isinstance(value, bool):
+            self.__mirror = value
 
-class Inheritance_pillar(Sprite):
-    pass
+    def parse_position_code(self, position):
+        """
+        Expects a board location code (e.g. "D3") and translates to coordinates tkinter can use
+        """
+        row, col = position
 
-class Polymorphism_pillar(Sprite):
-    pass
+        # convert from 1-indexed to 0-indexed
+        col = 7 - int(col)
+        col = col * SQUARE_SIZE
+        col += SQUARE_SIZE//2
 
-class Pit(Sprite):
-    pass
+        # cheap hack to convert A-G to 0-6
+        row = X_AXIS_LABELS.index(row)
+        row = row * SQUARE_SIZE
+        row += SQUARE_SIZE//2
 
-class Priestess(Sprite):
-    pass
+        return row, col
 
-class Thief(Sprite):
-    pass
+    def redraw_at(self, alphanum):
+        """
+        Given an alphanumeric position code, deletes this image and redraws at the specified location
+        """
+        self.erase()
 
-class Warrior(Sprite):
-    pass
+        # get new position
+        new_x, new_y = self.parse_position_code(alphanum)
 
-class Ogre(Sprite):
-    pass
+        # check if we need to flip the sprite
+        self.__mirror = self.__x_pos > new_x
 
-class Healing_potion_g(Sprite):
-    pass
+        # set new position and draw
+        self.__x_pos = new_x
+        self.__y_pos = new_y
+        self.draw()
 
-class Healing_potion_y(Sprite):
-    pass
+    def draw(self):
+        """
+        Creates a PhotoImage object at the specified location on self.canvas.
+        Retains a reference for later destruction.
+        """
 
-class Vision_potion(Sprite):
-    pass
+        # create and process image object
+        image_file = Image.open(f"sprites_image/{self.name}.png")
 
-class Gremlin(Sprite):
-    pass
+        if self.__mirror:
+            image_file = image_file.transpose(Image.FLIP_LEFT_RIGHT)
 
-class Skeleton(Sprite):
-    pass
+        dimensions = (64, 64) if self.name != "pit" else (256, 256)
+        image_obj = ImageOps.contain(image_file, dimensions)
 
-class Entrance(Sprite):
-    pass
+        self.image = ImageTk.PhotoImage(image=image_obj)
 
-class Exit(Sprite):
-    pass
+
+
+        # draw sprite
+        self.image_id = self.canvas.create_image(self.__x_pos, self.__y_pos, image=self.image, anchor=tk.CENTER, tags=f"sprites")
+
+    def erase(self):
+        """
+        Deletes the image from the canvas
+        """
+        if self.image:
+            self.canvas.delete(self.image_id)
+
