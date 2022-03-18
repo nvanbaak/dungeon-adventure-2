@@ -12,7 +12,7 @@ import configurations
 class PreferencesWindow():
 
     def __init__(self, view):
-        self.parent = view.parent
+        self.root = view.root
         self.fill_preference_colors()
         self.view = view
         self.create_preferences_window()
@@ -30,10 +30,10 @@ class PreferencesWindow():
         pass
 
     def create_preferences_window(self):
-        self.pref_window = Toplevel(self.parent)
+        self.pref_window = Toplevel(self.root)
         self.pref_window.title("set preferences")
         self.create_preferences_list()
-        self.pref_window.transient(self.parent)
+        self.pref_window.transient(self.root)
 
     def create_preferences_list(self):
         Label(self.pref_window, text="Board Color 1").grid(

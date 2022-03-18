@@ -136,20 +136,17 @@ class DungeonCharacter(ABC):
             if my_turn:
                 if my_attacks < self.attack_speed:
                     self.attack_target(target)
-                    my_turn = False
                     my_attacks += 1
                     if not target._is_alive:
                         break
+                my_turn = False
             else:
                 if target_attacks < target.attack_speed:
                     target.attack_target(self)
-                    my_turn = True
                     target_attacks += 1
                     if not self._is_alive:
                         break
-                else:
-                    # lets the player complete remaining attacks when the other player has completed the attack
-                    my_turn = True
+                my_turn = True
 
     def take_damage(self, dmg, source):
         self.hp -= dmg
