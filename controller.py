@@ -1,5 +1,3 @@
-from threading import current_thread
-from tkinter.tix import Tree
 import pygame
 
 from configurations import START_SPRITES_POSITION
@@ -20,6 +18,7 @@ class Controller:
         # gets set to True upon entering a room with a monster
         self.__monster_blocking_exit = False
         self.__game_over = False
+        self.announcements = []
 
         self.door_dict = {
             "C1" : self.model.move_down,
@@ -35,7 +34,6 @@ class Controller:
             "D7" : self.model.move_up,
             "E7" : self.model.move_up,
         }
-
         self.sfx_dict = {}
 
         # required for sound effects to function
@@ -100,6 +98,9 @@ class Controller:
                 curr_room.pillar = None
                 self.play("pillar")
 
+            if curr_room.is_entrance and candidate == "entrance":
+                move_succeeds = False
+
             if curr_room.is_exit and candidate == "exit":
                 if self.model.player_has_all_pillars():
                     self.announce(f"{self.model.player_name} has won the game!")
@@ -114,6 +115,9 @@ class Controller:
                 self.__room_transition = self.door_dict[alphanum]()
                 if self.__room_transition:
                     self.resolve_transition()
+
+        # retrieve any messages from Model
+        self.get_messages_from_model()
 
         return move_succeeds
 
@@ -137,28 +141,6 @@ class Controller:
         if current_room.is_exit:
             self.announce("You've reached the exit!")
 
-    def gather_sounds(self):
-        curr_pos = self.model.get_curr_pos()
-        if curr_pos.heal == "y":
-            self.play("magic_harp")
-        if curr_pos.heal == "g":
-            self.play("magic_harp")
-        if curr_pos.vision == True:
-            self.play("magic_harp")
-        if curr_pos.pillar == "a":
-            self.play("pillar")
-        if curr_pos.pillar == "e":
-            self.play("pillar")
-        if curr_pos.pillar == "p":
-            self.play("pillar")
-        if curr_pos.pillar == "i":
-            self.play("pillar")
-        if curr_pos.monster == "Gremlin" or curr_pos.monster == "Ogre" or curr_pos.monster == "Skeleton":
-            self.play("monster")
-        if self.model.player.hp <= 0:
-            self.play("game_over")
-            self.view.ask_new_game()
-
     def combat(self):
         curr_pos = self.model.get_curr_pos()
         monster_name = curr_pos.monster
@@ -167,9 +149,12 @@ class Controller:
         self.__monster_blocking_exit = False
 
         # resolve combat
-        self.announce(f"Pre-battle hit points: Player: {self.model.player.hp} | {monster_name} | {curr_pos.monster_obj.hp}")
+        self.announce(f"Initiating combat! {self.model.player_name}: {self.model.player.hp} | {monster_name} | {curr_pos.monster_obj.hp}")
 
         self.model.player.combat(curr_pos.monster_obj)
+
+        # combat generates messages we'll want to grab before making more announcements
+        self.get_messages_from_model()
 
         self.announce(f"Post-battle hit points: Player: {self.model.player.hp} | {monster_name} | {curr_pos.monster_obj.hp}")
 
@@ -182,7 +167,7 @@ class Controller:
         # resolve player death if applicable
         if self.model.player.hp <= 0:
             self.model.game_stats["Hit Points"] = self.model.player.hp
-            self.view.update_score_label()
+            self.view.update_bottom_frame()
             self.play("wilhelm_scream")
             self.view.ask_new_game()
 
@@ -193,13 +178,12 @@ class Controller:
         self.play("welcome_pit")
         if self.model.player.hp <= 0:
             self.model.game_stats["Hit Points"] = self.model.player.hp
-            self.view.update_score_label()
+            self.view.update_bottom_frame()
             self.play("game_over")
             self.view.ask_new_game()
 
     def use_vision_potion(self, room):
         self.model.player.use_vision_potion()
-        # str_vision = self.model.dungeon.use_vision_potion(room)
         return self.model.dungeon.vision_potion_rooms(room)
 
     def use_health_potion(self):
@@ -217,29 +201,16 @@ class Controller:
         self.sfx_dict[file] = pygame.mixer.Sound(filename)
         pygame.mixer.Sound.play(self.sfx_dict[file])
 
-
-    def load_hit_points(self):
-        self.model.game_stats["Hit Points"] = self.model.player.hp
-
-    def expunge(self):
-        curr_pos = self.model.get_curr_pos()
-        if curr_pos.heal == "y":
-            curr_pos.heal = None
-        if curr_pos.heal == "g":
-            curr_pos.heal = None
-        if curr_pos.vision == True:
-            curr_pos.vision = False
-        if curr_pos.pillar == "a":
-            curr_pos.pillar = None
-        if curr_pos.pillar == "e":
-            curr_pos.pillar = None
-        if curr_pos.pillar == "p":
-            curr_pos.pillar = None
-        if curr_pos.pillar == "i":
-            curr_pos.pillar = None
-
     def announce(self, message):
         """
-        TODO passes announcement to game log
+        Adds this message to announcements list.
         """
-        print(message)
+        self.announcements.append(message)
+
+    def get_messages_from_model(self):
+        """
+        Gets any announcements in Model and adds them to a list in this class.
+        """
+        while self.model.announcements:
+            msg = self.model.announcements.pop(0)
+            self.announcements.append(msg)
