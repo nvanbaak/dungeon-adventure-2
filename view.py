@@ -9,6 +9,7 @@ from preferenceswindow import PreferencesWindow
 from musicplayer import MusicPlayer
 from sprite import Sprite
 import save_load_game
+import menu_factory
 
 import sys
 import time
@@ -78,7 +79,7 @@ class View:
         """
         self.file_menu = Menu(self.menu_bar, tearoff=0)
         self.file_menu.add_command(
-            label="New Game", command=self.on_new_game_menu_clicked)
+            label="New Game", command=self.ask_new_game)
         self.file_menu.add_command(
             label="Save Game", command=self.on_save_game_menu_clicked)
         self.file_menu.add_command(
@@ -104,12 +105,6 @@ class View:
     ##################################
     #       MENU FUNCTIONALITY       #
     ##################################
-
-    def on_new_game_menu_clicked(self):
-        self.root.destroy()
-        self.music_player.stop_music()
-        self.root.quit()
-        init_new_game()
 
     def on_save_game_menu_clicked(self):
         saveload_window = tk.Tk()
@@ -159,6 +154,19 @@ class View:
 
     def on_preference_menu_clicked(self):
         PreferencesWindow(self)
+
+    def ask_new_game(self):
+        """
+        Gives the player the option of quitting or returning to the menu
+        """
+        play_again = messagebox.askyesno("Game Over!", "Would you like to play again?")
+        if play_again:
+            self.music_player.stop_music()
+            self.root.destroy()
+            menu_factory.MenuFactory.create_main_menu()
+        else:
+            self.root.destroy()
+            sys.exit()
 
 
     ##################################
@@ -610,20 +618,4 @@ class View:
             label.image = ph
             label.place(x=x_pos, y=y_pos)
 
-    def ask_new_game(self):
-        self.root.quit()
-        res = messagebox.askyesno("Game Over!", "Would you like to play again?")
-        if res == True:
-            m = self.controller.get_model()
-            m.pillars = {"A": "", "E": "", "P": "", "I": ""}
-            self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
-            self.update_frame_info()
-            self.on_new_game_menu_clicked()
-            self.root.destroy()
-            time.sleep(3)
-            self.music_player.stop_music()
-            self.root.quit()
-            init_new_game()
-        else:
-            self.root.destroy()
-            sys.exit()
+
