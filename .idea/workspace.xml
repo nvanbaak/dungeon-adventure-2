@@ -2,17 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="eb48ee86-23da-41ec-b755-0c0576d15e5c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/configurations.py" beforeDir="false" afterPath="$PROJECT_DIR$/configurations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dungeon_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/dungeon_builder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dungeonchar.py" beforeDir="false" afterPath="$PROJECT_DIR$/dungeonchar.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/maze_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/maze_generator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preferenceswindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/preferenceswindow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/room.py" beforeDir="false" afterPath="$PROJECT_DIR$/room.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sprite.py" beforeDir="false" afterPath="$PROJECT_DIR$/sprite.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/view.py" beforeDir="false" afterPath="$PROJECT_DIR$/view.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

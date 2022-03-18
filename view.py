@@ -40,6 +40,7 @@ class View:
         self.canvas_height = self.room_size
         self.main_frame = None
         self.canvas = None
+        self.secret_view = False
 
         self.info_label = None
         self.bottom_frame = None
@@ -175,6 +176,7 @@ class View:
         self.create_canvas()
         self.draw_walls()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
+        self.root.bind("<Key>", self.on_key_pressed)
         self.create_bottom_frame()
         self.update_game_log()
 
@@ -506,99 +508,182 @@ class View:
     #        NEED REFACTORING
     ##################################
 
-    def draw_vision_room(self, rm, i, j, type):
+    def create_map_window(self):
+        self.map_window = tk.Tk()
+        self.map_canvas_width = self.map_window.winfo_screenwidth()
+        self.map_canvas_height = self.map_window.winfo_screenheight()
+        self.map_canvas = Canvas(
+            self.map_window, width=self.map_canvas_width, height=self.map_canvas_height, bg=self.color)
+        self.map_canvas.pack(padx=8, pady=8)
+
+    def on_key_pressed(self, event):
+        if event.char == "x":
+            self.secret_view = True
+            self.show_entire_map()
+        else:
+            self.secret_view = False
+
+    def show_entire_map(self):
+        self.create_map_window()
+        entire_grid = self.controller.model.dungeon.dungeon.maze
+        row_min = 100
+        row_max = 0
+        col_min = 100
+        col_max = 0
+        grid_h = entire_grid.shape[0]
+        grid_w = entire_grid.shape[1]
+        for r in range(0, grid_h):
+            for c in range(0, grid_w):
+                if entire_grid[r][c]:
+                    row_min = min(row_min, entire_grid[r][c].location[0])
+                    row_max = max(row_max, entire_grid[r][c].location[0])
+                    col_min = min(col_min, entire_grid[r][c].location[1])
+                    col_max = max(col_max, entire_grid[r][c].location[1])
+                    self.draw_vision_room(entire_grid[r][c], c, r, "map")
+                else:
+                    pass
+
+
+    def draw_vision_room(self, rm, col, row, type):
+        vision_room_width = 0
+        vision_room_height = 0
+        canvas = ""
+        grid_h = 0
+        grid_w = 0
+        vision_sq_dim = 100
+        size = 0
+        ROWS = 3
+        COLS = 3
         WALL_WIDTH = 10
         door_dict = rm.door_value
-        vision_square_width = self.vision_canvas_width / 3
-        vision_square_height = self.vision_canvas_height / 3
+
+        if type == "vision":
+            vision_room_width = self.vision_canvas_width / 3
+            vision_room_height = self.vision_canvas_height / 3
+            canvas = self.vision_canvas
+            size = 300
+
         if type == "map":
-            pass
-            # vision_square_width = self.vision_canvas_width / 3
-            # vision_square_height = self.vision_canvas_height / 3
-        vi = i * vision_square_width
-        vj = j * vision_square_height
+            entire_grid = self.controller.model.dungeon.dungeon.maze
+            grid_h = entire_grid.shape[0]
+            grid_w = entire_grid.shape[1]
+            size = int(.92 * (min(self.map_canvas_width/grid_w, self.map_canvas_height/grid_h)))
+            vision_room_width = size
+            vision_room_height = size
+            canvas = self.map_canvas
+            ROWS = grid_h
+            COLS = grid_w
+            vision_sq_dim = int(vision_room_width / 3)
+
+        vx = col * vision_room_width
+        vy = row * vision_room_height
 
         vrs = []
-        VISION_SQUARE = 100
+        VISION_SQUARE = vision_sq_dim
         if rm.heal == "y":
-            vrs.append([sprite.create_sprite("healing_potion_y"), 0, 0])
+            vrs.append([self.sprite_dict["healing_potion_y"], 0, 0])
         if rm.heal == "g":
-            vrs.append([sprite.create_sprite("healing_potion_g"), 0, 2 * VISION_SQUARE])
+            vrs.append([self.sprite_dict["healing_potion_g"], 0, 2 * VISION_SQUARE])
         if rm.vision == True:
-            vrs.append([sprite.create_sprite("vision_potion"), 0, 1 * VISION_SQUARE])
+            vrs.append([self.sprite_dict["vision_potion"], 0, 1 * VISION_SQUARE])
         if rm.pillar == "a":
-            vrs.append([sprite.create_sprite("abstraction_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
+            vrs.append([self.sprite_dict["abstraction_pillar"], 2 * VISION_SQUARE, 1 * VISION_SQUARE])
         if rm.pillar == "e":
-            vrs.append([sprite.create_sprite("encapsulation_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
+            vrs.append([self.sprite_dict["encapsulation_pillar"], 2 * VISION_SQUARE, 1 * VISION_SQUARE])
         if rm.pillar == "p":
-            vrs.append([sprite.create_sprite("polymorphism_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
+            vrs.append([self.sprite_dict["polymorphism_pillar"], 2 * VISION_SQUARE, 1 * VISION_SQUARE])
         if rm.pillar == "i":
-            vrs.append([sprite.create_sprite("inheritance_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
+            vrs.append([self.sprite_dict["inheritance_pillar"], 2 * VISION_SQUARE, 1 * VISION_SQUARE])
         if rm.monster == "Gremlin":
-            vrs.append([sprite.create_sprite("gremlin"), 2 * VISION_SQUARE, 0])
+            vrs.append([self.sprite_dict["gremlin"], 2 * VISION_SQUARE, 0])
         if rm.monster == "Ogre":
-            vrs.append([sprite.create_sprite("ogre"), 2 * VISION_SQUARE, 0])
+            vrs.append([self.sprite_dict["ogre"], 2 * VISION_SQUARE, 0])
         if rm.monster == "Skeleton":
-            vrs.append([sprite.create_sprite("skeleton"), 2 * VISION_SQUARE, 0])
+            vrs.append([self.sprite_dict["skeleton"], 2 * VISION_SQUARE, 0])
         if rm.pit == True:
-            vrs.append([sprite.create_sprite("pit"), 2 * VISION_SQUARE, 2 * VISION_SQUARE])
+            vrs.append([self.sprite_dict["pit"], 2 * VISION_SQUARE, 2 * VISION_SQUARE])
         if rm.is_entrance:
-            vrs.append([sprite.create_sprite("entrance"), 0 * VISION_SQUARE, 1 * VISION_SQUARE])
+            vrs.append([self.sprite_dict["entrance"], 0 * VISION_SQUARE, 1 * VISION_SQUARE])
         if rm.is_exit:
-            vrs.append([sprite.create_sprite("exit"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
+            vrs.append([self.sprite_dict["exit"], 2 * VISION_SQUARE, 1 * VISION_SQUARE])
         orig_rm = self.controller.get_room_data()
-        if rm == orig_rm:
-            vrs.append([sprite.create_sprite(HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
+
+        vis = self.controller.get_visited_array()
+        visited = False
+        if vis[rm.location[0]][rm.location[1]]:
+            visited = True
+
+        if type == "map" and self.secret_view == True:
+            # secret view, want to show location in maze so only show player sprite in current room
+            if rm == orig_rm:
+                vrs.append([self.sprite_dict[HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
+        elif type == "map" and self.secret_view == False:
+            # end of game view: want to show player sprite in all rooms visited
+            if rm == orig_rm or visited == True:
+                vrs.append([self.sprite_dict[HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
+        else:
+            # vision potion room, so only want to show player sprite in current location
+            if rm == orig_rm:
+                vrs.append([self.sprite_dict[HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
+
         for i in range(0, len(vrs)):
-            self.draw_vision_sprite(vrs[i][0], vrs[i][1], vrs[i][2], vi, vj)
+            self.draw_vision_sprite(vrs[i][0], vrs[i][1], vrs[i][2], vx, vy, canvas)
 
         for key, value in door_dict.items():
             if key == "Up" and value == True:
-                self.vision_canvas.create_rectangle(vi, vj, vi + (vision_square_width/3), vj + WALL_WIDTH, fill="black")
-                self.vision_canvas.create_rectangle(vi + (2 * (vision_square_width/3)), vj, vi + vision_square_width,
-                                                     vj + WALL_WIDTH, fill="black")
+                canvas.create_rectangle(vx, vy, vx + (vision_room_width/3), vy + WALL_WIDTH, fill="black")
+                canvas.create_rectangle(vx + (2 * (vision_room_width/3)), vy, vx + vision_room_width,
+                                                     vy + WALL_WIDTH, fill="black")
             if key == "Up" and value == False:
-                self.vision_canvas.create_rectangle(vi, vj, (vi + vision_square_width), vj + WALL_WIDTH, fill="black")
+                canvas.create_rectangle(vx, vy, (vx + vision_room_width), vy + WALL_WIDTH, fill="black")
             if key == "Down" and value == True:
-                self.vision_canvas.create_rectangle(vi, vj + vision_square_height - WALL_WIDTH, vi + (vision_square_width/3),
-                                             vj + vision_square_height, fill="black")
-                self.vision_canvas.create_rectangle(vi + (2 * (vision_square_width/3)), vj + vision_square_height - WALL_WIDTH,
-                                             vi + vision_square_width, vj + vision_square_height, fill="black")
+                canvas.create_rectangle(vx, vy + vision_room_height - WALL_WIDTH, vx + (vision_room_width/3),
+                                             vy + vision_room_height, fill="black")
+                canvas.create_rectangle(vx + (2 * (vision_room_width/3)), vy + vision_room_height - WALL_WIDTH,
+                                             vx + vision_room_width, vy + vision_room_height, fill="black")
             if key == "Down" and value == False:
-                self.vision_canvas.create_rectangle(vi, vj + vision_square_height - WALL_WIDTH, vi + vision_square_width,
-                                             vj + vision_square_height, fill="black")
+                canvas.create_rectangle(vx, vy + vision_room_height - WALL_WIDTH, vx + vision_room_width,
+                                             vy + vision_room_height, fill="black")
             if key == "Left" and value == True:
-                self.vision_canvas.create_rectangle(vi, vj, vi + WALL_WIDTH, vj + (vision_square_height/3), fill="black")
-                self.vision_canvas.create_rectangle(vi, vj + (2 * (vision_square_height/3)), vi + WALL_WIDTH,
-                                             vj + vision_square_height, fill="black")
+                canvas.create_rectangle(vx, vy, vx + WALL_WIDTH, vy + (vision_room_height/3), fill="black")
+                canvas.create_rectangle(vx, vy + (2 * (vision_room_height/3)), vx + WALL_WIDTH,
+                                             vy + vision_room_height, fill="black")
             if key == "Left" and value == False:
-                self.vision_canvas.create_rectangle(vi, vj, vi + WALL_WIDTH, vj + vision_square_height, fill="black")
+                canvas.create_rectangle(vx, vy, vx + WALL_WIDTH, vy + vision_room_height, fill="black")
             if key == "Right" and value == True:
-                self.vision_canvas.create_rectangle(vi + vision_square_width - WALL_WIDTH, vj, vi + vision_square_width,
-                                             vj + (vision_square_height/3), fill="black")
-                self.vision_canvas.create_rectangle(vi + vision_square_width - WALL_WIDTH, vj + (2 * (vision_square_height/3)),
-                                             vi + vision_square_width, vj + vision_square_height, fill="black")
+                canvas.create_rectangle(vx + vision_room_width - WALL_WIDTH, vy, vx + vision_room_width,
+                                             vy + (vision_room_height/3), fill="black")
+                canvas.create_rectangle(vx + vision_room_width - WALL_WIDTH, vy + (2 * (vision_room_height/3)),
+                                             vx + vision_room_width, vy + vision_room_height, fill="black")
             if key == "Right" and value == False:
-                self.vision_canvas.create_rectangle(vi + vision_square_width - WALL_WIDTH, vj, vi + vision_square_height,
-                                             vj + vision_square_height, fill="black")
+                canvas.create_rectangle(vx + vision_room_width - WALL_WIDTH, vy, vx + vision_room_height,
+                                             vy + vision_room_height, fill="black")
             else:
                 pass
 
-    def draw_vision_sprite(self, sprite, x_pos, y_pos, vi, vj):
+
+    def draw_vision_sprite(self, sprite, spr_start_x, spr_start_y, rm_start_x, rm_start_y, canvas):
         UNDER_100 = (70, 70)
 
         if isinstance(sprite, Sprite):
+            WALL_CLEARANCE = 15
             filename = "sprites_image/{}.png".format(
                 sprite.name.lower())
             im = Image.open(filename)
             image = ImageOps.contain(im, UNDER_100)
-            ph = ImageTk.PhotoImage(image, master=self.vision_canvas)
-            x_pos = x_pos + 15 + vi
-            y_pos = y_pos + 15 + vj
-            label = tk.Label(self.vision_canvas, image=ph, bg=self.board_color_1)
-            label.config(width=70, height=70)
+            ph = ImageTk.PhotoImage(image, master=canvas)
+            if spr_start_x == 0:
+                # bordering left wall
+                spr_start_x = spr_start_x + WALL_CLEARANCE
+            if spr_start_y == 0:
+                # bordering top wall
+                spr_start_y = spr_start_y + WALL_CLEARANCE
+            spr_start_x = spr_start_x + rm_start_x
+            spr_start_y = spr_start_y + rm_start_y
+            label = tk.Label(canvas, image=ph, bg=self.board_color_1)
+            label.config(width=UNDER_100[0], height=UNDER_100[1])
             label.image = ph
-            label.place(x=x_pos, y=y_pos)
+            label.place(x=spr_start_x, y=spr_start_y)
 
     def ask_new_game(self):
         self.root.quit()
@@ -609,11 +694,11 @@ class View:
             self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
             self.update_frame_info()
             self.on_new_game_menu_clicked()
-            self.root.destroy()
-            time.sleep(3)
-            self.music_player.stop_music()
-            self.root.quit()
-            init_new_game()
+            # self.root.destroy()
+            # time.sleep(3)
+            # self.music_player.stop_music()
+            # self.root.quit()
+            # init_new_game()
         else:
             self.root.destroy()
             sys.exit()
