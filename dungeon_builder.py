@@ -9,7 +9,7 @@ class DungeonBuilder:
     @staticmethod
     def build_single_dungeon():
         """build a single dungeon"""
-        dun0 = Dungeon(6,6)
+        dun0 = Dungeon(4,6)
         result=[dun0]
         DungeonBuilder.__update_floor_details(result)
         return result
@@ -64,9 +64,4 @@ class DungeonBuilder:
                 for col in range(0, col_count):
                     array[i].dungeon.maze[row, col].floor = int(i)
             i +=1
-
-
-
-
-
 

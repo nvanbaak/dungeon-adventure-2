@@ -25,6 +25,7 @@ class Model:
         self.pillars = {"A": "", "E": "", "P": "", "I": ""}
         self.game_stats = {"Hit Points": 0, "Pillars": "", "Healing Potions": 0, "Vision Potions": 0}
         self.dungeon.update_monsters_to_room(self)
+        self.visited = self.create_visited_array()
 
     def announce(self, message):
         print(message)
@@ -102,3 +103,10 @@ class Model:
 
     def get_hero_dict(self):
         return self.hero_dict
+
+    def create_visited_array(self):
+         entire_grid = self.dungeon.dungeon.maze
+         grid_h = entire_grid.shape[0]
+         grid_w = entire_grid.shape[1]
+         self.visited = [[False for i in range(grid_w)] for j in range(grid_h)]
+         return self.visited

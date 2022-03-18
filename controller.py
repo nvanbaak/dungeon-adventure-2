@@ -210,3 +210,6 @@ class Controller:
 
     def set_model(self, saved_model):
         self.model = saved_model
+
+    def get_visited_array(self):
+        return self.model.visited
