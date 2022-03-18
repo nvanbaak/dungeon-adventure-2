@@ -41,6 +41,11 @@ class View:
         self.main_frame = None
         self.canvas = None
 
+        self.vision_window = None
+        self.vision_canvas = None
+        self.vision_canvas_height = None
+        self.vision_canvas_width = None
+
         self.health_button = None
         self.vision_button = None
         self.info_label = None
@@ -58,6 +63,7 @@ class View:
         self.hero_sprite = Sprite(hero_class, self.canvas, HERO_POSITION)
         self.sprite_dict = {}
         self.load_sprites()
+        self.secret_view = False
 
         self.start_new_game()
 
@@ -109,8 +115,6 @@ class View:
             label="Instructions", command=self.instructions)
         self.menu_bar.add_cascade(label="Help", menu=self.help_menu)
         self.root.config(menu=self.menu_bar)
-
-
 
     ##################################
     #       MENU FUNCTIONALITY       #
@@ -218,7 +222,6 @@ class View:
         ins_canvas.pack(padx=8, pady=8)
 
 
-
     ##################################
     #        GUI CONSTRUCTION        #
     ##################################
@@ -232,6 +235,7 @@ class View:
         self.create_canvas()
         self.draw_walls()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
+        self.canvas.bind("<Key>", self.on_key_pressed)
         self.create_bottom_frame()
         self.update_game_log()
 
@@ -318,18 +322,11 @@ class View:
 
     def use_vision(self):
         self.create_vision_window()
-        vision_grid = self.controller.use_vision_potion(self.controller.get_room_data())
-        row_min = 100
-        row_max = 0
-        col_min = 100
-        col_max = 0
+        rm = self.model.get_curr_pos()
+        vision_grid = self.controller.use_vision_potion(rm)
         for r in range(0, len(vision_grid[0])):
             for c in range(0, len(vision_grid[1])):
                 if vision_grid[r][c]:
-                    row_min = min(row_min, vision_grid[r][c].location[0])
-                    row_max = max(row_max, vision_grid[r][c].location[0])
-                    col_min = min(col_min, vision_grid[r][c].location[1])
-                    col_max = max(col_max, vision_grid[r][c].location[1])
                     self.draw_vision_room(vision_grid[r][c], c, r, "vision")
                 else:
                     pass
@@ -343,7 +340,7 @@ class View:
         self.vision_canvas_width = 900
         self.vision_canvas_height = 900
         self.vision_canvas = Canvas(
-            self.vision_window, width=self.vision_canvas_width, height=self.vision_canvas_height, bg=self.board_color_1)
+            self.vision_window, width=self.vision_canvas_width, height=self.vision_canvas_height, bg=BOARD_COLOR_1)
         self.vision_canvas.pack(padx=8, pady=8)
 
     def on_close_window(self):
@@ -396,6 +393,8 @@ class View:
         """
         self.draw_doors()
         self.draw_all_sprites()
+
+        self.model.visited[self.model.get_curr_pos().location[0]][self.model.get_curr_pos().location[1]] = True
 
     def draw_doors(self, fill_color=BOARD_COLOR_1):
         """
@@ -503,6 +502,7 @@ class View:
             label_text = "Y O U  D I E D !!!!!"
         elif exit_flag and self.model.player_has_all_pillars():
             label_text = "Y O U  W I N !!!!!"
+            self.show_entire_map()
 
         self.info_label.destroy()
         self.info_label = Label(self.bottom_frame, text=label_text)
@@ -574,98 +574,176 @@ class View:
     #        NEED REFACTORING
     ##################################
 
-    def draw_vision_room(self, rm, i, j, type):
+    def draw_vision_room(self, rm, col, row, type):
+        vision_room_width = 0
+        vision_room_height = 0
+        canvas = ""
+        grid_h = 0
+        grid_w = 0
+        vision_sq_dim = 100
+        size = 0
+        ROWS = 3
+        COLS = 3
         WALL_WIDTH = 10
         door_dict = rm.door_value
-        vision_square_width = self.vision_canvas_width / 3
-        vision_square_height = self.vision_canvas_height / 3
+
+        if type == "vision":
+            vision_room_width = self.vision_canvas_width / 3
+            vision_room_height = self.vision_canvas_height / 3
+            canvas = self.vision_canvas
+            size = 300
+
         if type == "map":
-            pass
-            # vision_square_width = self.vision_canvas_width / 3
-            # vision_square_height = self.vision_canvas_height / 3
-        vi = i * vision_square_width
-        vj = j * vision_square_height
+            entire_grid = self.model.dungeon.dungeon.maze
+            grid_h = entire_grid.shape[0]
+            grid_w = entire_grid.shape[1]
+            size = int(.92 * (min(self.map_canvas_width/grid_w, self.map_canvas_height/grid_h)))
+            vision_room_width = size
+            vision_room_height = size
+            canvas = self.map_canvas
+            ROWS = grid_h
+            COLS = grid_w
+            vision_sq_dim = int(vision_room_width / 3)
+            WALL_WIDTH = int(vision_sq_dim/10)
+
+        vx = col * vision_room_width
+        vy = row * vision_room_height
 
         vrs = []
-        VISION_SQUARE = 100
+        VISION_SQUARE = vision_sq_dim
         if rm.heal == "y":
-            vrs.append([sprite.create_sprite("healing_potion_y"), 0, 0])
+            vrs.append([Sprite("healing_potion_y", canvas), 0, 0])
         if rm.heal == "g":
-            vrs.append([sprite.create_sprite("healing_potion_g"), 0, 2 * VISION_SQUARE])
+            vrs.append([Sprite("healing_potion_g", canvas), 0, 2 * VISION_SQUARE])
         if rm.vision == True:
-            vrs.append([sprite.create_sprite("vision_potion"), 0, 1 * VISION_SQUARE])
+            vrs.append([Sprite("vision_potion", canvas), 0, 1 * VISION_SQUARE])
         if rm.pillar == "a":
-            vrs.append([sprite.create_sprite("abstraction_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
+            vrs.append([Sprite("abstraction_pillar", canvas), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
         if rm.pillar == "e":
-            vrs.append([sprite.create_sprite("encapsulation_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
+            vrs.append([Sprite("encapsulation_pillar", canvas), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
         if rm.pillar == "p":
-            vrs.append([sprite.create_sprite("polymorphism_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
+            vrs.append([Sprite("polymorphism_pillar", canvas), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
         if rm.pillar == "i":
-            vrs.append([sprite.create_sprite("inheritance_pillar"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
+            vrs.append([Sprite("inheritance_pillar", canvas), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
         if rm.monster == "Gremlin":
-            vrs.append([sprite.create_sprite("gremlin"), 2 * VISION_SQUARE, 0])
+            vrs.append([Sprite("gremlin", canvas), 2 * VISION_SQUARE, 0])
         if rm.monster == "Ogre":
-            vrs.append([sprite.create_sprite("ogre"), 2 * VISION_SQUARE, 0])
+            vrs.append([Sprite("ogre", canvas), 2 * VISION_SQUARE, 0])
         if rm.monster == "Skeleton":
-            vrs.append([sprite.create_sprite("skeleton"), 2 * VISION_SQUARE, 0])
+            vrs.append([Sprite("skeleton", canvas), 2 * VISION_SQUARE, 0])
         if rm.pit == True:
-            vrs.append([sprite.create_sprite("pit"), 2 * VISION_SQUARE, 2 * VISION_SQUARE])
+            vrs.append([Sprite("pit", canvas), 2 * VISION_SQUARE, 2 * VISION_SQUARE])
         if rm.is_entrance:
-            vrs.append([sprite.create_sprite("entrance"), 0 * VISION_SQUARE, 1 * VISION_SQUARE])
+            vrs.append([Sprite("entrance", canvas), 0 * VISION_SQUARE, 1 * VISION_SQUARE])
         if rm.is_exit:
-            vrs.append([sprite.create_sprite("exit"), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
-        orig_rm = self.controller.get_room_data()
-        if rm == orig_rm:
-            vrs.append([sprite.create_sprite(HERO_SPRITE), VISION_SQUARE, VISION_SQUARE])
+            vrs.append([Sprite("exit", canvas), 2 * VISION_SQUARE, 1 * VISION_SQUARE])
+
+        orig_rm = self.model.get_curr_pos()
+
+        vis = self.model.visited
+        visited = False
+        if vis[rm.location[0]][rm.location[1]]:
+            visited = True
+
+        if type == "map" and self.secret_view == True:
+            # secret view, want to show location in maze so only show player sprite in current room
+            if rm == orig_rm:
+                vrs.append([self.hero_sprite, VISION_SQUARE, VISION_SQUARE])
+        elif type == "map" and self.secret_view == False:
+            # end of game view: want to show player sprite in all rooms visited
+            if rm == orig_rm or visited == True:
+                vrs.append([self.hero_sprite, VISION_SQUARE, VISION_SQUARE])
+        else:
+            # vision potion room, so only want to show player sprite in current location
+            if rm == orig_rm:
+                vrs.append([self.hero_sprite, VISION_SQUARE, VISION_SQUARE])
+
         for i in range(0, len(vrs)):
-            self.draw_vision_sprite(vrs[i][0], vrs[i][1], vrs[i][2], vi, vj)
+            # print(vrs[i][0], vrs[i][1], vrs[i][2], vx, vy, canvas)
+            self.draw_vision_sprite(vrs[i][0], vrs[i][1], vrs[i][2], vx, vy, canvas, VISION_SQUARE)
 
         for key, value in door_dict.items():
             if key == "Up" and value == True:
-                self.vision_canvas.create_rectangle(vi, vj, vi + (vision_square_width/3), vj + WALL_WIDTH, fill="black")
-                self.vision_canvas.create_rectangle(vi + (2 * (vision_square_width/3)), vj, vi + vision_square_width,
-                                                     vj + WALL_WIDTH, fill="black")
+                canvas.create_rectangle(vx, vy, vx + (vision_room_width/3), vy + WALL_WIDTH, fill="black")
+                canvas.create_rectangle(vx + (2 * (vision_room_width/3)), vy, vx + vision_room_width,
+                                                     vy + WALL_WIDTH, fill="black")
             if key == "Up" and value == False:
-                self.vision_canvas.create_rectangle(vi, vj, (vi + vision_square_width), vj + WALL_WIDTH, fill="black")
+                canvas.create_rectangle(vx, vy, (vx + vision_room_width), vy + WALL_WIDTH, fill="black")
             if key == "Down" and value == True:
-                self.vision_canvas.create_rectangle(vi, vj + vision_square_height - WALL_WIDTH, vi + (vision_square_width/3),
-                                             vj + vision_square_height, fill="black")
-                self.vision_canvas.create_rectangle(vi + (2 * (vision_square_width/3)), vj + vision_square_height - WALL_WIDTH,
-                                             vi + vision_square_width, vj + vision_square_height, fill="black")
+                canvas.create_rectangle(vx, vy + vision_room_height - WALL_WIDTH, vx + (vision_room_width/3),
+                                             vy + vision_room_height, fill="black")
+                canvas.create_rectangle(vx + (2 * (vision_room_width/3)), vy + vision_room_height - WALL_WIDTH,
+                                             vx + vision_room_width, vy + vision_room_height, fill="black")
             if key == "Down" and value == False:
-                self.vision_canvas.create_rectangle(vi, vj + vision_square_height - WALL_WIDTH, vi + vision_square_width,
-                                             vj + vision_square_height, fill="black")
+                canvas.create_rectangle(vx, vy + vision_room_height - WALL_WIDTH, vx + vision_room_width,
+                                             vy + vision_room_height, fill="black")
             if key == "Left" and value == True:
-                self.vision_canvas.create_rectangle(vi, vj, vi + WALL_WIDTH, vj + (vision_square_height/3), fill="black")
-                self.vision_canvas.create_rectangle(vi, vj + (2 * (vision_square_height/3)), vi + WALL_WIDTH,
-                                             vj + vision_square_height, fill="black")
+                canvas.create_rectangle(vx, vy, vx + WALL_WIDTH, vy + (vision_room_height/3), fill="black")
+                canvas.create_rectangle(vx, vy + (2 * (vision_room_height/3)), vx + WALL_WIDTH,
+                                             vy + vision_room_height, fill="black")
             if key == "Left" and value == False:
-                self.vision_canvas.create_rectangle(vi, vj, vi + WALL_WIDTH, vj + vision_square_height, fill="black")
+                canvas.create_rectangle(vx, vy, vx + WALL_WIDTH, vy + vision_room_height, fill="black")
             if key == "Right" and value == True:
-                self.vision_canvas.create_rectangle(vi + vision_square_width - WALL_WIDTH, vj, vi + vision_square_width,
-                                             vj + (vision_square_height/3), fill="black")
-                self.vision_canvas.create_rectangle(vi + vision_square_width - WALL_WIDTH, vj + (2 * (vision_square_height/3)),
-                                             vi + vision_square_width, vj + vision_square_height, fill="black")
+                canvas.create_rectangle(vx + vision_room_width - WALL_WIDTH, vy, vx + vision_room_width,
+                                             vy + (vision_room_height/3), fill="black")
+                canvas.create_rectangle(vx + vision_room_width - WALL_WIDTH, vy + (2 * (vision_room_height/3)),
+                                             vx + vision_room_width, vy + vision_room_height, fill="black")
             if key == "Right" and value == False:
-                self.vision_canvas.create_rectangle(vi + vision_square_width - WALL_WIDTH, vj, vi + vision_square_height,
-                                             vj + vision_square_height, fill="black")
+                canvas.create_rectangle(vx + vision_room_width - WALL_WIDTH, vy, vx + vision_room_height,
+                                             vy + vision_room_height, fill="black")
             else:
                 pass
 
-    def draw_vision_sprite(self, sprite, x_pos, y_pos, vi, vj):
-        UNDER_100 = (70, 70)
+    def draw_vision_sprite(self, sprite, spr_start_x, spr_start_y, rm_start_x, rm_start_y, canvas, VISION_SQUARE):
+        SPRITE_SIZE = (int(.9 * VISION_SQUARE), int(.9 * VISION_SQUARE))
 
         if isinstance(sprite, Sprite):
+            WALL_CLEARANCE = int(VISION_SQUARE/10)
             filename = "sprites_image/{}.png".format(
-                sprite.name.lower())
+                sprite.name)
             im = Image.open(filename)
-            image = ImageOps.contain(im, UNDER_100)
-            ph = ImageTk.PhotoImage(image, master=self.vision_canvas)
-            x_pos = x_pos + 15 + vi
-            y_pos = y_pos + 15 + vj
-            label = tk.Label(self.vision_canvas, image=ph, bg=self.board_color_1)
-            label.config(width=70, height=70)
+            image = ImageOps.contain(im, SPRITE_SIZE)
+            ph = ImageTk.PhotoImage(image, master=canvas)
+            if spr_start_x == 0 or spr_start_y == 0:
+                if spr_start_x == 0:
+                    spr_start_x = spr_start_x + WALL_CLEARANCE
+                if spr_start_y == 0:
+                    # bordering top wall
+                    spr_start_y = spr_start_y + WALL_CLEARANCE
+            else:
+                spr_start_x = spr_start_x - WALL_CLEARANCE
+                spr_start_y = spr_start_y - WALL_CLEARANCE
+            spr_start_x = spr_start_x + rm_start_x
+            spr_start_y = spr_start_y + rm_start_y
+            label = tk.Label(canvas, image=ph, bg=BOARD_COLOR_1)
+            label.config(width=SPRITE_SIZE[0], height=SPRITE_SIZE[1])
             label.image = ph
-            label.place(x=x_pos, y=y_pos)
+            label.place(x=spr_start_x, y=spr_start_y)
+            canvas.pack()
 
+    def on_key_pressed(self, event):
+        if event.char == "x":
+            self.secret_view = True
+            self.show_entire_map()
+        else:
+            self.secret_view = False
 
+    def show_entire_map(self):
+        self.create_map_window()
+        entire_grid = self.controller.model.dungeon.dungeon.maze
+        grid_h = entire_grid.shape[0]
+        grid_w = entire_grid.shape[1]
+        for r in range(0, grid_h):
+            for c in range(0, grid_w):
+                if entire_grid[r][c]:
+                    self.draw_vision_room(entire_grid[r][c], c, r, "map")
+                else:
+                    pass
+
+    def create_map_window(self):
+        self.map_window = tk.Tk()
+        self.map_canvas_width = self.map_window.winfo_screenwidth()
+        self.map_canvas_height = self.map_window.winfo_screenheight()
+        self.map_canvas = Canvas(
+            self.map_window, width=self.map_canvas_width, height=self.map_canvas_height, bg=BOARD_COLOR_1)
+        self.map_canvas.pack(padx=8, pady=8)
