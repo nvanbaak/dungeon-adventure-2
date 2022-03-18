@@ -72,6 +72,7 @@ class View:
         self.menu_bar = Menu(self.root)
         self.create_file_menu()
         self.create_edit_menu()
+        self.create_help_menu()
 
     def create_file_menu(self):
         """
@@ -100,6 +101,15 @@ class View:
             label="Sound", command=self.music_player.toggle_music)
         self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
         self.root.config(menu=self.menu_bar)
+
+    def create_help_menu(self):
+        """ Creates Help menu with the instructions to play """
+        self.help_menu = Menu(self.menu_bar, tearoff=0)
+        self.help_menu.add_command(
+            label="Instructions", command=self.instructions)
+        self.menu_bar.add_cascade(label="Help", menu=self.help_menu)
+        self.root.config(menu=self.menu_bar)
+
 
 
     ##################################
@@ -173,6 +183,40 @@ class View:
         else:
             self.root.destroy()
             sys.exit()
+
+    @staticmethod
+    def instructions():
+        """ help_menu play guide"""
+
+        ins_window = tk.Tk()
+        ins_canvas_width = 500
+        ins_canvas_height = 500
+        ins_canvas = Canvas(
+            ins_window, width=ins_canvas_width, height=ins_canvas_height, bg=BOARD_COLOR_1)
+        ins_label = Label(ins_canvas)
+
+        instruction_txt = "Dungeon Adventure 2.0 Play Guide\n\n"
+        instruction_txt += "You are placed in a random room in a Dungeon.\n"
+        instruction_txt += "You can navigate to other rooms by clicking near the open doors\n"
+        instruction_txt += "You can collect items in a room by clicking on the item.\n"
+        instruction_txt += "\n Your mission is to collect 4 pillars placed in random rooms and find the exit room \n"
+        instruction_txt += "\n==Combat==\n All pillar rooms have a monster.\n" \
+                           "You cannot exit the room without killing the monster.\n"
+        instruction_txt += "The combat starts as you click on the monster.\n"\
+                           "The monster gives you damage based on its attack speed.\n"
+        instruction_txt += "\n==Use Health Potion==\n"\
+                            "If you have picked up Health Potion from a room, \n" \
+                           "you can increase your hp by clicking on the Use Health Button on the bottom left corner\n"
+        instruction_txt += "\n==Use Vision Potion==\n" \
+                            "If you have picked up Vision Potion from a room, \n" \
+                            "you can see the adjacent rooms by clicking on the Use Vision Button on the bottom left corner\n"
+        instruction_txt += "\n \n You can see your hp, pillars collected, no of health potions, \n"\
+                           " no of vision potions at the bottom of your game window."
+
+        ins_label.config(text=instruction_txt)
+        ins_label.pack()
+        ins_canvas.pack(padx=8, pady=8)
+
 
 
     ##################################
