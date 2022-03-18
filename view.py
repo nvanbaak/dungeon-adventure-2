@@ -249,6 +249,7 @@ class View:
             announce = self.controller.announcements.pop(0)
             self.game_log_contents.append(announce)
 
+
     ##################################
     #    GUI BUTTON FUNCTIONALITY    #
     ##################################
