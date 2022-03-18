@@ -100,6 +100,9 @@ class Controller:
                 curr_room.pillar = None
                 self.play("pillar")
 
+            if curr_room.is_entrace and candidate == "entrance":
+                move_succeeds = False
+
             if curr_room.is_exit and candidate == "exit":
                 if self.model.player_has_all_pillars():
                     self.announce(f"{self.model.player_name} has won the game!")
@@ -136,28 +139,6 @@ class Controller:
 
         if current_room.is_exit:
             self.announce("You've reached the exit!")
-
-    def gather_sounds(self):
-        curr_pos = self.model.get_curr_pos()
-        if curr_pos.heal == "y":
-            self.play("magic_harp")
-        if curr_pos.heal == "g":
-            self.play("magic_harp")
-        if curr_pos.vision == True:
-            self.play("magic_harp")
-        if curr_pos.pillar == "a":
-            self.play("pillar")
-        if curr_pos.pillar == "e":
-            self.play("pillar")
-        if curr_pos.pillar == "p":
-            self.play("pillar")
-        if curr_pos.pillar == "i":
-            self.play("pillar")
-        if curr_pos.monster == "Gremlin" or curr_pos.monster == "Ogre" or curr_pos.monster == "Skeleton":
-            self.play("monster")
-        if self.model.player.hp <= 0:
-            self.play("game_over")
-            self.view.ask_new_game()
 
     def combat(self):
         curr_pos = self.model.get_curr_pos()
@@ -199,7 +180,6 @@ class Controller:
 
     def use_vision_potion(self, room):
         self.model.player.use_vision_potion()
-        # str_vision = self.model.dungeon.use_vision_potion(room)
         return self.model.dungeon.vision_potion_rooms(room)
 
     def use_health_potion(self):
@@ -216,27 +196,6 @@ class Controller:
         filename = f"audio/{file}.wav"
         self.sfx_dict[file] = pygame.mixer.Sound(filename)
         pygame.mixer.Sound.play(self.sfx_dict[file])
-
-
-    def load_hit_points(self):
-        self.model.game_stats["Hit Points"] = self.model.player.hp
-
-    def expunge(self):
-        curr_pos = self.model.get_curr_pos()
-        if curr_pos.heal == "y":
-            curr_pos.heal = None
-        if curr_pos.heal == "g":
-            curr_pos.heal = None
-        if curr_pos.vision == True:
-            curr_pos.vision = False
-        if curr_pos.pillar == "a":
-            curr_pos.pillar = None
-        if curr_pos.pillar == "e":
-            curr_pos.pillar = None
-        if curr_pos.pillar == "p":
-            curr_pos.pillar = None
-        if curr_pos.pillar == "i":
-            curr_pos.pillar = None
 
     def announce(self, message):
         """

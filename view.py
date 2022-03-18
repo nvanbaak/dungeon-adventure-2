@@ -42,6 +42,7 @@ class View:
 
         self.info_label = None
         self.bottom_frame = None
+        self.side_frame = None
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_close_window)
 
@@ -170,6 +171,7 @@ class View:
         self.draw_walls()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
         self.create_bottom_frame()
+        self.create_side_frame()
 
     def create_canvas(self):
         """
@@ -217,6 +219,13 @@ class View:
         create_frame()
         create_vision_button()
         create_health_button()
+
+    def create_side_frame(self):
+        """
+        Constructs a frame on the side of the screen, used for combat logs
+        """
+        self.side_frame = Frame(self.root, width=150)
+        self.side_frame.pack(fill="y", side="right", padx=8, pady=5)
 
 
     ##################################
@@ -418,7 +427,7 @@ class View:
 
         self.info_label.destroy()
         self.info_label = Label(self.bottom_frame, text=label_text)
-        self.info_label.pack()
+        self.info_label.pack(side="left", padx=8, pady=5)
 
 
     ##################################
