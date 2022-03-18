@@ -35,6 +35,7 @@ class View:
         self.show_health_button = False
 
         # tk parameters
+        self.board_color = BOARD_COLOR_1
         self.room_size = ROW_COUNT * SQUARE_SIZE
         self.canvas_width = self.room_size
         self.canvas_height = self.room_size
@@ -125,7 +126,7 @@ class View:
         saveload_canvas_width = 100
         saveload_canvas_height = 40
         saveload_canvas = Canvas(
-            saveload_window, width=saveload_canvas_width, height=saveload_canvas_height, bg=BOARD_COLOR_1)
+            saveload_window, width=saveload_canvas_width, height=saveload_canvas_height, bg=self.board_color)
         saveload_label = Label(saveload_canvas)
         sg = SaveGame()
         game_name = sg.game_name_generator()
@@ -140,7 +141,7 @@ class View:
         saveload_canvas_width = 50
         saveload_canvas_height = 50
         saveload_canvas = Canvas(
-            self.saveload_window, width=saveload_canvas_width, height=saveload_canvas_height, bg=BOARD_COLOR_1)
+            self.saveload_window, width=saveload_canvas_width, height=saveload_canvas_height, bg=self.board_color)
         saveload_label = Label(saveload_canvas, text = "Select saved game")
         saveload_label.pack()
         saveload_canvas.pack(padx=8, pady=8)
@@ -235,7 +236,7 @@ class View:
         self.create_canvas()
         self.draw_walls()
         self.canvas.bind("<Button-1>", self.on_square_clicked)
-        self.canvas.bind("<Key>", self.on_key_pressed)
+        self.root.bind("<Key>", self.on_key_pressed)
         self.create_bottom_frame()
         self.update_game_log()
 
@@ -245,7 +246,7 @@ class View:
         Parameters can be modified in configurations.py
         """
         self.canvas = Canvas(
-            self.main_frame, width=self.canvas_width, height=self.canvas_height, bg=BOARD_COLOR_1)
+            self.main_frame, width=self.canvas_width, height=self.canvas_height, bg=self.board_color)
         self.canvas.pack(side="left", padx=8, pady=8)
 
     def create_bottom_frame(self):
@@ -340,7 +341,7 @@ class View:
         self.vision_canvas_width = 900
         self.vision_canvas_height = 900
         self.vision_canvas = Canvas(
-            self.vision_window, width=self.vision_canvas_width, height=self.vision_canvas_height, bg=BOARD_COLOR_1)
+            self.vision_window, width=self.vision_canvas_width, height=self.vision_canvas_height, bg=self.board_color)
         self.vision_canvas.pack(padx=8, pady=8)
 
     def on_close_window(self):
@@ -400,6 +401,7 @@ class View:
         """
         Draws doors where appropriate given the player's current locations.
         """
+        fill_color = self.board_color
         self.erase_doors()
         door_dict = self.model.get_curr_pos().door_value
 
@@ -439,7 +441,9 @@ class View:
         """
         Redraws the room wih a new color; unsure if this works
         """
+        self.board_color = color
         self.canvas.config(bg=color)
+        self.root.config(bg=color)
         self.erase_doors()
         self.draw_doors(color)
 
@@ -715,7 +719,7 @@ class View:
                 spr_start_y = spr_start_y - WALL_CLEARANCE
             spr_start_x = spr_start_x + rm_start_x
             spr_start_y = spr_start_y + rm_start_y
-            label = tk.Label(canvas, image=ph, bg=BOARD_COLOR_1)
+            label = tk.Label(canvas, image=ph, bg=self.board_color)
             label.config(width=SPRITE_SIZE[0], height=SPRITE_SIZE[1])
             label.image = ph
             label.place(x=spr_start_x, y=spr_start_y)
@@ -745,5 +749,5 @@ class View:
         self.map_canvas_width = self.map_window.winfo_screenwidth()
         self.map_canvas_height = self.map_window.winfo_screenheight()
         self.map_canvas = Canvas(
-            self.map_window, width=self.map_canvas_width, height=self.map_canvas_height, bg=BOARD_COLOR_1)
+            self.map_window, width=self.map_canvas_width, height=self.map_canvas_height, bg=self.board_color)
         self.map_canvas.pack(padx=8, pady=8)

@@ -38,6 +38,7 @@ class Model:
         self.announcements = []
 
         self.dungeon.update_monsters_to_room(self)
+        self.visited = self.create_visited_array()
 
     def get_game_stats(self):
         return self.game_stats
@@ -123,3 +124,10 @@ class Model:
 
     def move(self, start_pos, final_pos):
         self.hero_dict[final_pos] = self.hero_dict.pop(start_pos, None)
+
+    def create_visited_array(self):
+         entire_grid = self.dungeon.dungeon.maze
+         grid_h = entire_grid.shape[0]
+         grid_w = entire_grid.shape[1]
+         self.visited = [[False for i in range(grid_w)] for j in range(grid_h)]
+         return self.visited
