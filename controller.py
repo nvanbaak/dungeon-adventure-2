@@ -17,7 +17,6 @@ class Controller:
 
         # gets set to True upon entering a room with a monster
         self.__monster_blocking_exit = False
-        self.__game_over = False
         self.announcements = []
 
         self.door_dict = {

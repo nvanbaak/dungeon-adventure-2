@@ -68,7 +68,7 @@ class Sprite():
 
         return row, col
 
-    def redraw_at(self, alphanum):
+    def redraw_at(self, alphanum, invert=False):
         """
         Given an alphanumeric position code, deletes this image and redraws at the specified location
         """
