@@ -1,6 +1,5 @@
 import tkinter as tk
-from tkinter import N, Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, TOP, PhotoImage, messagebox
-from tkinter import TclError
+from tkinter import LEFT, N, Tk, Menu, Button, Label, Frame, Canvas, FLAT, SW, W, E, RIGHT, TOP, PhotoImage, messagebox
 from PIL import Image, ImageTk, ImageOps
 
 from configurations import *
@@ -41,6 +40,8 @@ class View:
         self.main_frame = None
         self.canvas = None
 
+        self.health_button = None
+        self.vision_button = None
         self.info_label = None
         self.bottom_frame = None
         self.game_log = None
@@ -115,7 +116,7 @@ class View:
         saveload_canvas_width = 100
         saveload_canvas_height = 40
         saveload_canvas = Canvas(
-            saveload_window, width=saveload_canvas_width, height=saveload_canvas_height, bg=self.board_color_1)
+            saveload_window, width=saveload_canvas_width, height=saveload_canvas_height, bg=BOARD_COLOR_1)
         saveload_label = Label(saveload_canvas)
         sg = save_load_game.SaveGame()
         game_name = sg.game_name_generator()
@@ -130,7 +131,7 @@ class View:
         saveload_canvas_width = 50
         saveload_canvas_height = 50
         saveload_canvas = Canvas(
-            saveload_window, width=saveload_canvas_width, height=saveload_canvas_height, bg=self.board_color_1)
+            saveload_window, width=saveload_canvas_width, height=saveload_canvas_height, bg=BOARD_COLOR_1)
         saveload_label = Label(saveload_canvas, text = "Select saved game")
         saveload_label.pack()
         saveload_canvas.pack(padx=8, pady=8)
@@ -145,14 +146,12 @@ class View:
         sg = save_load_game.SaveGame
         if self.clicked != "Select":
             m = sg.load_game(sg, selected_game)
-            self.controller.set_model(m)
-            self.draw_room()
-            self.controller.reset_default_characters()
-            self.draw_all_sprites()
-            self.on_square_clicked_manual(True)
+            self.model = m 
+            self.controller = Controller(self, self.model)
+            self.hero_sprite.name = self.model.hero
+            self.load_current_room()
             self.update_frame_info()
-            if self.vision == False:
-                self.vision_button.pack_forget()
+            self.update_game_log()
 
     def on_delete_games_menu_clicked(self):
         sg = save_load_game.SaveGame()
@@ -207,7 +206,7 @@ class View:
             self.vision_button = Button(self.bottom_frame, text="Use Vision", command=self.use_vision)
             self.vision_button.configure(activebackground="#33B5E5")
             self.vision_button.pack(side=TOP)
-            if self.vision == False:
+            if self.model.player.vision_potions == 0:
                 self.vision_button.pack_forget()
 
         def create_health_button():
@@ -218,7 +217,7 @@ class View:
             self.health_button = Button(self.bottom_frame, text="Use Health", command=self.use_health)
             self.health_button.configure(activebackground="#33B5E5")
             self.health_button.pack(side=TOP)
-            if self.show_health_button == False:
+            if self.model.player.health_potions == 0:
                 self.health_button.pack_forget()
 
         create_frame()
@@ -415,7 +414,6 @@ class View:
         """
         Modifies the text in the bottom frame using information from Model.  Also updates game log.
         """
-        game_stats = self.model.get_game_stats()
         exit_flag = self.model.get_curr_pos().is_exit
 
         pillar_str = ""
@@ -449,7 +447,18 @@ class View:
 
         self.info_label.destroy()
         self.info_label = Label(self.bottom_frame, text=label_text)
-        self.info_label.pack(side="left", padx=8, pady=5)
+        self.info_label.pack(side=LEFT, padx=8, pady=5)
+
+        # while we have the potion counts handy, let's check if the relevant buttons should be visible
+        if hud_data["Health Potions"]:
+            self.health_button.pack(side=RIGHT, padx=10)
+        else:
+            self.health_button.pack_forget()
+        
+        if hud_data["Vision Potions"]:
+            self.vision_button.pack(side=RIGHT, padx=10)
+        else:
+            self.vision_button.pack_forget()
 
 
     ##################################
@@ -479,9 +488,9 @@ class View:
                 elif "G" in click_pos:
                     click_pos = click_pos.replace("G", "A")
 
-        # then redraw the room
-        self.hero_sprite.redraw_at(click_pos)
-        self.load_current_room()
+            # then redraw the room
+            self.hero_sprite.redraw_at(click_pos)
+            self.load_current_room()
 
         # finally, update frames
         self.update_frame_info()
